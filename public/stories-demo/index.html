@@ -117,13 +117,35 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <input type="text" id="title" placeholder="e.g. Mira and the Rainy Day">
       <h3><span class="step-tag">2</span>What happens in this scene</h3>
       <textarea id="caption" placeholder="Type the story line for this scene. It shows as a caption, like a picture book."></textarea>
-      <h3><span class="step-tag">3</span>Read it aloud (optional)</h3>
-      <div class="row">
+      <h3><span class="step-tag">3</span>Add a voice (optional)</h3>
+      <p class="muted" style="margin-top:0">Choose one: a free AI storyteller voice that reads your words, or your own recorded voice.</p>
+      <div class="sel" style="margin-top:0">
+        <b>🗣 AI storyteller voice</b>
+        <div class="row" style="margin-top:8px">
+          <select id="aiVoice" style="flex:1;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
+            <option value="af_heart">Warm storyteller (female)</option><option value="af_bella">Bright and cheerful (female)</option>
+            <option value="am_michael">Calm storyteller (male)</option><option value="am_fenrir">Deep voice (male)</option>
+            <option value="bf_emma">British (female)</option><option value="bm_george">British (male)</option>
+          </select>
+          <select id="aiSpeed" style="background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
+            <option value="0.85">Slow</option><option value="0.95" selected>Normal</option><option value="1.05">Faster</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary sm" id="aiOne">Make AI voice for this scene</button>
+          <button class="btn sm" id="aiAll">For all scenes</button>
+        </div>
+        <p class="muted" id="aiInfo" style="margin:8px 0 0">The first time, the voice downloads once (about 90 MB, best on Wi-Fi). After that it works quickly. English only for now.</p>
+      </div>
+      <div class="row" style="margin-top:10px">
         <button class="btn rec" id="recBtn">● Record my voice</button>
         <button class="btn sm" id="hearBtn" disabled>▶ Listen</button>
         <button class="btn sm" id="delVoice" disabled>Remove</button>
       </div>
       <p class="muted" id="voiceInfo">No recording yet. Read your line aloud, then press Stop.</p>
+      <h3>Pronunciation help (optional)</h3>
+      <textarea id="pron" style="min-height:60px" placeholder="One per line, e.g.  Mochi = Mowchee"></textarea>
+      <p class="muted">If the AI voice says a name wrong, write how it sounds. Captions keep your spelling.</p>
       <h3>Scene length</h3>
       <div class="row"><input type="range" id="dur" min="3" max="20" step="0.5"><span id="durLbl"></span></div>
       <p class="muted">With a recording, the scene lasts as long as your voice plus a short pause.</p>
@@ -180,7 +202,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
     <ol class="steps">
       <li><b>Pick a scene</b> in the strip under the picture. Add more with <b>+ Scene</b>.</li>
       <li><b>Set the scene:</b> open <b>Background</b> to choose a place and <b>Characters</b> to add poses. Drag characters to move them; tap one to <b>flip</b>, resize or remove it.</li>
-      <li><b>Tell the story:</b> in <b>Words &amp; voice</b>, type what happens and press <b>Record my voice</b> to read it aloud. The title and words in the sample are just suggestions; mix and match.</li>
+      <li><b>Tell the story:</b> in <b>Words &amp; voice</b>, type what happens, then add a voice: a free <b>AI storyteller voice</b> or <b>Record my voice</b>. The title and words in the sample are just suggestions; mix and match.</li>
       <li><b>Press ▶ Play</b> to watch it, then <b>⬇ Make video</b> to save it to your device.</li>
     </ol>
     <div class="row" style="margin-top:12px">
@@ -296,7 +318,7 @@ function refresh(){
  $('caption').value=s.text||'';
  $('dur').value=s.dur; $('dur').disabled=!!s.abuf; $('durLbl').textContent=sceneDur(s).toFixed(1)+' s';
  $('hearBtn').disabled=$('delVoice').disabled=!s.abuf;
- $('voiceInfo').innerHTML=s.abuf?`<span class="pill ok">Recorded · ${s.abuf.duration.toFixed(1)} s</span>`:'No recording yet. Read your line aloud, then press Stop.';
+ $('voiceInfo').innerHTML=s.abuf?`<span class="pill ok">${s.ai?'AI voice':'Your recording'} · ${s.abuf.duration.toFixed(1)} s</span>`:'No voice yet for this scene.';
  document.querySelectorAll('#bgGrid button').forEach(b=>b.classList.toggle('on',b.dataset.k===s.bg));
  document.querySelectorAll('input[name=cam]').forEach(r=>r.checked=r.value===(s.cam||'in'));
  $('title').value=s.title||'';
@@ -365,7 +387,7 @@ $('recBtn').onclick=async()=>{
  catch(e){$('voiceInfo').textContent='Microphone not available. Allow microphone access in your browser and try again.';return;}
  recChunks=[]; rec=new MediaRecorder(recStream);
  rec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);
- rec.onstop=async()=>{recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
+ rec.onstop=async()=>{S[cur].ai=false;recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
   $('recBtn').textContent='● Record my voice';
   try{const buf=await ac().decodeAudioData(await blob.arrayBuffer());S[cur].abuf=buf;S[cur].audio=blob;}
   catch(e){$('voiceInfo').textContent='Could not read the recording. Please try again.';}
@@ -374,7 +396,51 @@ $('recBtn').onclick=async()=>{
 };
 let hearSrc=null;
 $('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearSrc.stop()}catch(e){}}hearSrc=ac().createBufferSource();hearSrc.buffer=s.abuf;hearSrc.connect(ac().destination);hearSrc.start();};
-$('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;refresh();};
+$('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;refresh();};
+
+// ---------- AI voice (Kokoro, runs in the browser; Apache-2.0)
+let tts=null, ttsLoading=null;
+function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('=')).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
+function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
+ for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
+ return t.replace(/["“”]/g,'').trim();}
+async function loadTTS(){
+ if(tts)return tts; if(ttsLoading)return ttsLoading;
+ ttsLoading=(async()=>{
+  $('aiInfo').textContent='Downloading the AI voice (one time)…';
+  const mod=await import('./assets/kokoro.web.js');
+  const files={};
+  tts=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
+   progress_callback:p=>{if(p.status==='progress'&&p.total){files[p.file]=[p.loaded,p.total];
+     let l=0,t=0;for(const k in files){l+=files[k][0];t+=files[k][1];}
+     $('aiInfo').textContent=`Downloading the AI voice (one time)… ${Math.round(l/t*100)}%`;}}});
+  return tts;})();
+ try{return await ttsLoading;}catch(e){ttsLoading=null;throw e;}
+}
+async function aiFor(i){
+ const s=S[i], text=spoken(s); if(!text){return false;}
+ const m=await loadTTS();
+ const out=await m.generate(text,{voice:$('aiVoice').value,speed:+$('aiSpeed').value});
+ const data=out.audio, sr=out.sampling_rate||24000;
+ const buf=ac().createBuffer(1,data.length,sr); buf.copyToChannel(data,0);
+ s.abuf=buf; s.ai=true; delete s.audio; return true;
+}
+async function runAI(list){
+ $('aiOne').disabled=$('aiAll').disabled=true;
+ try{let done=0;
+  for(const i of list){$('aiInfo').textContent=list.length>1?`Making voice for scene ${i+1} (${done+1} of ${list.length})…`:'Making the voice…';
+   if(tts)await new Promise(r=>setTimeout(r,30));
+   await aiFor(i); done++; if(i===cur)refresh(); else strip();}
+  $('aiInfo').innerHTML=`<span class="pill ok">Done</span> Press ▶ Listen or ▶ Play to hear it. Change the words? Just make the voice again.`;
+ }catch(e){console.warn(e);$('aiInfo').textContent='The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.';}
+ $('aiOne').disabled=$('aiAll').disabled=false; refresh();
+}
+$('aiOne').onclick=()=>{if(!spoken(S[cur])){$('aiInfo').textContent='Type the words for this scene first (step 2).';return;}runAI([cur]);};
+$('aiAll').onclick=()=>runAI(S.map((s,i)=>i).filter(i=>spoken(S[i])));
+$('pron').oninput=e=>{try{localStorage.setItem('ts-pron',e.target.value)}catch(_){}};
+try{const v=localStorage.getItem('ts-pron');$('pron').value=v!==null?v:'Mochi = Mowchee';}catch(_){$('pron').value='Mochi = Mowchee';}
+try{const v=localStorage.getItem('ts-voice');if(v)$('aiVoice').value=v;}catch(_){}
+$('aiVoice').onchange=e=>{try{localStorage.setItem('ts-voice',e.target.value)}catch(_){}};
 
 // ---------- music (original, synthesized in the browser)
 const mf=m=>440*Math.pow(2,(m-69)/12);
