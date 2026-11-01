@@ -298,7 +298,8 @@ function roundRect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w
 
 // ---------- editor rendering loop (gentle live motion)
 let playing=null; const t0=performance.now();
-function loop(){ if(!playing){ drawScene(S[cur],((performance.now()-t0)/1000)%6,{editing:true}); } requestAnimationFrame(loop);}
+let lastDraw=0;
+function loop(now){ requestAnimationFrame(loop); if(playing||document.hidden||now-lastDraw<33)return; lastDraw=now; drawScene(S[cur],((now-t0)/1000)%6,{editing:true}); }
 
 // ---------- UI
 function strip(){
@@ -399,37 +400,34 @@ $('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearS
 $('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;refresh();};
 
 // ---------- AI voice (Kokoro, runs in the browser; Apache-2.0)
-let tts=null, ttsLoading=null;
+let worker=null, reqs={}, rid=0;
+function getWorker(){
+ if(worker)return worker;
+ worker=new Worker('./assets/tts-worker.js',{type:'module'});
+ worker.onmessage=e=>{const m=e.data;
+  if(m.type==='progress'){$('aiInfo').textContent=`Downloading the AI voice (one time)… ${m.pct}%`;return;}
+  const r=reqs[m.id]; if(!r)return; delete reqs[m.id];
+  m.type==='done'?r.ok(m):r.fail(new Error(m.msg));};
+ worker.onerror=e=>{for(const k in reqs){reqs[k].fail(new Error('worker'));delete reqs[k];} worker=null;};
+ return worker;
+}
+function speak(text){return new Promise((ok,fail)=>{const id=++rid;reqs[id]={ok,fail};
+ getWorker().postMessage({id,text,voice:$('aiVoice').value,speed:+$('aiSpeed').value});});}
 function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('=')).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
  for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
  return t.replace(/["“”]/g,'').trim();}
-async function loadTTS(){
- if(tts)return tts; if(ttsLoading)return ttsLoading;
- ttsLoading=(async()=>{
-  $('aiInfo').textContent='Downloading the AI voice (one time)…';
-  const mod=await import('./assets/kokoro.web.js');
-  const files={};
-  tts=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
-   progress_callback:p=>{if(p.status==='progress'&&p.total){files[p.file]=[p.loaded,p.total];
-     let l=0,t=0;for(const k in files){l+=files[k][0];t+=files[k][1];}
-     $('aiInfo').textContent=`Downloading the AI voice (one time)… ${Math.round(l/t*100)}%`;}}});
-  return tts;})();
- try{return await ttsLoading;}catch(e){ttsLoading=null;throw e;}
-}
 async function aiFor(i){
- const s=S[i], text=spoken(s); if(!text){return false;}
- const m=await loadTTS();
- const out=await m.generate(text,{voice:$('aiVoice').value,speed:+$('aiSpeed').value});
- const data=out.audio, sr=out.sampling_rate||24000;
- const buf=ac().createBuffer(1,data.length,sr); buf.copyToChannel(data,0);
+ const s=S[i], text=spoken(s); if(!text)return false;
+ const m=await speak(text);
+ const buf=ac().createBuffer(1,m.audio.length,m.sr); buf.copyToChannel(m.audio,0);
  s.abuf=buf; s.ai=true; delete s.audio; return true;
 }
 async function runAI(list){
  $('aiOne').disabled=$('aiAll').disabled=true;
+ $('aiInfo').textContent=list.length>1?'Getting the AI voice ready…':'Making the voice…';
  try{let done=0;
-  for(const i of list){$('aiInfo').textContent=list.length>1?`Making voice for scene ${i+1} (${done+1} of ${list.length})…`:'Making the voice…';
-   if(tts)await new Promise(r=>setTimeout(r,30));
+  for(const i of list){if(worker||i!==list[0])$('aiInfo').textContent=list.length>1?`Making voice for scene ${i+1} (${done+1} of ${list.length})…`:'Making the voice…';
    await aiFor(i); done++; if(i===cur)refresh(); else strip();}
   $('aiInfo').innerHTML=`<span class="pill ok">Done</span> Press ▶ Listen or ▶ Play to hear it. Change the words? Just make the voice again.`;
  }catch(e){console.warn(e);$('aiInfo').textContent='The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.';}
@@ -622,7 +620,7 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
 (async()=>{
  restore();
  await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
- refresh(); loop();
+ refresh(); requestAnimationFrame(loop);
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
  if(!seen)$('help').classList.add('on');
 })();
