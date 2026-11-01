@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI voice speed test – Telar Stories</title><meta name="robots" content="noindex">
+<style>:root{--bg:#16131c;--fg:#f4f1f8;--mut:#a8a1b1;--line:#2e2936}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 system-ui,-apple-system,Roboto,sans-serif;padding:20px 16px;max-width:640px;margin:auto}
+h1{font-size:24px;margin:0 0 6px}p{color:var(--mut)}button{background:#ff8fa3;color:#2a0d14;border:0;border-radius:12px;padding:14px 20px;font:inherit;font-weight:800;width:100%}
+button:disabled{opacity:.5}pre{background:#1f1b27;border:1px solid var(--line);border-radius:12px;padding:14px;white-space:pre-wrap;font-size:15px;color:var(--fg)}</style></head><body>
+<h1>AI voice speed test</h1><p>This checks how fast the free AI voice runs on this phone. Tap the button, wait until it says <b>Finished</b>, then send a screenshot.</p>
+<button id="go">Start test</button><pre id="out">Ready.</pre>
+<script type="module">
+const out=document.getElementById('out'), go=document.getElementById('go');
+const log=s=>{out.textContent+='\n'+s;};
+go.onclick=async()=>{go.disabled=true;out.textContent='';
+ log('Multi-core mode: '+(self.crossOriginIsolated?'ON':'OFF'));
+ log('Processor cores: '+(navigator.hardwareConcurrency||'?'));
+ log('Browser: '+navigator.userAgent.replace(/^Mozilla\/5.0 /,'').slice(0,140));
+ try{
+  let t=performance.now();
+  const mod=await import('../assets/kokoro.web.js');
+  mod.env.wasmPaths=new URL('./ort/',location.href).href;
+  log('Loading voice…');
+  const tts=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
+   progress_callback:p=>{if(p.status==='progress'&&p.total){out.dataset.p=Math.round(p.loaded/p.total*100);}}});
+  log('Loaded in '+((performance.now()-t)/1000).toFixed(1)+' s');
+  await tts.generate('Hello.',{voice:'af_heart'});
+  t=performance.now();
+  const r=await tts.generate('It was a rainy afternoon. Mira wanted to play outside, but the rain would not stop.',{voice:'af_heart'});
+  const secs=(performance.now()-t)/1000, len=r.audio.length/r.sampling_rate;
+  log(`Made ${len.toFixed(1)} s of speech in ${secs.toFixed(1)} s`);
+  log('Finished ✔');
+  const ctx=new AudioContext();const b=ctx.createBuffer(1,r.audio.length,r.sampling_rate);b.copyToChannel(r.audio,0);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
+ }catch(e){log('Error: '+(e&&e.message||e));}
+ go.disabled=false;};
+</script></body></html>

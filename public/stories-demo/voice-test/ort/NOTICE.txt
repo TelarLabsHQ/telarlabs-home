@@ -1,0 +1,2 @@
+ONNX Runtime Web (ort-wasm-simd-threaded.jsep.*) is Copyright (c) Microsoft Corporation, MIT License.
+These files were distributed with @huggingface/transformers 3.5.1 (Apache-2.0, see LICENSE-transformers.txt).
