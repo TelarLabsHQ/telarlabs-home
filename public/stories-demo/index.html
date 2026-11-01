@@ -85,6 +85,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   <h1>Telar <span>Stories</span></h1><span class="badge">Prototype</span>
   <div class="sp"></div>
   <button class="btn" id="helpBtn">❓<span class="lbl"> How to use</span></button>
+  <button class="btn" id="undoBtn" disabled title="Undo (Ctrl+Z)">↶<span class="lbl"> Undo</span></button>
   <button class="btn" id="playBtn">▶ Play</button>
   <button class="btn primary" id="exportBtn">⬇<span class="lbl"> Make</span> video</button>
 </header>
@@ -98,9 +99,9 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <button class="btn sm" id="selSmaller">− Smaller</button>
       <button class="btn sm" id="selBigger">+ Bigger</button>
       <button class="btn sm" id="selFront">Bring to front</button>
-      <select id="selMove" title="Movement"><option value="idle">Movement: breathe</option><option value="walk">Movement: walk across</option><option value="hop">Movement: hop</option></select>
+      <select id="selMove" title="Movement"><option value="still">Movement: steady (no motion)</option><option value="idle">Movement: gentle breathing</option><option value="walk">Movement: walk across</option><option value="hop">Movement: hop</option></select>
       <button class="btn sm" id="selDel">🗑 Remove</button>
-      <button class="btn sm" id="selDone">Done</button>
+      <button class="btn sm" id="selDone" title="Close this toolbar (deselect the character)">✓ Close</button>
     </div>
     <div class="tipbar" id="hint"><b>Tip:</b> tap a character in the picture to <b>flip</b>, resize, move or remove it. Drag it to move it around.</div>
     <div class="strip" id="strip"></div>
@@ -255,8 +256,20 @@ function sample(){return [
 let S=sample(), cur=0, sel=null;
 
 // ---------- persistence (layout only; recordings stay in memory)
-function save(){try{localStorage.setItem('ts-proto',JSON.stringify(S.map(s=>({...s,audio:undefined,abuf:undefined}))))}catch(e){}}
-function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'null');if(Array.isArray(j)&&j.length){S=j;S.forEach(s=>s.chars.forEach(c=>c.id=uid++));}}catch(e){}}
+const strip_=s=>({...s,audio:undefined,abuf:undefined,ai:undefined,aiKey:undefined});
+let hist=[], lastSnap=null, lastPush=0, lastGroup=null;
+function snap(){S.forEach(s=>{if(!s.sid)s.sid=uid++;});return JSON.stringify(S.map(strip_));}
+function persist(j){try{localStorage.setItem('ts-proto',j)}catch(e){}}
+function save(group){const now=snap();
+ if(lastSnap!==null&&now!==lastSnap){const t=Date.now(); if(!group||group!==lastGroup||t-lastPush>1500||!hist.length){hist.push(lastSnap);if(hist.length>60)hist.shift();} lastPush=t; lastGroup=group||null;}
+ lastSnap=now; persist(now); $('undoBtn').disabled=!hist.length;}
+function undo(){if(!hist.length||playing||aiBusy)return;
+ const keep={}; S.forEach(s=>{if(s.sid&&s.abuf)keep[s.sid]=s;});
+ const prev=hist.pop(); S=JSON.parse(prev);
+ S.forEach(s=>{const o=keep[s.sid]; if(o){s.abuf=o.abuf;s.audio=o.audio;s.ai=o.ai;s.aiKey=o.aiKey;}});
+ lastSnap=prev; lastPush=0; persist(prev); cur=Math.min(cur,S.length-1);
+ if(!S[cur].chars.some(c=>c.id===sel))sel=null; refresh(); $('undoBtn').disabled=!hist.length;}
+function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'null');if(Array.isArray(j)&&j.length){S=j;S.forEach(s=>{s.sid=0;s.chars.forEach(c=>c.id=uid++);});}}catch(e){}}
 
 // ---------- drawing
 function sceneDur(s){return s.abuf? Math.max(3,s.abuf.duration+1.2): s.dur;}
@@ -267,6 +280,7 @@ function drawChar(c,t,dur,selected){
  const k=c.h/im.height, w=im.width*k, h=c.h;
  let x=c.x, y=c.y, sy=1+0.012*(0.5+0.5*Math.sin(TAU*t/3.2)), ang=1.2*Math.sin(TAU*t/4)*Math.PI/180;
  if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*(c.flip?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
+ if(c.move==='still'){sy=1; ang=0;}
  if(c.move==='hop'){y-=Math.abs(Math.sin(Math.PI*t*1.4))*26; sy=1;}
  cx.save();
  // soft contact shadow
@@ -339,19 +353,19 @@ function refresh(){
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
-$('caption').oninput=e=>{S[cur].text=e.target.value;strip();save();};
-$('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.target.value).toFixed(1)+' s';save();};
+$('caption').oninput=e=>{S[cur].text=e.target.value;strip();save('text'+cur);};
+$('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.target.value).toFixed(1)+' s';save('dur'+cur);};
 document.querySelectorAll('input[name=cam]').forEach(r=>r.onchange=()=>{S[cur].cam=r.value;save();});
 const selC=()=>S[cur].chars.find(c=>c.id===sel);
 $('selMove').onchange=e=>{const c=selC();if(c){c.move=e.target.value;save();}};
 $('selBigger').onclick=()=>{const c=selC();if(c){c.h=Math.min(680,Math.round(c.h*1.12));save();}};
 $('selSmaller').onclick=()=>{const c=selC();if(c){c.h=Math.max(60,Math.round(c.h/1.12));save();}};
 $('selDone').onclick=()=>{sel=null;refresh();};
-$('title').oninput=e=>{S[cur].title=e.target.value;strip();save();};
+$('title').oninput=e=>{S[cur].title=e.target.value;strip();save('title'+cur);};
 $('selFlip').onclick=()=>{const c=selC();if(c){c.flip=!c.flip;save();refresh();}};
 $('selFront').onclick=()=>{const a=S[cur].chars,i=a.findIndex(c=>c.id===sel);if(i>=0){a.push(a.splice(i,1)[0]);save();}};
 $('selDel').onclick=()=>{S[cur].chars=S[cur].chars.filter(c=>c.id!==sel);sel=null;refresh();save();};
-$('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...s,audio:undefined,abuf:undefined}));c.chars.forEach(x=>x.id=uid++);S.splice(cur+1,0,c);cur++;refresh();save();};
+$('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...s,audio:undefined,abuf:undefined}));c.chars.forEach(x=>x.id=uid++);c.sid=uid++;S.splice(cur+1,0,c);cur++;refresh();save();};
 $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,cur-1);sel=null;refresh();save();};
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
@@ -627,13 +641,15 @@ function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('o
 
 // ---------- help
 const closeHelp=()=>{$('help').classList.remove('on');try{localStorage.setItem('ts-help','1')}catch(e){}};
+$('undoBtn').onclick=undo;
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!e.shiftKey&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo();}});
 $('helpBtn').onclick=()=>$('help').classList.add('on');
 $('helpGo').onclick=closeHelp;
 $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();closeHelp();};
 
 // ---------- start
 (async()=>{
- restore();
+ restore(); lastSnap=snap();
  await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
  refresh(); requestAnimationFrame(loop);
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
