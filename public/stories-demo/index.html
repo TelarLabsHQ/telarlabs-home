@@ -421,7 +421,7 @@ function getWorker(){
  if(worker)return worker;
  worker=new Worker('./assets/tts-worker.js',{type:'module'});
  worker.onmessage=e=>{const m=e.data;
-  if(m.type==='alive'){aiStage='Loading the AI voice…';tick();return;}
+  if(m.type==='alive'){alive=true;aiStage='Loading the AI voice…';tick();return;}
   if(m.type==='ready'){aiStage='Voice loaded. Making the first voice…';tick();return;}
   if(m.type==='progress'){aiStage=`Downloading the AI voice (one time)… ${m.pct!=null?m.pct+'% · ':''}${m.mb} MB`;if(m.pct!=null)aiPct=m.pct;tick();return;}
   const r=reqs[m.id]; if(!r)return; delete reqs[m.id];
@@ -429,7 +429,9 @@ function getWorker(){
  worker.onerror=e=>{const msg='worker: '+(e.message||'could not start');for(const k in reqs){reqs[k].fail(new Error(msg));delete reqs[k];} worker=null;};
  return worker;
 }
+let alive=false;
 function speak(text){return new Promise((ok,fail)=>{const id=++rid;reqs[id]={ok,fail};
+ if(!alive){const w=getWorker();setTimeout(()=>{if(!alive&&worker===w){w.terminate();worker=null;for(const k in reqs){reqs[k].fail(new Error('voice engine did not start (isolated='+self.crossOriginIsolated+')'));delete reqs[k];}}},20000);}
  getWorker().postMessage({id,text,voice:$('aiVoice').value,speed:+$('aiSpeed').value});});}
 function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('=')).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');

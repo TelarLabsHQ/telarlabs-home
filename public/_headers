@@ -1,6 +1,6 @@
 /assets/*
   Cache-Control: public, max-age=86400
-/stories-demo/voice-test/*
+/stories-demo/*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
 /stories-demo/assets/ort/*
