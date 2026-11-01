@@ -140,7 +140,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
           <button class="btn primary sm" id="aiOne">Make AI voice for this scene</button>
           <button class="btn sm" id="aiAll">For all scenes</button>
         </div>
-        <p class="muted" id="aiInfo" style="margin:8px 0 0">The first time, the voice downloads once (about 110 MB, best on Wi-Fi). Each scene then takes about 10 to 30 seconds, depending on your phone. Scenes with your own recording are kept. English only for now.</p>
+        <p class="muted" id="aiInfo" style="margin:8px 0 0">The first time, the voice downloads once (about 110 MB, best on Wi-Fi). Each scene then takes up to a minute, depending on your phone. Finished voices are saved on this device, so you can leave and come back. Scenes with your own recording are kept. English only for now.</p>
       </div>
       <div class="row" style="margin-top:10px">
         <button class="btn rec" id="recBtn">● Record my voice</button>
@@ -257,7 +257,24 @@ function sample(){return [
 ];}
 let S=sample(), cur=0, sel=null;
 
-// ---------- persistence (layout only; recordings stay in memory)
+// ---------- voice storage (IndexedDB): finished voices survive a refresh or closed tab
+let vdb=null;
+function vOpen(){if(vdb)return vdb;vdb=new Promise((ok,no)=>{try{const r=indexedDB.open('telar-stories',1);
+ r.onupgradeneeded=()=>r.result.createObjectStore('voices');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);}catch(e){no(e)}});return vdb;}
+async function vTx(mode,fn){const db=await vOpen();return new Promise((ok,no)=>{const t=db.transaction('voices',mode);const st=t.objectStore('voices');const r=fn(st);
+ t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error);});}
+function vPut(s){if(!s.sid||!s.abuf)return;const d=s.abuf.getChannelData(0).slice();
+ vTx('readwrite',st=>st.put({pcm:d,sr:s.abuf.sampleRate,ai:!!s.ai,aiKey:s.aiKey||null},s.sid)).catch(e=>console.warn('voice save',e));}
+function vDel(s){if(s.sid)vTx('readwrite',st=>st.delete(s.sid)).catch(()=>{});}
+async function vLoadAll(){try{
+ const keys=await vTx('readonly',st=>st.getAllKeys()), vals=await vTx('readonly',st=>st.getAll());
+ const bySid={};S.forEach(s=>bySid[s.sid]=s); let n=0;
+ keys.forEach((k,i)=>{const s=bySid[k],v=vals[i]; if(!s){vTx('readwrite',st=>st.delete(k)).catch(()=>{});return;}
+  if(s.abuf||!v||!v.pcm)return; const b=ac().createBuffer(1,v.pcm.length,v.sr);b.copyToChannel(v.pcm,0);
+  s.abuf=b;s.ai=v.ai;s.aiKey=v.aiKey;n++;});
+ return n;}catch(e){console.warn('voice load',e);return 0;}}
+
+// ---------- persistence (layout in localStorage; voices in IndexedDB)
 const strip_=s=>({...s,audio:undefined,abuf:undefined,ai:undefined,aiKey:undefined});
 let hist=[], lastSnap=null, lastPush=0, lastGroup=null;
 function snap(){S.forEach(s=>{if(!s.sid)s.sid=uid++;});return JSON.stringify(S.map(strip_));}
@@ -271,7 +288,7 @@ function undo(){if(!hist.length||playing||aiBusy)return;
  S.forEach(s=>{const o=keep[s.sid]; if(o){s.abuf=o.abuf;s.audio=o.audio;s.ai=o.ai;s.aiKey=o.aiKey;}});
  lastSnap=prev; lastPush=0; persist(prev); cur=Math.min(cur,S.length-1);
  if(!S[cur].chars.some(c=>c.id===sel))sel=null; refresh(); $('undoBtn').disabled=!hist.length;}
-function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'null');if(Array.isArray(j)&&j.length){S=j;S.forEach(s=>{s.sid=0;s.chars.forEach(c=>c.id=uid++);});}}catch(e){}}
+function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'null');if(Array.isArray(j)&&j.length){S=j;const mx=Math.max(0,...S.map(s=>+s.sid||0));uid=Math.max(uid,mx+1);S.forEach(s=>{s.chars.forEach(c=>c.id=uid++);});}}catch(e){}}
 
 // ---------- drawing
 function sceneDur(s){return s.abuf? Math.max(3,s.abuf.duration+1.2): s.dur;}
@@ -409,14 +426,14 @@ $('recBtn').onclick=async()=>{
  rec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);
  rec.onstop=async()=>{S[cur].ai=false;recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
   $('recBtn').textContent='● Record my voice';
-  try{const buf=await ac().decodeAudioData(await blob.arrayBuffer());S[cur].abuf=buf;S[cur].audio=blob;}
+  const sc=S[cur];try{const buf=await ac().decodeAudioData(await blob.arrayBuffer());sc.abuf=buf;sc.audio=blob;snap();vPut(sc);}
   catch(e){$('voiceInfo').textContent='Could not read the recording. Please try again.';}
   refresh();};
  rec.start(); $('recBtn').textContent='■ Stop'; $('voiceInfo').innerHTML='<span class="pill" style="background:#4a1d22;color:#ffb3b8">Recording… read your line, then press Stop</span>';
 };
 let hearSrc=null;
 $('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearSrc.stop()}catch(e){}}hearSrc=ac().createBufferSource();hearSrc.buffer=s.abuf;hearSrc.connect(ac().destination);hearSrc.start();};
-$('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;refresh();};
+$('delVoice').onclick=()=>{vDel(S[cur]);delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;delete S[cur].aiKey;refresh();};
 
 // ---------- AI voice (Kokoro, runs in the browser; Apache-2.0)
 let worker=null, reqs={}, rid=0;
@@ -460,11 +477,11 @@ async function aiFor(i){
  const s=S[i], text=spoken(s); if(!text)return false;
  const key=aiKey(s), m=await speak(text);
  const buf=ac().createBuffer(1,m.audio.length,m.sr); buf.copyToChannel(m.audio,0);
- s.abuf=buf; s.ai=true; s.aiKey=key; delete s.audio; return true;
+ s.abuf=buf; s.ai=true; s.aiKey=key; delete s.audio; snap(); vPut(s); return true;
 }
 let aiBusy=false, aiStage='', aiPct=0, aiT=0, aiTimer=null;
 function tick(){if(!aiBusy)return;const s=Math.round((performance.now()-aiT)/1000);aiMsg(`${aiStage} <span class="muted">(${s} s)</span><br>Keep this page open. Play and Make video unlock when the voices are ready.`,aiPct);}
-function busy(on){aiBusy=on; clearInterval(aiTimer); if(on){aiT=performance.now();aiTimer=setInterval(tick,1000);}
+function busy(on){aiBusy=on; keepAwake(on); clearInterval(aiTimer); if(on){aiT=performance.now();aiTimer=setInterval(tick,1000);}
  $('aiOne').disabled=$('aiAll').disabled=$('playBtn').disabled=$('exportBtn').disabled=on;
  if(!playing)playLabels(); else $('playBtn').disabled=$('exportBtn').disabled=true;}
 function aiMsg(html,pct){$('aiInfo').innerHTML=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');}
@@ -541,11 +558,12 @@ try{const m=localStorage.getItem('ts-music');if(m&&STYLES[m]||m==='none')$('musi
 // Keep the screen awake while playing/recording (where supported)
 let wake=null;
 async function keepAwake(on){try{if(on&&'wakeLock' in navigator&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null);}
- else if(!on&&wake){await wake.release();wake=null;}}catch(e){}}
+ else if(!on&&wake&&!aiBusy&&!playing){await wake.release();wake=null;}}catch(e){}}
 // If the page is hidden (phone locked, app switched), freeze the story clock and the recorder,
 // so no scenes are skipped; continue when the page comes back.
 let activeRec=null, pausedByHide=false;
 document.addEventListener('visibilitychange',async()=>{
+ if(aiBusy&&!document.hidden)keepAwake(true);
  if(!playing)return; const ctx=ac();
  if(document.hidden){pausedByHide=true;try{activeRec&&activeRec.state==='recording'&&activeRec.pause();}catch(e){} try{await ctx.suspend();}catch(e){}}
  else{try{await ctx.resume();}catch(e){} try{activeRec&&activeRec.state==='paused'&&activeRec.resume();}catch(e){} keepAwake(true);}
@@ -676,7 +694,8 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
 
 // ---------- start
 (async()=>{
- restore(); lastSnap=snap();
+ restore(); lastSnap=snap(); persist(lastSnap);
+ vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);}});
  await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
  refresh(); requestAnimationFrame(loop);
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
