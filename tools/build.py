@@ -137,7 +137,7 @@ def extras():
         open(os.path.join(PUB, 'ads.txt'), 'w').write(f'google.com, {pub}, DIRECT, f08c47fec0942fa0\n')
     open(os.path.join(PUB, '_headers'), 'w').write('/assets/*\n  Cache-Control: public, max-age=86400\n'
         '/stories-demo/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n'
-        '/stories-demo/assets/ort/*\n  Cache-Control: public, max-age=604800\n')
+        '/stories-demo/assets/ort-v2/*\n  Cache-Control: public, max-age=604800\n')
 
 if __name__ == '__main__':
     home(); pages(); extras()

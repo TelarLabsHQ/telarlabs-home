@@ -3,5 +3,5 @@
 /stories-demo/*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
-/stories-demo/assets/ort/*
+/stories-demo/assets/ort-v2/*
   Cache-Control: public, max-age=604800

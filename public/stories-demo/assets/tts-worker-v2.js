@@ -4,7 +4,7 @@ async function load(){
   if(tts) return tts;
   if(!loading) loading=(async()=>{
     const mod=await import('./kokoro.web.js');
-    mod.env.wasmPaths=new URL('./ort/',import.meta.url).href;
+    mod.env.wasmPaths=new URL('./ort-v2/',import.meta.url).href;
     const files={};
     tts=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
       progress_callback:p=>{ if(p.status==='progress'){ files[p.file]=[p.loaded||0,p.total||0];

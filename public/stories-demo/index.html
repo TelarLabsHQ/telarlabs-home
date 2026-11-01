@@ -419,7 +419,7 @@ $('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;delete S[cur].
 let worker=null, reqs={}, rid=0;
 function getWorker(){
  if(worker)return worker;
- worker=new Worker('./assets/tts-worker.js',{type:'module'});
+ worker=new Worker('./assets/tts-worker-v2.js',{type:'module'});
  worker.onmessage=e=>{const m=e.data;
   if(m.type==='alive'){alive=true;aiStage='Loading the AI voice…';tick();return;}
   if(m.type==='ready'){aiStage='Voice loaded. Making the first voice…';tick();return;}
@@ -429,10 +429,25 @@ function getWorker(){
  worker.onerror=e=>{const msg='worker: '+(e.message||'could not start');for(const k in reqs){reqs[k].fail(new Error(msg));delete reqs[k];} worker=null;};
  return worker;
 }
-let alive=false;
-function speak(text){return new Promise((ok,fail)=>{const id=++rid;reqs[id]={ok,fail};
- if(!alive){const w=getWorker();setTimeout(()=>{if(!alive&&worker===w){w.terminate();worker=null;for(const k in reqs){reqs[k].fail(new Error('voice engine did not start (isolated='+self.crossOriginIsolated+')'));delete reqs[k];}}},20000);}
+let alive=false, useMain=false, mainTTS=null;
+async function speakMain(text){
+ if(!mainTTS){aiStage='Loading the AI voice (backup mode)…';tick();
+  const mod=await import('./assets/kokoro.web.js'); mod.env.wasmPaths=new URL('./assets/ort-v2/',location.href).href;
+  mainTTS=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
+   progress_callback:p=>{if(p.status==='progress'&&p.total){aiStage=`Downloading the AI voice (one time)… ${Math.round(p.loaded/p.total*100)}%`;tick();}}});
+  aiStage='Making the voice…';tick();}
+ await new Promise(r=>setTimeout(r,50));
+ const out=await mainTTS.generate(text,{voice:$('aiVoice').value,speed:+$('aiSpeed').value});
+ return {audio:out.audio,sr:out.sampling_rate||24000};
+}
+function speakWorker(text){return new Promise((ok,fail)=>{const id=++rid;reqs[id]={ok,fail};
+ if(!alive){const w=getWorker();setTimeout(()=>{if(!alive&&worker===w){w.terminate();worker=null;for(const k in reqs){reqs[k].fail(new Error('worker: did not start'));delete reqs[k];}}},20000);}
  getWorker().postMessage({id,text,voice:$('aiVoice').value,speed:+$('aiSpeed').value});});}
+async function speak(text){
+ if(useMain)return speakMain(text);
+ try{return await speakWorker(text);}
+ catch(e){if(alive||!/worker/.test(e.message))throw e; console.warn('worker failed, using main thread',e); useMain=true; if(worker){try{worker.terminate()}catch(_){}} worker=null; return speakMain(text);}
+}
 function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('=')).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
  for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
