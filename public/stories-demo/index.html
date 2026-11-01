@@ -139,11 +139,12 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
         <span class="muted">Background music</span>
         <select id="music" style="flex:1;background:var(--bg3);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
           <option value="gentle">Gentle (calm)</option><option value="happy">Happy (bouncy)</option>
-          <option value="dreamy">Dreamy (bedtime)</option><option value="adventure">Adventure</option><option value="none">No music</option>
+          <option value="dreamy">Dreamy (bedtime)</option><option value="adventure">Adventure</option><option value="custom">My own music file…</option><option value="none">No music</option>
         </select>
         <button class="btn sm" id="musicPrev">▶ Preview</button>
       </div>
-      <p class="muted">All music is original and free to use in your video.</p>
+      <input type="file" id="musicFile" accept="audio/*" hidden>
+      <p class="muted" id="musicInfo">The built-in tracks are original and free to use. You can also choose <b>My own music file</b> to use any song you have the right to use (MP3 or M4A).</p>
       <div class="row" style="margin-top:8px">
         <button class="btn sm" id="newStory">Start a blank story</button>
         <button class="btn sm" id="loadSample">Load the sample story</button>
@@ -384,7 +385,12 @@ const STYLES={
 };
 function note(ctx,out,f,t,len,wave,g,att=.02){const o=ctx.createOscillator(),v=ctx.createGain();o.type=wave;o.frequency.value=f;
  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.exponentialRampToValueAtTime(0.0008,t+len);o.connect(v);v.connect(out);o.start(t);o.stop(t+len+.05);return o;}
+let customBuf=null;
 function startMusic(ctx,dest,total,style){
+ if(style==='custom'){ if(!customBuf)return()=>{};
+  const g=ctx.createGain(),src=ctx.createBufferSource();src.buffer=customBuf;src.loop=true;src.connect(g);g.connect(dest);
+  const n=ctx.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(0.22,n+1.5);g.gain.setValueAtTime(0.22,n+Math.max(1.5,total-2.5));g.gain.linearRampToValueAtTime(0,n+total);
+  src.start(n);src.stop(n+total+0.1);return()=>{try{src.stop()}catch(e){}try{g.disconnect()}catch(e){}};}
  const st=STYLES[style]; if(!st)return()=>{};
  const out=ctx.createGain();out.gain.value=0;out.connect(dest);
  const now=ctx.currentTime, lvl=0.055; out.gain.linearRampToValueAtTime(lvl,now+1.5); out.gain.setValueAtTime(lvl,now+Math.max(1.5,total-2.5)); out.gain.linearRampToValueAtTime(0,now+total);
@@ -405,7 +411,12 @@ let musicStop=null;
 $('musicPrev').onclick=()=>{if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';return;}
  const ctx=ac();if(ctx.state==='suspended')ctx.resume();musicStop=startMusic(ctx,ctx.destination,8,$('music').value);$('musicPrev').textContent='■ Stop';
  setTimeout(()=>{if(musicStop){musicStop=null;$('musicPrev').textContent='▶ Preview';}},8000);};
-$('music').onchange=e=>{try{localStorage.setItem('ts-music',e.target.value)}catch(_){}};
+$('music').onchange=e=>{const v=e.target.value; if(v==='custom'&&!customBuf){$('musicFile').click();}
+ if(v!=='custom'){try{localStorage.setItem('ts-music',v)}catch(_){}}};
+$('musicFile').onchange=async e=>{const f=e.target.files[0]; if(!f){if(!customBuf)$('music').value='gentle';return;}
+ try{customBuf=await ac().decodeAudioData(await f.arrayBuffer());$('musicInfo').innerHTML='<span class="pill ok">Using: '+esc(f.name)+'</span> It plays softly under your voice and loops if the story is longer. <a href="#" id="musicChange">Choose another file</a>';
+  $('musicChange').onclick=ev=>{ev.preventDefault();$('musicFile').click();};}
+ catch(err){customBuf=null;$('music').value='gentle';$('musicInfo').textContent='That file could not be read. Try an MP3 or M4A file.';}};
 try{const m=localStorage.getItem('ts-music');if(m&&STYLES[m]||m==='none')$('music').value=m;}catch(_){}
 
 // ---------- playback (preview & export share this)
