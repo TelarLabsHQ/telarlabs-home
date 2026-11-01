@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Telar Stories – Prototype</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#16131c;--bg2:#1f1b27;--bg3:#2a2533;--fg:#f4f1f8;--muted:#a8a1b1;--line:#352f40;--accent:#ff8fa3;--ok:#5ED39A;--warn:#ffb547;--r:12px}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:#121017;position:sticky;top:0;z-index:5}
+.top h1{font-size:17px;margin:0;font-weight:800}.top h1 span{color:var(--accent)}
+.badge{font-size:11px;font-weight:700;background:#f0d9ff;color:#3a1752;padding:2px 8px;border-radius:99px}
+.top .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--bg3);padding:8px 14px;border-radius:10px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}.btn.primary{background:var(--accent);color:#2a0d14;border-color:var(--accent)}
+.btn.rec{background:#e5484d;border-color:#e5484d;color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:13px}
+.wrap{display:grid;grid-template-columns:1fr 360px;gap:16px;padding:16px;max-width:1500px;margin:0 auto}
+@media(max-width:980px){.wrap{grid-template-columns:1fr;padding:12px 12px 80px}}
+main{min-width:0}
+.stage-box{background:#000;border-radius:var(--r);overflow:hidden;position:relative;border:1px solid var(--line)}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+.hint{font-size:13px;color:var(--muted);margin:8px 2px 0}
+.strip{display:flex;gap:10px;overflow-x:auto;padding:12px 2px 6px}
+.scene{flex:0 0 auto;width:150px;border:2px solid transparent;border-radius:10px;background:var(--bg2);padding:4px;position:relative}
+.scene.on{border-color:var(--accent)}
+.scene img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:7px;display:block}
+.scene .n{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);font-size:12px;font-weight:700;padding:1px 7px;border-radius:99px}
+.scene .mic{position:absolute;top:8px;right:8px;font-size:12px;background:rgba(0,0,0,.7);padding:1px 6px;border-radius:99px}
+.scene p{margin:4px 2px 2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.add{flex:0 0 auto;width:110px;border:2px dashed var(--line);border-radius:10px;background:none;color:var(--muted);font-weight:700}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:0;padding:12px 4px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.pane{padding:14px;display:none}.pane.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.grid button{background:var(--bg3);border:2px solid transparent;border-radius:10px;padding:4px}
+.grid button.on{border-color:var(--accent)}
+.grid img{width:100%;display:block;border-radius:7px}
+.cgrid{grid-template-columns:repeat(3,1fr)}
+.cgrid img{aspect-ratio:1;object-fit:contain;background:repeating-conic-gradient(#2f2a38 0 25%,#262130 0 50%) 0 0/16px 16px}
+.cgrid small{display:block;font-size:11px;color:var(--muted);text-align:center;padding-top:2px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px}
+h3:first-child{margin-top:0}
+textarea{width:100%;min-height:96px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.sel{background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px}
+.muted{color:var(--muted);font-size:13px}
+.note{font-size:13px;background:#2b2130;border:1px solid #4a3550;border-radius:10px;padding:10px;color:#e8d9ef}
+.overlay{position:fixed;inset:0;background:rgba(10,8,14,.82);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.overlay.on{display:flex}
+.dlg{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:440px;width:100%}
+.dlg h2{margin:0 0 8px;font-size:20px}
+.bar{height:8px;background:var(--bg3);border-radius:99px;overflow:hidden;margin:14px 0}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted)}
+.pill.ok{background:#173a2a;color:var(--ok)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Telar <span>Stories</span></h1><span class="badge">Prototype</span>
+  <div class="sp"></div>
+  <button class="btn" id="playBtn">▶ Play</button>
+  <button class="btn primary" id="exportBtn">⬇ Make video</button>
+</header>
+
+<div class="wrap">
+  <main>
+    <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
+    <p class="hint" id="hint">Tap a character on the picture to move, resize or flip it. Drag to move.</p>
+    <div class="strip" id="strip"></div>
+  </main>
+
+  <aside class="panel">
+    <div class="tabs">
+      <button data-t="words" class="on">Words &amp; voice</button>
+      <button data-t="chars">Characters</button>
+      <button data-t="bg">Background</button>
+    </div>
+
+    <section class="pane on" id="p-words">
+      <h3>What happens in this scene</h3>
+      <textarea id="caption" placeholder="Type the story line for this scene…"></textarea>
+      <h3>Narration</h3>
+      <div class="row">
+        <button class="btn rec" id="recBtn">● Record my voice</button>
+        <button class="btn sm" id="hearBtn" disabled>▶ Listen</button>
+        <button class="btn sm" id="delVoice" disabled>Remove</button>
+      </div>
+      <p class="muted" id="voiceInfo">No recording yet. Read your line aloud, then press Stop.</p>
+      <h3>Scene length</h3>
+      <div class="row"><input type="range" id="dur" min="3" max="20" step="0.5"><span id="durLbl"></span></div>
+      <p class="muted">With a recording, the scene lasts as long as your voice plus a short pause.</p>
+      <h3>Scene</h3>
+      <div class="row">
+        <button class="btn sm" id="dupScene">Duplicate</button>
+        <button class="btn sm" id="moveL">◀ Move</button>
+        <button class="btn sm" id="moveR">Move ▶</button>
+        <button class="btn sm" id="delScene">Delete scene</button>
+      </div>
+      <h3>Whole story</h3>
+      <div class="row">
+        <label class="row muted"><input type="checkbox" id="music" checked> Soft background music</label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn sm" id="newStory">Start a blank story</button>
+        <button class="btn sm" id="loadSample">Load the sample story</button>
+      </div>
+    </section>
+
+    <section class="pane" id="p-chars">
+      <h3>Tap a pose to add it to the scene</h3>
+      <div class="grid cgrid" id="charGrid"></div>
+      <div class="sel" id="selBox" hidden>
+        <div class="row"><b id="selName">Selected</b><span class="sp" style="flex:1"></span></div>
+        <div class="row" style="margin-top:8px"><span class="muted">Size</span><input type="range" id="selSize" min="80" max="600"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn sm" id="selFlip">⇋ Flip</button>
+          <button class="btn sm" id="selFront">Bring to front</button>
+          <button class="btn sm" id="selDel">Remove</button>
+        </div>
+        <h3>Movement</h3>
+        <div class="row">
+          <label class="muted"><input type="radio" name="mv" value="idle"> Breathe</label>
+          <label class="muted"><input type="radio" name="mv" value="walk"> Walk across</label>
+          <label class="muted"><input type="radio" name="mv" value="hop"> Hop</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="pane" id="p-bg">
+      <h3>Choose a place</h3>
+      <div class="grid" id="bgGrid"></div>
+      <h3>Camera</h3>
+      <div class="row">
+        <label class="muted"><input type="radio" name="cam" value="in"> Slow zoom in</label>
+        <label class="muted"><input type="radio" name="cam" value="out"> Slow zoom out</label>
+        <label class="muted"><input type="radio" name="cam" value="still"> Still</label>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<div class="overlay" id="ov">
+  <div class="dlg">
+    <h2 id="ovTitle">Making your video…</h2>
+    <p class="muted" id="ovText">Keep this tab open. The video is recorded in real time, so it takes as long as the story.</p>
+    <div class="bar"><i id="ovBar"></i></div>
+    <div class="row" id="ovBtns"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+const W=1280,H=720,FPS=30,TAU=Math.PI*2;
+const A='assets/';
+const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitchen','Kitchen'],['garden-rainbow','Garden & rainbow'],['village-park','Village park']];
+const CHARS=[['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
+ ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
+ ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow']];
+const IMG={};
+function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src;});}
+
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+let uid=1;
+const ch=(pose,x,y,h,o={})=>Object.assign({id:uid++,pose,x,y,h,flip:false,move:'idle'},o);
+
+function sample(){return [
+ {bg:'reading-nook',cam:'in',title:'Mira and the Rainy Day',text:'',dur:5,chars:[ch('mira-wave-smile',373,700,400),ch('mochi-sitting',566,700,155)]},
+ {bg:'reading-nook',cam:'out',text:'It was a rainy afternoon. Mira wanted to play outside, but the rain would not stop.',dur:7,chars:[ch('mira-bored',373,700,315)]},
+ {bg:'reading-nook',cam:'in',text:'"There is nothing to do," Mira sighed. Her little cat, Mochi, was fast asleep.',dur:7,chars:[ch('mira-bored',346,700,315),ch('mochi-sleeping',633,703,100)]},
+ {bg:'library',cam:'in',text:'Then Mochi woke up, stretched, and wandered over to the bookshelf.',dur:6,chars:[ch('mochi-walking',233,667,155,{move:'walk'})]},
+ {bg:'library',cam:'in',text:'Bump! Mochi pushed an old red book onto the floor.',dur:5.5,chars:[ch('mira-surprised',373,673,315),ch('mochi-book',653,667,160)]},
+ {bg:'library',cam:'out',text:'"What is this?" Mira wondered. She picked up the book and opened it.',dur:6.5,chars:[ch('mira-thinking',426,673,375),ch('mochi-sitting',633,670,140)]},
+ {bg:'reading-nook',cam:'in',text:'The book was full of stories about faraway places, brave animals and wonderful friends.',dur:7,chars:[ch('mira-reading',400,700,315),ch('mochi-sleeping',633,703,100)]},
+ {bg:'garden-rainbow',cam:'in',text:'When she looked up, the rain was stopping, and a rainbow filled the sky!',dur:6.5,chars:[ch('mira-pointing',833,693,375),ch('mochi-sitting',1013,693,140)]},
+ {bg:'garden-rainbow',cam:'in',text:'Mira jumped for joy. "Come on, Mochi! Let\'s go outside!"',dur:5.5,chars:[ch('mira-jumping',600,687,385,{move:'hop'}),ch('mochi-meow',800,693,140)]},
+ {bg:'village-park',cam:'out',title:'The End',text:'A rainy day can become a great adventure when you open a book.',dur:7,chars:[ch('mira-wave-smile',506,673,385),ch('mochi-meow',700,673,140)]},
+];}
+let S=sample(), cur=0, sel=null;
+
+// ---------- persistence (layout only; recordings stay in memory)
+function save(){try{localStorage.setItem('ts-proto',JSON.stringify(S.map(s=>({...s,audio:undefined,abuf:undefined}))))}catch(e){}}
+function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'null');if(Array.isArray(j)&&j.length){S=j;S.forEach(s=>s.chars.forEach(c=>c.id=uid++));}}catch(e){}}
+
+// ---------- drawing
+function sceneDur(s){return s.abuf? Math.max(3,s.abuf.duration+1.2): s.dur;}
+function wrap(text,maxW){const words=text.split(/\s+/);const lines=[];let l='';
+ for(const w of words){const t=l?l+' '+w:w; if(cx.measureText(t).width>maxW&&l){lines.push(l);l=w}else l=t;} if(l)lines.push(l); return lines;}
+function drawChar(c,t,dur,selected){
+ const im=IMG[c.pose]; if(!im)return;
+ const k=c.h/im.height, w=im.width*k, h=c.h;
+ let x=c.x, y=c.y, sy=1+0.012*(0.5+0.5*Math.sin(TAU*t/3.2)), ang=1.2*Math.sin(TAU*t/4)*Math.PI/180;
+ if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*(c.flip?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
+ if(c.move==='hop'){y-=Math.abs(Math.sin(Math.PI*t*1.4))*26; sy=1;}
+ cx.save();
+ // soft contact shadow
+ const g=cx.createRadialGradient(x,c.y,2,x,c.y,w*0.4); g.addColorStop(0,'rgba(0,0,0,.32)'); g.addColorStop(1,'rgba(0,0,0,0)');
+ cx.fillStyle=g; cx.beginPath(); cx.ellipse(x,c.y,w*0.4,12,0,0,TAU); cx.fill();
+ cx.translate(x,y); cx.rotate(ang); cx.scale(c.flip?-1:1,sy);
+ cx.drawImage(im,-w/2,-h,w,h);
+ cx.restore();
+ if(selected){cx.save();cx.strokeStyle='#ff8fa3';cx.lineWidth=3;cx.setLineDash([10,8]);cx.strokeRect(x-w/2-6,y-h-6,w+12,h+12);cx.restore();}
+}
+function drawScene(s,t,{caption=true,fade=false,editing=false}={}){
+ const dur=sceneDur(s), u=Math.min(1,t/dur), e=0.5-0.5*Math.cos(Math.PI*u);
+ const z = s.cam==='in'?1+0.05*e : s.cam==='out'?1.05-0.05*e : 1;
+ cx.save(); cx.translate(W/2,H/2); cx.scale(z,z); cx.translate(-W/2,-H/2);
+ const bg=IMG['bg:'+s.bg]; if(bg)cx.drawImage(bg,0,0,W,H); else{cx.fillStyle='#222';cx.fillRect(0,0,W,H);}
+ for(const c of s.chars) drawChar(c,t,dur,editing&&sel===c.id);
+ cx.restore();
+ if(s.title){cx.save();cx.font='700 64px Georgia,"Times New Roman",serif';cx.textAlign='center';cx.fillStyle='#fff4dc';cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=18;
+  cx.fillText(s.title,W/2,s.text?140:200);cx.restore();}
+ if(caption&&s.text){
+  cx.save();cx.font='600 30px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  const lines=wrap(s.text,1060), lh=40, bh=lines.length*lh+28, tw=Math.max(...lines.map(l=>cx.measureText(l).width));
+  const y0=(s.title?180:28);
+  cx.fillStyle='rgba(10,8,20,.66)'; roundRect((W-tw)/2-26,y0,tw+52,bh,18); cx.fill();
+  cx.fillStyle='#fff'; cx.textAlign='center'; cx.textBaseline='middle';
+  lines.forEach((l,i)=>cx.fillText(l,W/2,y0+14+lh*i+lh/2)); cx.restore();
+ }
+ if(fade){const f=Math.min(1,t/0.4,(dur-t)/0.4); if(f<1){cx.fillStyle=`rgba(0,0,0,${1-Math.max(0,f)})`;cx.fillRect(0,0,W,H);}}
+}
+function roundRect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
+
+// ---------- editor rendering loop (gentle live motion)
+let playing=null; const t0=performance.now();
+function loop(){ if(!playing){ drawScene(S[cur],((performance.now()-t0)/1000)%6,{editing:true}); } requestAnimationFrame(loop);}
+
+// ---------- UI
+function strip(){
+ const el=$('strip'); el.innerHTML='';
+ S.forEach((s,i)=>{const b=document.createElement('button');b.className='scene'+(i===cur?' on':'');
+  b.innerHTML=`<img src="${A}bg/${s.bg}-t.webp" alt=""><span class="n">${i+1}</span>${s.abuf?'<span class="mic">🎙</span>':''}<p>${esc(s.title||s.text||'(no words)')}</p>`;
+  b.onclick=()=>{cur=i;sel=null;refresh();}; el.appendChild(b);});
+ const add=document.createElement('button');add.className='add';add.textContent='+ Scene';
+ add.onclick=()=>{const p=S[cur];S.splice(cur+1,0,{bg:p.bg,cam:'in',text:'',dur:5,chars:[]});cur++;sel=null;refresh();save();};
+ el.appendChild(add);
+ el.children[cur]?.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function refresh(){
+ const s=S[cur]; strip();
+ $('caption').value=s.text||'';
+ $('dur').value=s.dur; $('dur').disabled=!!s.abuf; $('durLbl').textContent=sceneDur(s).toFixed(1)+' s';
+ $('hearBtn').disabled=$('delVoice').disabled=!s.abuf;
+ $('voiceInfo').innerHTML=s.abuf?`<span class="pill ok">Recorded · ${s.abuf.duration.toFixed(1)} s</span>`:'No recording yet. Read your line aloud, then press Stop.';
+ document.querySelectorAll('#bgGrid button').forEach(b=>b.classList.toggle('on',b.dataset.k===s.bg));
+ document.querySelectorAll('input[name=cam]').forEach(r=>r.checked=r.value===(s.cam||'in'));
+ const c=s.chars.find(c=>c.id===sel);
+ $('selBox').hidden=!c;
+ if(c){$('selName').textContent=CHARS.find(x=>x[0]===c.pose)?.[1]||c.pose;$('selSize').value=c.h;
+  document.querySelectorAll('input[name=mv]').forEach(r=>r.checked=r.value===c.move);}
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+ document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
+$('caption').oninput=e=>{S[cur].text=e.target.value;strip();save();};
+$('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.target.value).toFixed(1)+' s';save();};
+document.querySelectorAll('input[name=cam]').forEach(r=>r.onchange=()=>{S[cur].cam=r.value;save();});
+document.querySelectorAll('input[name=mv]').forEach(r=>r.onchange=()=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.move=r.value;save();}});
+$('selSize').oninput=e=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.h=+e.target.value;save();}};
+$('selFlip').onclick=()=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.flip=!c.flip;save();}};
+$('selFront').onclick=()=>{const a=S[cur].chars,i=a.findIndex(c=>c.id===sel);if(i>=0){a.push(a.splice(i,1)[0]);save();}};
+$('selDel').onclick=()=>{S[cur].chars=S[cur].chars.filter(c=>c.id!==sel);sel=null;refresh();save();};
+$('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...s,audio:undefined,abuf:undefined}));c.chars.forEach(x=>x.id=uid++);S.splice(cur+1,0,c);cur++;refresh();save();};
+$('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,cur-1);sel=null;refresh();save();};
+$('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
+$('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
+$('newStory').onclick=()=>{if(!confirmIn('Start a blank story? Your current scenes will be replaced.'))return;S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();};
+$('loadSample').onclick=()=>{if(!confirmIn('Load the sample story? Your current scenes will be replaced.'))return;S=sample();cur=0;sel=null;refresh();save();};
+let confirmArmed=0;
+function confirmIn(msg){ // simple two-tap confirm without browser dialogs
+ const now=Date.now(); if(now-confirmArmed<4000){confirmArmed=0;return true;}
+ confirmArmed=now; $('hint').textContent=msg+' Tap the button again to confirm.'; setTimeout(()=>$('hint').textContent='Tap a character on the picture to move, resize or flip it. Drag to move.',4000); return false;}
+
+// backgrounds & characters grids
+BGS.forEach(([k,n])=>{const b=document.createElement('button');b.dataset.k=k;b.title=n;b.innerHTML=`<img src="${A}bg/${k}-t.webp" alt="${n}">`;
+ b.onclick=()=>{S[cur].bg=k;refresh();save();};$('bgGrid').appendChild(b);});
+CHARS.forEach(([k,n])=>{const b=document.createElement('button');b.innerHTML=`<img src="${A}ch/${k}.webp" alt="${n}"><small>${n}</small>`;
+ b.onclick=()=>{const isCat=k.startsWith('mochi');const c=ch(k,W/2,690,isCat?150:360);S[cur].chars.push(c);sel=c.id;refresh();save();};
+ $('charGrid').appendChild(b);});
+
+// ---------- drag on canvas
+function toCanvas(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+function hit(p){const a=S[cur].chars;for(let i=a.length-1;i>=0;i--){const c=a[i],im=IMG[c.pose];if(!im)continue;const w=im.width*c.h/im.height;
+ if(p.x>c.x-w/2&&p.x<c.x+w/2&&p.y>c.y-c.h&&p.y<c.y)return c;}return null;}
+let drag=null;
+cv.addEventListener('pointerdown',e=>{if(playing)return;const p=toCanvas(e),c=hit(p);sel=c?c.id:null;
+ if(c){drag={c,dx:p.x-c.x,dy:p.y-c.y};cv.setPointerCapture(e.pointerId);
+  document.querySelector('.tabs button[data-t=chars]').click();}
+ refresh();});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const p=toCanvas(e);drag.c.x=Math.round(p.x-drag.dx);drag.c.y=Math.round(Math.min(H+40,Math.max(80,p.y-drag.dy)));});
+cv.addEventListener('pointerup',()=>{if(drag){drag=null;save();}});
+
+// ---------- voice recording
+let rec=null,recChunks=[],recStream=null;
+let AC=null; function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC;}
+$('recBtn').onclick=async()=>{
+ if(rec){rec.stop();return;}
+ try{recStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});}
+ catch(e){$('voiceInfo').textContent='Microphone not available. Allow microphone access in your browser and try again.';return;}
+ recChunks=[]; rec=new MediaRecorder(recStream);
+ rec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);
+ rec.onstop=async()=>{recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
+  $('recBtn').textContent='● Record my voice';
+  try{const buf=await ac().decodeAudioData(await blob.arrayBuffer());S[cur].abuf=buf;S[cur].audio=blob;}
+  catch(e){$('voiceInfo').textContent='Could not read the recording. Please try again.';}
+  refresh();};
+ rec.start(); $('recBtn').textContent='■ Stop'; $('voiceInfo').innerHTML='<span class="pill" style="background:#4a1d22;color:#ffb3b8">Recording… read your line, then press Stop</span>';
+};
+let hearSrc=null;
+$('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearSrc.stop()}catch(e){}}hearSrc=ac().createBufferSource();hearSrc.buffer=s.abuf;hearSrc.connect(ac().destination);hearSrc.start();};
+$('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;refresh();};
+
+// ---------- music (soft original chords, synthesized)
+function startMusic(ctx,dest,total){
+ const out=ctx.createGain();out.gain.value=0;out.connect(dest);
+ const now=ctx.currentTime; out.gain.linearRampToValueAtTime(0.05,now+2); out.gain.setValueAtTime(0.05,now+Math.max(2,total-2.5)); out.gain.linearRampToValueAtTime(0,now+total);
+ const chords=[[196,246.9,293.7],[164.8,196,246.9],[130.8,164.8,196],[146.8,185,220]]; const seg=4; const nodes=[];
+ for(let k=0;k*seg<total;k++){const c=chords[k%4],t=now+k*seg;
+  for(const f of c){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);
+   g.gain.linearRampToValueAtTime(0.3,t+1);g.gain.setValueAtTime(0.3,t+seg-0.5);g.gain.linearRampToValueAtTime(0,t+seg+0.8);
+   o.connect(g);g.connect(out);o.start(t);o.stop(t+seg+1);nodes.push(o);}
+  const m=ctx.createOscillator(),mg=ctx.createGain();m.type='triangle';m.frequency.value=c[2]*2;mg.gain.setValueAtTime(0.12,t);mg.gain.exponentialRampToValueAtTime(0.001,t+2.4);
+  m.connect(mg);mg.connect(out);m.start(t);m.stop(t+2.5);nodes.push(m);}
+ return()=>{nodes.forEach(n=>{try{n.stop()}catch(e){}});out.disconnect();};
+}
+
+// ---------- playback (preview & export share this)
+function play({dest=null,onProgress=null}={}){
+ return new Promise(res=>{
+  const ctx=ac(); if(ctx.state==='suspended')ctx.resume();
+  const out=dest||ctx.destination;
+  const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0);
+  const start=ctx.currentTime+0.15; const srcs=[];
+  let acc=0; S.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
+  const stopMusic=$('music').checked?startMusic(ctx,out,total+0.2):()=>{};
+  playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;res(false);}};
+  sel=null;
+  (function frame(){
+   if(!playing)return;
+   const t=ctx.currentTime-start;
+   if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;$('playBtn').textContent='▶ Play';refresh();res(true);return;}
+   let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
+   drawScene(S[i],Math.max(0,t-a),{fade:true});
+   if(onProgress)onProgress(Math.max(0,t)/total);
+   requestAnimationFrame(frame);
+  })();
+ });
+}
+$('playBtn').onclick=()=>{if(playing){playing.stop();$('playBtn').textContent='▶ Play';refresh();return;}$('playBtn').textContent='■ Stop';play();};
+
+// ---------- export to video
+function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+ for(const m of c){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;}return '';}
+$('exportBtn').onclick=async()=>{
+ if(playing)return;
+ if(!cv.captureStream||!window.MediaRecorder){showDone('Not supported here','This browser cannot record video. Please try Chrome on Android or a computer.');return;}
+ const ctx=ac(); if(ctx.state==='suspended')await ctx.resume();
+ const dest=ctx.createMediaStreamDestination();
+ const stream=new MediaStream([...cv.captureStream(FPS).getVideoTracks(),...dest.stream.getAudioTracks()]);
+ const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
+ const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+ $('ovTitle').textContent='Making your video…'; $('ovText').textContent='Keep this tab open and on screen. The video is recorded in real time, so it takes as long as the story.';
+ $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
+ let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;playing&&playing.stop();};
+ mr.start(500);
+ const ok=await play({dest,onProgress:p=>$('ovBar').style.width=(p*100).toFixed(1)+'%'});
+ await new Promise(r=>{mr.onstop=r;mr.stop();});
+ if(cancelled||!ok){$('ov').classList.remove('on');refresh();return;}
+ const type=mr.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
+ const url=URL.createObjectURL(new Blob(chunks,{type}));
+ $('ovTitle').textContent='Your video is ready';
+ $('ovText').textContent=ext==='mp4'?'Saved as MP4. It plays on phones, TVs and in CapCut.':'Saved as WebM. It plays in Chrome and YouTube; to use it in CapCut on some phones, convert it to MP4 first.';
+ $('ovBar').style.width='100%';
+ $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.${ext}">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
+ $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
+};
+function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('ovBtns').innerHTML='<button class="btn" id="ovClose">Close</button>';$('ov').classList.add('on');$('ovClose').onclick=()=>$('ov').classList.remove('on');}
+
+// ---------- start
+(async()=>{
+ restore();
+ await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
+ refresh(); loop();
+})();
+})();
+</script>
+</body>
+</html>
