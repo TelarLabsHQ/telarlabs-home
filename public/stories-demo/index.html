@@ -420,21 +420,34 @@ $('musicFile').onchange=async e=>{const f=e.target.files[0]; if(!f){if(!customBu
 try{const m=localStorage.getItem('ts-music');if(m&&STYLES[m]||m==='none')$('music').value=m;}catch(_){}
 
 // ---------- playback (preview & export share this)
+// Keep the screen awake while playing/recording (where supported)
+let wake=null;
+async function keepAwake(on){try{if(on&&'wakeLock' in navigator&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null);}
+ else if(!on&&wake){await wake.release();wake=null;}}catch(e){}}
+// If the page is hidden (phone locked, app switched), freeze the story clock and the recorder,
+// so no scenes are skipped; continue when the page comes back.
+let activeRec=null, pausedByHide=false;
+document.addEventListener('visibilitychange',async()=>{
+ if(!playing)return; const ctx=ac();
+ if(document.hidden){pausedByHide=true;try{activeRec&&activeRec.state==='recording'&&activeRec.pause();}catch(e){} try{await ctx.suspend();}catch(e){}}
+ else{try{await ctx.resume();}catch(e){} try{activeRec&&activeRec.state==='paused'&&activeRec.resume();}catch(e){} keepAwake(true);}
+});
 function play({dest=null,onProgress=null}={}){
- return new Promise(res=>{
-  const ctx=ac(); if(ctx.state==='suspended')ctx.resume();
+ return new Promise(async res=>{
+  const ctx=ac(); if(ctx.state!=='running'){try{await ctx.resume();}catch(e){}}
+  keepAwake(true); pausedByHide=false;
   const out=dest||ctx.destination;
   const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0);
   const start=ctx.currentTime+0.15; const srcs=[];
   let acc=0; S.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
   if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';}
   const stopMusic=startMusic(ctx,out,total+0.2,$('music').value);
-  playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;res(false);}};
+  playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);res(false);}};
   sel=null;
   (function frame(){
    if(!playing)return;
    const t=ctx.currentTime-start;
-   if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;$('playBtn').textContent='▶ Play';refresh();res(true);return;}
+   if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);$('playBtn').textContent='▶ Play';refresh();res(true);return;}
    let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
    drawScene(S[i],Math.max(0,t-a),{fade:true});
    if(onProgress)onProgress(Math.max(0,t)/total);
@@ -455,12 +468,13 @@ $('exportBtn').onclick=async()=>{
  const stream=new MediaStream([...cv.captureStream(FPS).getVideoTracks(),...dest.stream.getAudioTracks()]);
  const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
  const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
- $('ovTitle').textContent='Making your video…'; $('ovText').textContent='Keep this tab open and on screen. The video is recorded in real time, so it takes as long as the story.';
+ $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML='<b>Keep this screen open</b> until it finishes. The video is recorded in real time, so it takes as long as the story. If you leave the page, recording pauses and continues when you come back.';
  $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;playing&&playing.stop();};
- mr.start(500);
+ activeRec=mr; drawScene(S[0],0,{fade:true}); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+ mr.start(1000);
  const ok=await play({dest,onProgress:p=>$('ovBar').style.width=(p*100).toFixed(1)+'%'});
- await new Promise(r=>{mr.onstop=r;mr.stop();});
+ await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null;
  if(cancelled||!ok){$('ov').classList.remove('on');refresh();return;}
  const type=mr.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
  const url=URL.createObjectURL(new Blob(chunks,{type}));
