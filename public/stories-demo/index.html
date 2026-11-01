@@ -421,10 +421,12 @@ function getWorker(){
  if(worker)return worker;
  worker=new Worker('./assets/tts-worker.js',{type:'module'});
  worker.onmessage=e=>{const m=e.data;
-  if(m.type==='progress'){$('aiInfo').textContent=`Downloading the AI voice (one time)… ${m.pct}%`;return;}
+  if(m.type==='alive'){aiStage='Loading the AI voice…';tick();return;}
+  if(m.type==='ready'){aiStage='Voice loaded. Making the first voice…';tick();return;}
+  if(m.type==='progress'){aiStage=`Downloading the AI voice (one time)… ${m.pct!=null?m.pct+'% · ':''}${m.mb} MB`;if(m.pct!=null)aiPct=m.pct;tick();return;}
   const r=reqs[m.id]; if(!r)return; delete reqs[m.id];
   m.type==='done'?r.ok(m):r.fail(new Error(m.msg));};
- worker.onerror=e=>{for(const k in reqs){reqs[k].fail(new Error('worker'));delete reqs[k];} worker=null;};
+ worker.onerror=e=>{const msg='worker: '+(e.message||'could not start');for(const k in reqs){reqs[k].fail(new Error(msg));delete reqs[k];} worker=null;};
  return worker;
 }
 function speak(text){return new Promise((ok,fail)=>{const id=++rid;reqs[id]={ok,fail};
@@ -440,23 +442,25 @@ async function aiFor(i){
  const buf=ac().createBuffer(1,m.audio.length,m.sr); buf.copyToChannel(m.audio,0);
  s.abuf=buf; s.ai=true; s.aiKey=key; delete s.audio; return true;
 }
-let aiBusy=false;
-function busy(on){aiBusy=on;
+let aiBusy=false, aiStage='', aiPct=0, aiT=0, aiTimer=null;
+function tick(){if(!aiBusy)return;const s=Math.round((performance.now()-aiT)/1000);aiMsg(`${aiStage} <span class="muted">(${s} s)</span><br>Keep this page open. Play and Make video unlock when the voices are ready.`,aiPct);}
+function busy(on){aiBusy=on; clearInterval(aiTimer); if(on){aiT=performance.now();aiTimer=setInterval(tick,1000);}
  $('aiOne').disabled=$('aiAll').disabled=$('playBtn').disabled=$('exportBtn').disabled=on;
  $('playBtn').textContent=on?'⏳ Making voices…':'▶ Play';}
 function aiMsg(html,pct){$('aiInfo').innerHTML=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');}
 async function runAI(list){
  if(aiBusy||!list.length)return; busy(true);
- aiMsg(list.length>1?'Getting the AI voice ready…':'Making the voice…',0);
+ aiStage=worker?'Making the voice…':'Starting the AI voice…'; aiPct=0; tick();
  const t0=performance.now();
  try{let done=0;
   for(const i of list){
-   if(done||worker){const left=done?Math.round((performance.now()-t0)/done*(list.length-done)/1000):null;
-    aiMsg(`Making voice ${done+1} of ${list.length} (scene ${i+1})…`+(left?` about ${left<60?left+' s':Math.ceil(left/60)+' min'} left.`:'')+'<br>Keep this page open. Play and Make video unlock when all voices are ready.',Math.round(done/list.length*100));}
+   if(done){const left=Math.round((performance.now()-t0)/done*(list.length-done)/1000);
+    aiStage=`Making voice ${done+1} of ${list.length} (scene ${i+1})… about ${left<60?left+' s':Math.ceil(left/60)+' min'} left.`; aiPct=Math.round(done/list.length*100); aiT=performance.now(); tick();}
    await aiFor(i); done++; if(i===cur)refresh(); else strip();}
+  busy(false);
   aiMsg(`<span class="pill ok">Done</span> ${list.length>1?'All '+list.length+' voices are ready. ':''}Press ▶ Play to hear the story. Changed the words? Make the voice again.`);
- }catch(e){console.warn(e);aiMsg('The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.');}
- busy(false); refresh();
+ }catch(e){console.warn(e);busy(false);aiMsg('The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.<br><span class="muted" style="font-size:12px">Details: '+esc(String(e&&e.message||e)).slice(0,200)+'</span>');}
+ refresh();
 }
 $('aiOne').onclick=()=>{if(!spoken(S[cur])){aiMsg('Type the words for this scene first (step 2).');return;}runAI([cur]);};
 $('aiAll').onclick=()=>{
