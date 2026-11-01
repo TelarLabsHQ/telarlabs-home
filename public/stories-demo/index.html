@@ -76,6 +76,8 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .inscene img{width:34px;height:34px;object-fit:contain}
 .step-tag{display:inline-block;background:var(--accent);color:#2a0d14;font-weight:800;font-size:11px;border-radius:99px;padding:1px 8px;margin-right:6px;vertical-align:1px}
 
+.aibar{display:block;height:6px;background:var(--line);border-radius:9px;margin-top:8px;overflow:hidden}.aibar i{display:block;height:100%;background:#ff8fa3;transition:width .4s}
+.btn:disabled{opacity:.55;cursor:default}
 </style>
 </head>
 <body>
@@ -135,7 +137,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
           <button class="btn primary sm" id="aiOne">Make AI voice for this scene</button>
           <button class="btn sm" id="aiAll">For all scenes</button>
         </div>
-        <p class="muted" id="aiInfo" style="margin:8px 0 0">The first time, the voice downloads once (about 90 MB, best on Wi-Fi). After that it works quickly. English only for now.</p>
+        <p class="muted" id="aiInfo" style="margin:8px 0 0">The first time, the voice downloads once (about 110 MB, best on Wi-Fi). Each scene then takes about 10 to 30 seconds, depending on your phone. Scenes with your own recording are kept. English only for now.</p>
       </div>
       <div class="row" style="margin-top:10px">
         <button class="btn rec" id="recBtn">● Record my voice</button>
@@ -417,24 +419,37 @@ function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('='))
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
  for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
  return t.replace(/["“”]/g,'').trim();}
+const aiKey=s=>spoken(s)+'|'+$('aiVoice').value+'|'+$('aiSpeed').value;
 async function aiFor(i){
  const s=S[i], text=spoken(s); if(!text)return false;
- const m=await speak(text);
+ const key=aiKey(s), m=await speak(text);
  const buf=ac().createBuffer(1,m.audio.length,m.sr); buf.copyToChannel(m.audio,0);
- s.abuf=buf; s.ai=true; delete s.audio; return true;
+ s.abuf=buf; s.ai=true; s.aiKey=key; delete s.audio; return true;
 }
+let aiBusy=false;
+function busy(on){aiBusy=on;
+ $('aiOne').disabled=$('aiAll').disabled=$('playBtn').disabled=$('exportBtn').disabled=on;
+ $('playBtn').textContent=on?'⏳ Making voices…':'▶ Play';}
+function aiMsg(html,pct){$('aiInfo').innerHTML=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');}
 async function runAI(list){
- $('aiOne').disabled=$('aiAll').disabled=true;
- $('aiInfo').textContent=list.length>1?'Getting the AI voice ready…':'Making the voice…';
+ if(aiBusy||!list.length)return; busy(true);
+ aiMsg(list.length>1?'Getting the AI voice ready…':'Making the voice…',0);
+ const t0=performance.now();
  try{let done=0;
-  for(const i of list){if(worker||i!==list[0])$('aiInfo').textContent=list.length>1?`Making voice for scene ${i+1} (${done+1} of ${list.length})…`:'Making the voice…';
+  for(const i of list){
+   if(done||worker){const left=done?Math.round((performance.now()-t0)/done*(list.length-done)/1000):null;
+    aiMsg(`Making voice ${done+1} of ${list.length} (scene ${i+1})…`+(left?` about ${left<60?left+' s':Math.ceil(left/60)+' min'} left.`:'')+'<br>Keep this page open. Play and Make video unlock when all voices are ready.',Math.round(done/list.length*100));}
    await aiFor(i); done++; if(i===cur)refresh(); else strip();}
-  $('aiInfo').innerHTML=`<span class="pill ok">Done</span> Press ▶ Listen or ▶ Play to hear it. Change the words? Just make the voice again.`;
- }catch(e){console.warn(e);$('aiInfo').textContent='The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.';}
- $('aiOne').disabled=$('aiAll').disabled=false; refresh();
+  aiMsg(`<span class="pill ok">Done</span> ${list.length>1?'All '+list.length+' voices are ready. ':''}Press ▶ Play to hear the story. Changed the words? Make the voice again.`);
+ }catch(e){console.warn(e);aiMsg('The AI voice could not load on this device or connection. Try again on Wi-Fi, or use Record my voice.');}
+ busy(false); refresh();
 }
-$('aiOne').onclick=()=>{if(!spoken(S[cur])){$('aiInfo').textContent='Type the words for this scene first (step 2).';return;}runAI([cur]);};
-$('aiAll').onclick=()=>runAI(S.map((s,i)=>i).filter(i=>spoken(S[i])));
+$('aiOne').onclick=()=>{if(!spoken(S[cur])){aiMsg('Type the words for this scene first (step 2).');return;}runAI([cur]);};
+$('aiAll').onclick=()=>{
+ const own=S.filter(s=>s.abuf&&!s.ai).length;
+ const list=S.map((s,i)=>i).filter(i=>{const s=S[i];return spoken(s)&&!(s.abuf&&!s.ai)&&!(s.ai&&s.aiKey===aiKey(s));});
+ if(!list.length){aiMsg(`<span class="pill ok">Done</span> Every scene already has a voice${own?' (your own recordings were kept)':''}.`);return;}
+ runAI(list);};
 $('pron').oninput=e=>{try{localStorage.setItem('ts-pron',e.target.value)}catch(_){}};
 try{const v=localStorage.getItem('ts-pron');$('pron').value=v!==null?v:'Mochi = Mowchee';}catch(_){$('pron').value='Mochi = Mowchee';}
 try{const v=localStorage.getItem('ts-voice');if(v)$('aiVoice').value=v;}catch(_){}
@@ -520,7 +535,7 @@ function play({dest=null,onProgress=null}={}){
   })();
  });
 }
-$('playBtn').onclick=()=>{if(playing){playing.stop();$('playBtn').textContent='▶ Play';refresh();return;}$('playBtn').textContent='■ Stop';play();};
+$('playBtn').onclick=()=>{if(aiBusy)return;if(playing){playing.stop();$('playBtn').textContent='▶ Play';refresh();return;}$('playBtn').textContent='■ Stop';play();};
 
 // ---------- export to video
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
@@ -603,7 +618,7 @@ async function exportFast(){
  $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.mp4">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
  $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
 }
-$('exportBtn').onclick=async()=>{
+$('exportBtn').onclick=async()=>{if(aiBusy)return;
  if(playing)return;
  if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);}}
  await exportRealtime();
