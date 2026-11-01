@@ -115,6 +115,7 @@ def pages():
 <p>This site doesn't have accounts or forms, and we don't ask for personal information. If you email us, we use your address only to reply.</p>
 <h2>Advertising</h2>
 <p>We may use Google AdSense on our information pages. Google and its partners use cookies to show ads based on your visits to this and other websites. You can turn off personalized ads in <a href="https://adssettings.google.com" rel="noopener">Google Ads Settings</a>, and learn more at <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">How Google uses information from sites that use its services</a>. Visitors in the European Economic Area, the UK and Switzerland are shown a consent message before personalized ads are used.</p>
+<h2>Analytics</h2><p>We use Cloudflare Web Analytics to count page visits. It does not use cookies and does not track you across websites.</p>
 <h2>Hosting</h2>
 <p>Our sites are hosted on Cloudflare, which may record basic technical information such as IP address and browser type to keep the service secure.</p>
 <h2>Children</h2>
