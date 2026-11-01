@@ -78,6 +78,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 
 .aibar{display:block;height:6px;background:var(--line);border-radius:9px;margin-top:8px;overflow:hidden}.aibar i{display:block;height:100%;background:#ff8fa3;transition:width .4s}
 .btn:disabled{opacity:.55;cursor:default}
+.scenebar{display:flex;align-items:center;gap:12px;margin:10px 0 0;flex-wrap:wrap}.scenebar .muted{font-size:14px}
 </style>
 </head>
 <body>
@@ -104,6 +105,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <button class="btn sm" id="selDone" title="Close this toolbar (deselect the character)">✓ Close</button>
     </div>
     <div class="tipbar" id="hint"><b>Tip:</b> tap a character in the picture to <b>flip</b>, resize, move or remove it. Drag it to move it around.</div>
+    <div class="scenebar"><button class="btn sm" id="playScene">▶ Play this scene</button><span class="muted" id="sceneInfo"></span></div>
     <div class="strip" id="strip"></div>
   </main>
 
@@ -335,6 +337,7 @@ function refresh(){
  $('caption').value=s.text||'';
  $('dur').value=s.dur; $('dur').disabled=!!s.abuf; $('durLbl').textContent=sceneDur(s).toFixed(1)+' s';
  $('hearBtn').disabled=$('delVoice').disabled=!s.abuf;
+ $('sceneInfo').textContent=`Scene ${cur+1} of ${S.length} · ${sceneDur(s).toFixed(1)} s${s.abuf?(s.ai?' · AI voice':' · your voice'):' · no voice yet'}`;
  $('voiceInfo').innerHTML=s.abuf?`<span class="pill ok">${s.ai?'AI voice':'Your recording'} · ${s.abuf.duration.toFixed(1)} s</span>`:'No voice yet for this scene.';
  document.querySelectorAll('#bgGrid button').forEach(b=>b.classList.toggle('on',b.dataset.k===s.bg));
  document.querySelectorAll('input[name=cam]').forEach(r=>r.checked=r.value===(s.cam||'in'));
@@ -463,7 +466,7 @@ let aiBusy=false, aiStage='', aiPct=0, aiT=0, aiTimer=null;
 function tick(){if(!aiBusy)return;const s=Math.round((performance.now()-aiT)/1000);aiMsg(`${aiStage} <span class="muted">(${s} s)</span><br>Keep this page open. Play and Make video unlock when the voices are ready.`,aiPct);}
 function busy(on){aiBusy=on; clearInterval(aiTimer); if(on){aiT=performance.now();aiTimer=setInterval(tick,1000);}
  $('aiOne').disabled=$('aiAll').disabled=$('playBtn').disabled=$('exportBtn').disabled=on;
- $('playBtn').textContent=on?'⏳ Making voices…':'▶ Play';}
+ if(!playing)playLabels(); else $('playBtn').disabled=$('exportBtn').disabled=true;}
 function aiMsg(html,pct){$('aiInfo').innerHTML=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');}
 async function runAI(list){
  if(aiBusy||!list.length)return; busy(true);
@@ -547,30 +550,33 @@ document.addEventListener('visibilitychange',async()=>{
  if(document.hidden){pausedByHide=true;try{activeRec&&activeRec.state==='recording'&&activeRec.pause();}catch(e){} try{await ctx.suspend();}catch(e){}}
  else{try{await ctx.resume();}catch(e){} try{activeRec&&activeRec.state==='paused'&&activeRec.resume();}catch(e){} keepAwake(true);}
 });
-function play({dest=null,onProgress=null}={}){
+function play({dest=null,onProgress=null,only=null}={}){
  return new Promise(async res=>{
   const ctx=ac(); if(ctx.state!=='running'){try{await ctx.resume();}catch(e){}}
   keepAwake(true); pausedByHide=false;
   const out=dest||ctx.destination;
-  const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0);
+  const L=only!=null?[S[only]]:S;
+  const durs=L.map(sceneDur), total=durs.reduce((a,b)=>a+b,0);
   const start=ctx.currentTime+0.15; const srcs=[];
-  let acc=0; S.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
+  let acc=0; L.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
   if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';}
   const stopMusic=startMusic(ctx,out,total+0.2,$('music').value);
-  playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);res(false);}};
-  sel=null;
+  playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();res(false);}};
+  sel=null; $('selBar').hidden=true;
   (function frame(){
    if(!playing)return;
    const t=ctx.currentTime-start;
-   if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);$('playBtn').textContent='▶ Play';refresh();res(true);return;}
-   let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-   drawScene(S[i],Math.max(0,t-a),{fade:true});
+   if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();refresh();res(true);return;}
+   let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
+   drawScene(L[i],Math.max(0,t-a),{fade:true});
    if(onProgress)onProgress(Math.max(0,t)/total);
    requestAnimationFrame(frame);
   })();
  });
 }
-$('playBtn').onclick=()=>{if(aiBusy)return;if(playing){playing.stop();$('playBtn').textContent='▶ Play';refresh();return;}$('playBtn').textContent='■ Stop';play();};
+function playLabels(){$('playBtn').textContent=aiBusy?'⏳ Making voices…':'▶ Play';$('playScene').textContent='▶ Play this scene';$('playScene').disabled=false;$('playBtn').disabled=$('exportBtn').disabled=aiBusy;}
+$('playBtn').onclick=()=>{if(aiBusy)return;if(playing){playing.stop();refresh();return;}$('playBtn').textContent='■ Stop';$('playScene').disabled=true;play();};
+$('playScene').onclick=()=>{if(playing){playing.stop();refresh();return;}$('playScene').textContent='■ Stop';$('playBtn').disabled=true;play({only:cur});};
 
 // ---------- export to video
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
