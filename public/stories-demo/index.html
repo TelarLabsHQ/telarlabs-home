@@ -61,20 +61,46 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
 .pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted)}
 .pill.ok{background:#173a2a;color:var(--ok)}
+@media(max-width:600px){.top{gap:6px;padding:8px 12px}.badge{display:none}.top .btn{padding:7px 10px;font-size:14px;white-space:nowrap}.lbl{display:none}.top h1{font-size:16px}}
+.selbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--accent);border-radius:var(--r);padding:10px 12px;margin-top:10px}
+.selbar b{margin-right:4px}.selbar select{background:var(--bg3);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font:inherit}
+.tipbar{margin-top:10px;font-size:14px;color:var(--muted);background:var(--bg2);border:1px dashed var(--line);border-radius:var(--r);padding:10px 12px}
+.steps{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 40px;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#2a0d14;font-weight:800;display:flex;align-items:center;justify-content:center}
+.dlg.wide{max-width:560px;max-height:90vh;overflow:auto}
+input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+.inscene{display:flex;flex-direction:column;gap:6px}
+.inscene .row{background:var(--bg3);border-radius:10px;padding:6px 8px}
+.inscene img{width:34px;height:34px;object-fit:contain}
+.step-tag{display:inline-block;background:var(--accent);color:#2a0d14;font-weight:800;font-size:11px;border-radius:99px;padding:1px 8px;margin-right:6px;vertical-align:1px}
+
 </style>
 </head>
 <body>
 <header class="top">
   <h1>Telar <span>Stories</span></h1><span class="badge">Prototype</span>
   <div class="sp"></div>
+  <button class="btn" id="helpBtn">❓<span class="lbl"> How to use</span></button>
   <button class="btn" id="playBtn">▶ Play</button>
-  <button class="btn primary" id="exportBtn">⬇ Make video</button>
+  <button class="btn primary" id="exportBtn">⬇<span class="lbl"> Make</span> video</button>
 </header>
 
 <div class="wrap">
   <main>
     <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
-    <p class="hint" id="hint">Tap a character on the picture to move, resize or flip it. Drag to move.</p>
+    <div class="selbar" id="selBar" hidden>
+      <b id="selName">Character</b>
+      <button class="btn sm" id="selFlip">⇋ Flip</button>
+      <button class="btn sm" id="selSmaller">− Smaller</button>
+      <button class="btn sm" id="selBigger">+ Bigger</button>
+      <button class="btn sm" id="selFront">Bring to front</button>
+      <select id="selMove" title="Movement"><option value="idle">Movement: breathe</option><option value="walk">Movement: walk across</option><option value="hop">Movement: hop</option></select>
+      <button class="btn sm" id="selDel">🗑 Remove</button>
+      <button class="btn sm" id="selDone">Done</button>
+    </div>
+    <div class="tipbar" id="hint"><b>Tip:</b> tap a character in the picture to <b>flip</b>, resize, move or remove it. Drag it to move it around.</div>
     <div class="strip" id="strip"></div>
   </main>
 
@@ -86,9 +112,12 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     </div>
 
     <section class="pane on" id="p-words">
-      <h3>What happens in this scene</h3>
-      <textarea id="caption" placeholder="Type the story line for this scene…"></textarea>
-      <h3>Narration</h3>
+      <div class="note"><b>The sample story is only an example.</b> Change any title, words, characters or backgrounds. Mix and match to tell your own story, or tap <b>Start a blank story</b> below.</div>
+      <h3><span class="step-tag">1</span>Title (optional)</h3>
+      <input type="text" id="title" placeholder="e.g. Mira and the Rainy Day">
+      <h3><span class="step-tag">2</span>What happens in this scene</h3>
+      <textarea id="caption" placeholder="Type the story line for this scene. It shows as a caption, like a picture book."></textarea>
+      <h3><span class="step-tag">3</span>Read it aloud (optional)</h3>
       <div class="row">
         <button class="btn rec" id="recBtn">● Record my voice</button>
         <button class="btn sm" id="hearBtn" disabled>▶ Listen</button>
@@ -107,8 +136,14 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       </div>
       <h3>Whole story</h3>
       <div class="row">
-        <label class="row muted"><input type="checkbox" id="music" checked> Soft background music</label>
+        <span class="muted">Background music</span>
+        <select id="music" style="flex:1;background:var(--bg3);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
+          <option value="gentle">Gentle (calm)</option><option value="happy">Happy (bouncy)</option>
+          <option value="dreamy">Dreamy (bedtime)</option><option value="adventure">Adventure</option><option value="none">No music</option>
+        </select>
+        <button class="btn sm" id="musicPrev">▶ Preview</button>
       </div>
+      <p class="muted">All music is original and free to use in your video.</p>
       <div class="row" style="margin-top:8px">
         <button class="btn sm" id="newStory">Start a blank story</button>
         <button class="btn sm" id="loadSample">Load the sample story</button>
@@ -116,27 +151,16 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     </section>
 
     <section class="pane" id="p-chars">
-      <h3>Tap a pose to add it to the scene</h3>
+      <h3>Tap a pose to add it to this scene</h3>
+      <p class="muted">Each character comes in several poses. Pick the one that fits the moment in your story.</p>
       <div class="grid cgrid" id="charGrid"></div>
-      <div class="sel" id="selBox" hidden>
-        <div class="row"><b id="selName">Selected</b><span class="sp" style="flex:1"></span></div>
-        <div class="row" style="margin-top:8px"><span class="muted">Size</span><input type="range" id="selSize" min="80" max="600"></div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn sm" id="selFlip">⇋ Flip</button>
-          <button class="btn sm" id="selFront">Bring to front</button>
-          <button class="btn sm" id="selDel">Remove</button>
-        </div>
-        <h3>Movement</h3>
-        <div class="row">
-          <label class="muted"><input type="radio" name="mv" value="idle"> Breathe</label>
-          <label class="muted"><input type="radio" name="mv" value="walk"> Walk across</label>
-          <label class="muted"><input type="radio" name="mv" value="hop"> Hop</label>
-        </div>
-      </div>
+      <h3>In this scene</h3>
+      <div class="inscene" id="inScene"></div>
+      <p class="muted">Tap a character in the picture (or here) to flip, resize or remove it.</p>
     </section>
 
     <section class="pane" id="p-bg">
-      <h3>Choose a place</h3>
+      <h3>Tap a place for this scene</h3>
       <div class="grid" id="bgGrid"></div>
       <h3>Camera</h3>
       <div class="row">
@@ -146,6 +170,23 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       </div>
     </section>
   </aside>
+</div>
+
+<div class="overlay" id="help">
+  <div class="dlg wide">
+    <h2>Make a story video in 4 steps</h2>
+    <p class="muted">A sample story is already loaded so you can see how it works. Everything in it can be changed.</p>
+    <ol class="steps">
+      <li><b>Pick a scene</b> in the strip under the picture. Add more with <b>+ Scene</b>.</li>
+      <li><b>Set the scene:</b> open <b>Background</b> to choose a place and <b>Characters</b> to add poses. Drag characters to move them; tap one to <b>flip</b>, resize or remove it.</li>
+      <li><b>Tell the story:</b> in <b>Words &amp; voice</b>, type what happens and press <b>Record my voice</b> to read it aloud. The title and words in the sample are just suggestions; mix and match.</li>
+      <li><b>Press ▶ Play</b> to watch it, then <b>⬇ Make video</b> to save it to your device.</li>
+    </ol>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="helpGo">Got it, let's start</button>
+      <button class="btn" id="helpBlank">Start with a blank story</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="ov">
@@ -246,6 +287,7 @@ function strip(){
  el.appendChild(add);
  el.children[cur]?.scrollIntoView({block:'nearest',inline:'nearest'});
 }
+function nameOf(k){return (CHARS.find(x=>x[0]===k)||[k,k])[1];}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function refresh(){
  const s=S[cur]; strip();
@@ -255,10 +297,17 @@ function refresh(){
  $('voiceInfo').innerHTML=s.abuf?`<span class="pill ok">Recorded · ${s.abuf.duration.toFixed(1)} s</span>`:'No recording yet. Read your line aloud, then press Stop.';
  document.querySelectorAll('#bgGrid button').forEach(b=>b.classList.toggle('on',b.dataset.k===s.bg));
  document.querySelectorAll('input[name=cam]').forEach(r=>r.checked=r.value===(s.cam||'in'));
+ $('title').value=s.title||'';
  const c=s.chars.find(c=>c.id===sel);
- $('selBox').hidden=!c;
- if(c){$('selName').textContent=CHARS.find(x=>x[0]===c.pose)?.[1]||c.pose;$('selSize').value=c.h;
-  document.querySelectorAll('input[name=mv]').forEach(r=>r.checked=r.value===c.move);}
+ $('selBar').hidden=!c; $('hint').hidden=!!c;
+ if(c){$('selName').textContent=nameOf(c.pose);$('selMove').value=c.move||'idle';}
+ const L=$('inScene'); L.innerHTML='';
+ if(!s.chars.length) L.innerHTML='<p class="muted">No characters yet. Tap a pose above to add one.</p>';
+ s.chars.forEach(x=>{const r=document.createElement('div');r.className='row';
+  r.innerHTML=`<img src="${A}ch/${x.pose}.webp" alt=""><span style="flex:1">${esc(nameOf(x.pose))}</span>`;
+  const f=document.createElement('button');f.className='btn sm';f.textContent='⇋ Flip';f.onclick=()=>{x.flip=!x.flip;save();};
+  const e=document.createElement('button');e.className='btn sm';e.textContent='Select';e.onclick=()=>{sel=x.id;refresh();cv.scrollIntoView({behavior:'smooth',block:'nearest'});};
+  r.append(f,e);L.appendChild(r);});
 }
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
@@ -266,9 +315,13 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
 $('caption').oninput=e=>{S[cur].text=e.target.value;strip();save();};
 $('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.target.value).toFixed(1)+' s';save();};
 document.querySelectorAll('input[name=cam]').forEach(r=>r.onchange=()=>{S[cur].cam=r.value;save();});
-document.querySelectorAll('input[name=mv]').forEach(r=>r.onchange=()=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.move=r.value;save();}});
-$('selSize').oninput=e=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.h=+e.target.value;save();}};
-$('selFlip').onclick=()=>{const c=S[cur].chars.find(c=>c.id===sel);if(c){c.flip=!c.flip;save();}};
+const selC=()=>S[cur].chars.find(c=>c.id===sel);
+$('selMove').onchange=e=>{const c=selC();if(c){c.move=e.target.value;save();}};
+$('selBigger').onclick=()=>{const c=selC();if(c){c.h=Math.min(680,Math.round(c.h*1.12));save();}};
+$('selSmaller').onclick=()=>{const c=selC();if(c){c.h=Math.max(60,Math.round(c.h/1.12));save();}};
+$('selDone').onclick=()=>{sel=null;refresh();};
+$('title').oninput=e=>{S[cur].title=e.target.value;strip();save();};
+$('selFlip').onclick=()=>{const c=selC();if(c){c.flip=!c.flip;save();refresh();}};
 $('selFront').onclick=()=>{const a=S[cur].chars,i=a.findIndex(c=>c.id===sel);if(i>=0){a.push(a.splice(i,1)[0]);save();}};
 $('selDel').onclick=()=>{S[cur].chars=S[cur].chars.filter(c=>c.id!==sel);sel=null;refresh();save();};
 $('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...s,audio:undefined,abuf:undefined}));c.chars.forEach(x=>x.id=uid++);S.splice(cur+1,0,c);cur++;refresh();save();};
@@ -280,7 +333,7 @@ $('loadSample').onclick=()=>{if(!confirmIn('Load the sample story? Your current 
 let confirmArmed=0;
 function confirmIn(msg){ // simple two-tap confirm without browser dialogs
  const now=Date.now(); if(now-confirmArmed<4000){confirmArmed=0;return true;}
- confirmArmed=now; $('hint').textContent=msg+' Tap the button again to confirm.'; setTimeout(()=>$('hint').textContent='Tap a character on the picture to move, resize or flip it. Drag to move.',4000); return false;}
+ confirmArmed=now; const h=$('hint'),old=h.innerHTML; h.hidden=false; h.innerHTML='<b>'+msg+'</b> Tap the button again to confirm.'; setTimeout(()=>{h.innerHTML=old;refresh();},4000); return false;}
 
 // backgrounds & characters grids
 BGS.forEach(([k,n])=>{const b=document.createElement('button');b.dataset.k=k;b.title=n;b.innerHTML=`<img src="${A}bg/${k}-t.webp" alt="${n}">`;
@@ -296,7 +349,7 @@ function hit(p){const a=S[cur].chars;for(let i=a.length-1;i>=0;i--){const c=a[i]
 let drag=null;
 cv.addEventListener('pointerdown',e=>{if(playing)return;const p=toCanvas(e),c=hit(p);sel=c?c.id:null;
  if(c){drag={c,dx:p.x-c.x,dy:p.y-c.y};cv.setPointerCapture(e.pointerId);
-  document.querySelector('.tabs button[data-t=chars]').click();}
+}
  refresh();});
 cv.addEventListener('pointermove',e=>{if(!drag)return;const p=toCanvas(e);drag.c.x=Math.round(p.x-drag.dx);drag.c.y=Math.round(Math.min(H+40,Math.max(80,p.y-drag.dy)));});
 cv.addEventListener('pointerup',()=>{if(drag){drag=null;save();}});
@@ -321,19 +374,39 @@ let hearSrc=null;
 $('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearSrc.stop()}catch(e){}}hearSrc=ac().createBufferSource();hearSrc.buffer=s.abuf;hearSrc.connect(ac().destination);hearSrc.start();};
 $('delVoice').onclick=()=>{delete S[cur].abuf;delete S[cur].audio;refresh();};
 
-// ---------- music (soft original chords, synthesized)
-function startMusic(ctx,dest,total){
+// ---------- music (original, synthesized in the browser)
+const mf=m=>440*Math.pow(2,(m-69)/12);
+const STYLES={
+ gentle:{seg:4,chords:[[55,59,62],[52,55,59],[48,52,55],[50,54,57]],pad:'sine',padG:.3,bell:1},
+ happy:{seg:2.2,chords:[[48,52,55],[43,47,50],[45,48,52],[41,45,48]],pad:'sine',padG:.16,arp:{n:8,wave:'triangle',oct:12,g:.16}},
+ dreamy:{seg:6,chords:[[41,45,48,52],[40,43,47,50],[38,41,45,48],[36,40,43,47]],pad:'sine',padG:.24,sparkle:1},
+ adventure:{seg:2.6,chords:[[45,48,52],[41,45,48],[48,52,55],[43,47,50]],pad:'triangle',padG:.12,bass:4,arp:{n:4,wave:'triangle',oct:12,g:.14}},
+};
+function note(ctx,out,f,t,len,wave,g,att=.02){const o=ctx.createOscillator(),v=ctx.createGain();o.type=wave;o.frequency.value=f;
+ v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.exponentialRampToValueAtTime(0.0008,t+len);o.connect(v);v.connect(out);o.start(t);o.stop(t+len+.05);return o;}
+function startMusic(ctx,dest,total,style){
+ const st=STYLES[style]; if(!st)return()=>{};
  const out=ctx.createGain();out.gain.value=0;out.connect(dest);
- const now=ctx.currentTime; out.gain.linearRampToValueAtTime(0.05,now+2); out.gain.setValueAtTime(0.05,now+Math.max(2,total-2.5)); out.gain.linearRampToValueAtTime(0,now+total);
- const chords=[[196,246.9,293.7],[164.8,196,246.9],[130.8,164.8,196],[146.8,185,220]]; const seg=4; const nodes=[];
- for(let k=0;k*seg<total;k++){const c=chords[k%4],t=now+k*seg;
-  for(const f of c){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);
-   g.gain.linearRampToValueAtTime(0.3,t+1);g.gain.setValueAtTime(0.3,t+seg-0.5);g.gain.linearRampToValueAtTime(0,t+seg+0.8);
-   o.connect(g);g.connect(out);o.start(t);o.stop(t+seg+1);nodes.push(o);}
-  const m=ctx.createOscillator(),mg=ctx.createGain();m.type='triangle';m.frequency.value=c[2]*2;mg.gain.setValueAtTime(0.12,t);mg.gain.exponentialRampToValueAtTime(0.001,t+2.4);
-  m.connect(mg);mg.connect(out);m.start(t);m.stop(t+2.5);nodes.push(m);}
- return()=>{nodes.forEach(n=>{try{n.stop()}catch(e){}});out.disconnect();};
+ const now=ctx.currentTime, lvl=0.055; out.gain.linearRampToValueAtTime(lvl,now+1.5); out.gain.setValueAtTime(lvl,now+Math.max(1.5,total-2.5)); out.gain.linearRampToValueAtTime(0,now+total);
+ const nodes=[];
+ for(let k=0;k*st.seg<total;k++){const c=st.chords[k%st.chords.length],t=now+k*st.seg;
+  for(const m of c){const o=ctx.createOscillator(),g=ctx.createGain();o.type=st.pad;o.frequency.value=mf(m);g.gain.setValueAtTime(0,t);
+   g.gain.linearRampToValueAtTime(st.padG,t+Math.min(1,st.seg/3));g.gain.setValueAtTime(st.padG,t+st.seg-0.3);g.gain.linearRampToValueAtTime(0,t+st.seg+0.6);
+   o.connect(g);g.connect(out);o.start(t);o.stop(t+st.seg+.7);nodes.push(o);}
+  if(st.bell) nodes.push(note(ctx,out,mf(c[c.length-1]+12),t,2.4,'triangle',.14));
+  if(st.arp){const pat=[0,1,2,1,2,1,0,2];for(let a=0;a<st.arp.n;a++){const m=c[pat[a%pat.length]%c.length]+st.arp.oct;
+    nodes.push(note(ctx,out,mf(m),t+a*st.seg/st.arp.n,st.seg/st.arp.n*1.6,st.arp.wave,st.arp.g,.01));}}
+  if(st.bass){for(let a=0;a<st.bass;a++) nodes.push(note(ctx,out,mf(c[0]-12),t+a*st.seg/st.bass,st.seg/st.bass*.9,'triangle',.22,.01));}
+  if(st.sparkle){[0.7,2.9,4.6].forEach((d,q)=>nodes.push(note(ctx,out,mf(c[(k+q)%c.length]+24),t+d,1.8,'sine',.1)));}
+ }
+ return()=>{nodes.forEach(n=>{try{n.stop()}catch(e){}});try{out.disconnect()}catch(e){}};
 }
+let musicStop=null;
+$('musicPrev').onclick=()=>{if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';return;}
+ const ctx=ac();if(ctx.state==='suspended')ctx.resume();musicStop=startMusic(ctx,ctx.destination,8,$('music').value);$('musicPrev').textContent='■ Stop';
+ setTimeout(()=>{if(musicStop){musicStop=null;$('musicPrev').textContent='▶ Preview';}},8000);};
+$('music').onchange=e=>{try{localStorage.setItem('ts-music',e.target.value)}catch(_){}};
+try{const m=localStorage.getItem('ts-music');if(m&&STYLES[m]||m==='none')$('music').value=m;}catch(_){}
 
 // ---------- playback (preview & export share this)
 function play({dest=null,onProgress=null}={}){
@@ -343,7 +416,8 @@ function play({dest=null,onProgress=null}={}){
   const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0);
   const start=ctx.currentTime+0.15; const srcs=[];
   let acc=0; S.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
-  const stopMusic=$('music').checked?startMusic(ctx,out,total+0.2):()=>{};
+  if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';}
+  const stopMusic=startMusic(ctx,out,total+0.2,$('music').value);
   playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;res(false);}};
   sel=null;
   (function frame(){
@@ -387,11 +461,19 @@ $('exportBtn').onclick=async()=>{
 };
 function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('ovBtns').innerHTML='<button class="btn" id="ovClose">Close</button>';$('ov').classList.add('on');$('ovClose').onclick=()=>$('ov').classList.remove('on');}
 
+// ---------- help
+const closeHelp=()=>{$('help').classList.remove('on');try{localStorage.setItem('ts-help','1')}catch(e){}};
+$('helpBtn').onclick=()=>$('help').classList.add('on');
+$('helpGo').onclick=closeHelp;
+$('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();closeHelp();};
+
 // ---------- start
 (async()=>{
  restore();
  await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
  refresh(); loop();
+ let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
+ if(!seen)$('help').classList.add('on');
 })();
 })();
 </script>
