@@ -2,18 +2,47 @@
   "studio": "Telar Labs",
   "site_url": "https://telarlabs.net",
   "contact_email": "telarlabs@gmail.com",
-  "adsense_client": "",
+  "adsense_client": "ca-pub-4326677240395780",
   "updated": "2026-11-01",
   "apps": [
-    {"name": "Telar Clips", "url": "https://clips.telarlabs.net", "img": "clips.webp", "color": "#ffb547", "for": "For creators",
-     "blurb": "Free motion backgrounds, illustrated scenes and green screens for greetings, reels, intros and school or church videos."},
-    {"name": "PizarraPad", "url": "https://pizarrapad.telarlabs.net", "img": "pp.webp", "color": "#5ED39A", "for": "For teachers",
-     "blurb": "A free online whiteboard, blackboard and greenboard for the classroom projector. Write with a stylus, finger or mouse, add pictures, works offline."},
-    {"name": "QuizPolice", "url": "https://quizpolice.telarlabs.net", "img": "qp.webp", "color": "#7FA6FF", "for": "For teachers",
-     "blurb": "Free quiz monitoring for Google Forms, Microsoft Forms and Wayground. See live who left the quiz tab, and for how long."},
-    {"name": "DraftTrail", "url": "https://drafttrail.telarlabs.net", "img": "dt.webp", "color": "#C49BFF", "for": "For students & teachers",
-     "blurb": "A writing recorder that replays how an essay was written, step by step, so teachers can see the process, not just the result."},
-    {"name": "Telar Stories", "img": "stories.webp", "color": "#ff8fa3", "soon": true,
-     "blurb": "Turn illustrated scenes and characters into 2 to 3 minute narrated story videos for classrooms, Sunday school and organization promos."}
+    {
+      "name": "Telar Clips",
+      "url": "https://clips.telarlabs.net",
+      "img": "clips.webp",
+      "color": "#ffb547",
+      "for": "For creators",
+      "blurb": "Free motion backgrounds, illustrated scenes and green screens for greetings, reels, intros and school or church videos."
+    },
+    {
+      "name": "PizarraPad",
+      "url": "https://pizarrapad.telarlabs.net",
+      "img": "pp.webp",
+      "color": "#5ED39A",
+      "for": "For teachers",
+      "blurb": "A free online whiteboard, blackboard and greenboard for the classroom projector. Write with a stylus, finger or mouse, add pictures, works offline."
+    },
+    {
+      "name": "QuizPolice",
+      "url": "https://quizpolice.telarlabs.net",
+      "img": "qp.webp",
+      "color": "#7FA6FF",
+      "for": "For teachers",
+      "blurb": "Free quiz monitoring for Google Forms, Microsoft Forms and Wayground. See live who left the quiz tab, and for how long."
+    },
+    {
+      "name": "DraftTrail",
+      "url": "https://drafttrail.telarlabs.net",
+      "img": "dt.webp",
+      "color": "#C49BFF",
+      "for": "For students & teachers",
+      "blurb": "A writing recorder that replays how an essay was written, step by step, so teachers can see the process, not just the result."
+    },
+    {
+      "name": "Telar Stories",
+      "img": "stories.webp",
+      "color": "#ff8fa3",
+      "soon": true,
+      "blurb": "Turn illustrated scenes and characters into 2 to 3 minute narrated story videos for classrooms, Sunday school and organization promos."
+    }
   ]
 }
