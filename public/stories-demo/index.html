@@ -199,6 +199,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   </div>
 </div>
 
+<script src="assets/mp4-muxer.js"></script>
 <script>
 (function(){
 const W=1280,H=720,FPS=30,TAU=Math.PI*2;
@@ -460,8 +461,7 @@ $('playBtn').onclick=()=>{if(playing){playing.stop();$('playBtn').textContent='�
 // ---------- export to video
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
  for(const m of c){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;}return '';}
-$('exportBtn').onclick=async()=>{
- if(playing)return;
+async function exportRealtime(){
  if(!cv.captureStream||!window.MediaRecorder){showDone('Not supported here','This browser cannot record video. Please try Chrome on Android or a computer.');return;}
  const ctx=ac(); if(ctx.state==='suspended')await ctx.resume();
  const dest=ctx.createMediaStreamDestination();
@@ -483,6 +483,66 @@ $('exportBtn').onclick=async()=>{
  $('ovBar').style.width='100%';
  $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.${ext}">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
  $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
+}
+
+// ---------- fast, reliable export: render every frame, encode with WebCodecs, mux to MP4
+let AUD={codec:'mp4a.40.2',mux:'aac'};
+async function canFastExport(){
+ if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return false;
+ try{const v=await VideoEncoder.isConfigSupported({codec:'avc1.42001f',width:W,height:H,bitrate:4_000_000,framerate:FPS});
+  if(!v.supported)return false;
+  for(const [codec,mux] of [['mp4a.40.2','aac'],['opus','opus']]){
+   const a=await AudioEncoder.isConfigSupported({codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
+   if(a.supported){AUD={codec,mux};return true;}}
+  return false;}catch(e){return false;}
+}
+async function renderAudio(total){
+ const SR=48000, off=new OfflineAudioContext(2,Math.ceil(SR*(total+0.3)),SR);
+ const durs=S.map(sceneDur); let acc=0;
+ S.forEach((s,i)=>{if(s.abuf){const b=off.createBufferSource();b.buffer=s.abuf;b.connect(off.destination);b.start(acc+0.5);}acc+=durs[i];});
+ startMusic(off,off.destination,total+0.2,$('music').value);
+ return await off.startRendering();
+}
+async function exportFast(){
+ const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0), nFrames=Math.ceil(total*FPS);
+ $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML='Putting your story together. This is usually faster than the story itself. You can keep using your phone; no scenes will be skipped.';
+ $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
+ let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
+ const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H,frameRate:FPS},
+   audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+ let err=null;
+ const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});
+ ve.configure({codec:'avc1.42001f',width:W,height:H,bitrate:4_000_000,framerate:FPS});
+ const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});
+ ae.configure({codec:AUD.codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
+ // audio first (quick)
+ const ab=await renderAudio(total); const L=ab.getChannelData(0),Rr=ab.getChannelData(1),N=Math.min(ab.length,Math.ceil(48000*total)),CH=4800;
+ for(let o=0;o<N;o+=CH){const n=Math.min(CH,N-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
+  const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();}
+ // video frames, drawn one by one (independent of the clock)
+ sel=null; let lastUI=0;
+ for(let f=0;f<nFrames;f++){
+  if(cancelled||err)break;
+  const t=f/FPS; let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
+  drawScene(S[i],t-a,{fade:true});
+  const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
+  ve.encode(vf,{keyFrame:f%(FPS*2)===0}); vf.close();
+  if(ve.encodeQueueSize>8) await new Promise(r=>setTimeout(r,0));
+  const now=performance.now(); if(now-lastUI>120){lastUI=now;$('ovBar').style.width=(f/nFrames*100).toFixed(1)+'%';await new Promise(r=>setTimeout(r,0));}
+ }
+ if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
+ await ve.flush(); await ae.flush(); if(err)throw err;
+ muxer.finalize();
+ const url=URL.createObjectURL(new Blob([muxer.target.buffer],{type:'video/mp4'}));
+ $('ovTitle').textContent='Your video is ready'; $('ovText').textContent=`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`;
+ $('ovBar').style.width='100%';
+ $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.mp4">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
+ $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
+}
+$('exportBtn').onclick=async()=>{
+ if(playing)return;
+ if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);}}
+ await exportRealtime();
 };
 function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('ovBtns').innerHTML='<button class="btn" id="ovClose">Close</button>';$('ov').classList.add('on');$('ovClose').onclick=()=>$('ov').classList.remove('on');}
 
