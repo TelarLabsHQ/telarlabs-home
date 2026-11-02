@@ -44,6 +44,7 @@ canvas{display:block;width:100%;height:auto;touch-action:none}
 .grid img{width:100%;display:block;border-radius:7px}
 .cgrid{grid-template-columns:repeat(3,1fr)}
 .cgrid img{aspect-ratio:1;object-fit:contain;background:repeating-conic-gradient(#2f2a38 0 25%,#262130 0 50%) 0 0/16px 16px}
+.ghead{grid-column:1/-1;font-weight:700;font-size:13px;color:var(--accent);margin:10px 2px 0}
 .cgrid small{display:block;font-size:11px;color:var(--muted);text-align:center;padding-top:2px}
 h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px}
 h3:first-child{margin-top:0}
@@ -174,7 +175,9 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <p class="muted" id="musicInfo">The built-in tracks are original and free to use. You can also choose <b>My own music file</b> to use any song you have the right to use (MP3 or M4A).</p>
       <div class="row" style="margin-top:8px">
         <button class="btn sm" id="newStory">Start a blank story</button>
-        <button class="btn sm" id="loadSample">Load the sample story</button>
+        <select id="storyPick" style="background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
+          <option value="mira">Mira and the Rainy Day</option><option value="xmas">The First Christmas</option></select>
+        <button class="btn sm" id="loadSample">Load this ready-made story</button>
       </div>
     </section>
 
@@ -231,10 +234,20 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 (function(){
 const W=1280,H=720,FPS=30,TAU=Math.PI*2;
 const A='assets/';
-const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitchen','Kitchen'],['garden-rainbow','Garden & rainbow'],['village-park','Village park']];
-const CHARS=[['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
+const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitchen','Kitchen'],['garden-rainbow','Garden & rainbow'],['village-park','Village park'],
+ ['nazareth-house','House in Nazareth'],['road-bethlehem','Road to Bethlehem'],['bethlehem-street','Bethlehem street'],['stable','Inside the stable'],['fields-night','Fields at night'],['stable-star','Stable & star']];
+const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
- ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow']];
+ ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow'],
+ ['#','The First Christmas'],
+ ['mary-surprised','Mary · surprised',400],['mary-sweeping','Mary · sweep',400],['mary-praying','Mary · pray',330],['mary-kneeling','Mary · kneel',330],
+ ['mary-tired','Mary · rest',310],['mary-baby','Mary · baby Jesus',330],['mary-donkey','Mary · on donkey',380,1],
+ ['joseph-standing','Joseph · stand',420],['joseph-donkey','Joseph · donkey',420],['joseph-knocking','Joseph · knock',430],['joseph-hay','Joseph · hay',410],
+ ['donkey-walking','Donkey · walk',280,1],['donkey-standing','Donkey · stand',280,1],['baby-manger','Baby in manger',170],
+ ['gabriel-standing','Angel Gabriel',440],['gabriel-hand','Gabriel · greet',440],['gabriel-arms','Gabriel · speak',440],['gabriel-floating','Gabriel · float',420],
+ ['angel-choir','Angel choir',220],['shepherd-boy-surprised','Shepherd boy · wow',330],['shepherd-boy-lamb','Shepherd boy & lamb',330],
+ ['shepherd-old-looking','Old shepherd · look',380],['shepherd-old-kneeling','Old shepherd · kneel',330]];
+const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
 function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src;});}
 
@@ -243,7 +256,7 @@ const $=id=>document.getElementById(id);
 let uid=1;
 const ch=(pose,x,y,h,o={})=>Object.assign({id:uid++,pose,x,y,h,flip:false,move:'idle'},o);
 
-function sample(){return [
+function sample(){return withVo('mira',[
  {bg:'reading-nook',cam:'in',title:'Mira and the Rainy Day',text:'',dur:5,chars:[ch('mira-wave-smile',373,700,400),ch('mochi-sitting',566,700,155)]},
  {bg:'reading-nook',cam:'out',text:'It was a rainy afternoon. Mira wanted to play outside, but the rain would not stop.',dur:7,chars:[ch('mira-bored',373,700,315)]},
  {bg:'reading-nook',cam:'in',text:'"There is nothing to do," Mira sighed. Her little cat, Mochi, was fast asleep.',dur:7,chars:[ch('mira-bored',346,700,315),ch('mochi-sleeping',633,703,100)]},
@@ -254,7 +267,30 @@ function sample(){return [
  {bg:'garden-rainbow',cam:'in',text:'When she looked up, the rain was stopping, and a rainbow filled the sky!',dur:6.5,chars:[ch('mira-pointing',833,693,375),ch('mochi-sitting',1013,693,140)]},
  {bg:'garden-rainbow',cam:'in',text:'Mira jumped for joy. "Come on, Mochi! Let\'s go outside!"',dur:5.5,chars:[ch('mira-jumping',600,687,385,{move:'hop'}),ch('mochi-meow',800,693,140)]},
  {bg:'village-park',cam:'out',title:'The End',text:'A rainy day can become a great adventure when you open a book.',dur:7,chars:[ch('mira-wave-smile',506,673,385),ch('mochi-meow',700,673,140)]},
+]);}
+function withVo(id,list){list.forEach((s,i)=>{if(!s.vo)s.vo=id+'/s'+(i+1);});return list;}
+function firstChristmas(){return [
+ {bg:'stable-star',cam:'in',title:'The First Christmas',text:'A story from the Bible.',dur:5,vo:'first-christmas/s1',chars:[ch('mary-baby',560,700,300),ch('joseph-standing',760,700,380,{move:'still'})]},
+ {bg:'nazareth-house',cam:'in',text:'Long ago, in a little town called Nazareth, lived a young woman named Mary. One day, an angel named Gabriel came to visit her.',dur:8,vo:'first-christmas/s2',
+  chars:[ch('mary-sweeping',430,690,400),ch('gabriel-hand',900,680,440)]},
+ {bg:'nazareth-house',cam:'in',text:'"Do not be afraid, Mary," said the angel. "God is with you. You will have a baby boy, and you will name him Jesus."',dur:8,vo:'first-christmas/s3',
+  chars:[ch('mary-praying',420,690,330),ch('gabriel-arms',880,680,440)]},
+ {bg:'road-bethlehem',cam:'out',text:'Mary married a kind carpenter named Joseph. The king ordered everyone to be counted in their hometown, so they made the long trip to Bethlehem.',dur:8,vo:'first-christmas/s4',
+  chars:[ch('mary-donkey',260,700,360,{flip:true,move:'walk'}),ch('joseph-standing',470,705,390,{move:'walk'})]},
+ {bg:'bethlehem-street',cam:'in',text:'When they arrived, Bethlehem was crowded with people. There was no room for them anywhere.',dur:6,vo:'first-christmas/s5',
+  chars:[ch('mary-donkey',380,710,350,{flip:true}),ch('joseph-knocking',860,710,420)]},
+ {bg:'stable',cam:'in',text:'A kind innkeeper let them stay in his stable. It was quiet and warm, with the animals all around.',dur:7,vo:'first-christmas/s6',
+  chars:[ch('joseph-hay',360,700,390),ch('mary-tired',830,705,300),ch('donkey-walking',1110,700,250,{move:'still'})]},
+ {bg:'stable',cam:'in',text:'That night, baby Jesus was born. Mary wrapped him in soft cloths and laid him in a manger.',dur:7,vo:'first-christmas/s7',
+  chars:[ch('baby-manger',640,640,165,{move:'still'}),ch('mary-kneeling',400,700,320),ch('joseph-standing',880,700,390)]},
+ {bg:'fields-night',cam:'in',text:'Out in the fields, shepherds were watching their sheep. Suddenly, an angel appeared! "I bring you good news of great joy. Today a Savior is born!"',dur:9,vo:'first-christmas/s8',
+  chars:[ch('shepherd-boy-lamb',330,705,320),ch('shepherd-old-looking',620,705,370),ch('gabriel-floating',1000,540,380)]},
+ {bg:'fields-night',cam:'out',text:'Then the sky filled with angels, singing, "Glory to God in the highest, and peace on earth!" The shepherds hurried off to Bethlehem.',dur:9,vo:'first-christmas/s9',
+  chars:[ch('angel-choir',640,330,210),ch('shepherd-boy-surprised',330,705,320),ch('shepherd-old-looking',930,705,370,{flip:true})]},
+ {bg:'stable-star',cam:'in',text:"They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas. The End.",dur:9,vo:'first-christmas/s10',
+  chars:[ch('shepherd-old-kneeling',290,705,290),ch('mary-baby',560,705,300),ch('joseph-standing',760,705,370,{move:'still'}),ch('shepherd-boy-lamb',1010,705,300,{flip:true})]},
 ];}
+const STORIES={mira:{name:'Mira and the Rainy Day',build:sample,vo:'mira'},xmas:{name:'The First Christmas',build:firstChristmas}};
 let S=sample(), cur=0, sel=null;
 
 // ---------- voice storage (IndexedDB): finished voices survive a refresh or closed tab
@@ -298,7 +334,7 @@ function drawChar(c,t,dur,selected){
  const im=IMG[c.pose]; if(!im)return;
  const k=c.h/im.height, w=im.width*k, h=c.h;
  let x=c.x, y=c.y, sy=1+0.012*(0.5+0.5*Math.sin(TAU*t/3.2)), ang=1.2*Math.sin(TAU*t/4)*Math.PI/180;
- if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*(c.flip?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
+ if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*((!!c.flip!==FACE_L.has(c.pose))?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
  if(c.move==='still'){sy=1; ang=0;}
  if(c.move==='hop'){y-=Math.abs(Math.sin(Math.PI*t*1.4))*26; sy=1;}
  cx.save();
@@ -373,7 +409,7 @@ function refresh(){
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
-$('caption').oninput=e=>{S[cur].text=e.target.value;strip();save('text'+cur);};
+$('caption').oninput=e=>{delete S[cur].vo;S[cur].text=e.target.value;strip();save('text'+cur);};
 $('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.target.value).toFixed(1)+' s';save('dur'+cur);};
 document.querySelectorAll('input[name=cam]').forEach(r=>r.onchange=()=>{S[cur].cam=r.value;save();});
 const selC=()=>S[cur].chars.find(c=>c.id===sel);
@@ -381,7 +417,7 @@ $('selMove').onchange=e=>{const c=selC();if(c){c.move=e.target.value;save();}};
 $('selBigger').onclick=()=>{const c=selC();if(c){c.h=Math.min(680,Math.round(c.h*1.12));save();}};
 $('selSmaller').onclick=()=>{const c=selC();if(c){c.h=Math.max(60,Math.round(c.h/1.12));save();}};
 $('selDone').onclick=()=>{sel=null;refresh();};
-$('title').oninput=e=>{S[cur].title=e.target.value;strip();save('title'+cur);};
+$('title').oninput=e=>{delete S[cur].vo;S[cur].title=e.target.value;strip();save('title'+cur);};
 $('selFlip').onclick=()=>{const c=selC();if(c){c.flip=!c.flip;save();refresh();}};
 $('selFront').onclick=()=>{const a=S[cur].chars,i=a.findIndex(c=>c.id===sel);if(i>=0){a.push(a.splice(i,1)[0]);save();}};
 $('selDel').onclick=()=>{S[cur].chars=S[cur].chars.filter(c=>c.id!==sel);sel=null;refresh();save();};
@@ -390,7 +426,13 @@ $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,c
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
 $('newStory').onclick=()=>{if(!confirmIn('Start a blank story? Your current scenes will be replaced.'))return;S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();};
-$('loadSample').onclick=()=>{if(!confirmIn('Load the sample story? Your current scenes will be replaced.'))return;S=sample();cur=0;sel=null;refresh();save();};
+async function loadStory(id){const st=STORIES[id]||STORIES.mira;S=st.build();cur=0;sel=null;refresh();save();await attachVo();}
+// ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
+async function attachVo(){let n=0;
+ await Promise.all(S.map(async s=>{if(!s.vo||s.abuf)return;try{const r=await fetch(A+'voice/'+s.vo+'.m4a');if(!r.ok)return;
+  const buf=await ac().decodeAudioData(await r.arrayBuffer());s.abuf=buf;s.ai=true;s.aiKey=aiKey(s);snap();vPut(s);n++;}catch(e){}}));
+ if(n){refresh();aiMsg(`<span class="pill ok">Ready</span> This story already has its voice. Press ▶ Play to watch it.`);}}
+$('loadSample').onclick=()=>{if(!confirmIn('Load "'+STORIES[$('storyPick').value].name+'"? Your current scenes will be replaced.'))return;loadStory($('storyPick').value);};
 let confirmArmed=0;
 function confirmIn(msg){ // simple two-tap confirm without browser dialogs
  const now=Date.now(); if(now-confirmArmed<4000){confirmArmed=0;return true;}
@@ -399,8 +441,10 @@ function confirmIn(msg){ // simple two-tap confirm without browser dialogs
 // backgrounds & characters grids
 BGS.forEach(([k,n])=>{const b=document.createElement('button');b.dataset.k=k;b.title=n;b.innerHTML=`<img src="${A}bg/${k}-t.webp" alt="${n}">`;
  b.onclick=()=>{S[cur].bg=k;refresh();save();};$('bgGrid').appendChild(b);});
-CHARS.forEach(([k,n])=>{const b=document.createElement('button');b.innerHTML=`<img src="${A}ch/${k}.webp" alt="${n}"><small>${n}</small>`;
- b.onclick=()=>{const isCat=k.startsWith('mochi');const c=ch(k,W/2,690,isCat?150:360);S[cur].chars.push(c);sel=c.id;refresh();save();};
+CHARS.forEach(([k,n,h])=>{
+ if(k==='#'){const d=document.createElement('div');d.className='ghead';d.textContent=n;$('charGrid').appendChild(d);return;}
+ const b=document.createElement('button');b.innerHTML=`<img src="${A}ch/${k}.webp" alt="${n}" loading="lazy"><small>${n}</small>`;
+ b.onclick=()=>{const isCat=k.startsWith('mochi');const c=ch(k,W/2,690,h||(isCat?150:360));S[cur].chars.push(c);sel=c.id;refresh();save();};
  $('charGrid').appendChild(b);});
 
 // ---------- drag on canvas
@@ -424,7 +468,7 @@ $('recBtn').onclick=async()=>{
  catch(e){$('voiceInfo').textContent='Microphone not available. Allow microphone access in your browser and try again.';return;}
  recChunks=[]; rec=new MediaRecorder(recStream);
  rec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);
- rec.onstop=async()=>{S[cur].ai=false;recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
+ rec.onstop=async()=>{S[cur].ai=false;delete S[cur].vo;recStream.getTracks().forEach(t=>t.stop());const blob=new Blob(recChunks,{type:rec.mimeType});rec=null;
   $('recBtn').textContent='● Record my voice';
   const sc=S[cur];try{const buf=await ac().decodeAudioData(await blob.arrayBuffer());sc.abuf=buf;sc.audio=blob;snap();vPut(sc);}
   catch(e){$('voiceInfo').textContent='Could not read the recording. Please try again.';}
@@ -433,7 +477,7 @@ $('recBtn').onclick=async()=>{
 };
 let hearSrc=null;
 $('hearBtn').onclick=()=>{const s=S[cur];if(!s.abuf)return;if(hearSrc){try{hearSrc.stop()}catch(e){}}hearSrc=ac().createBufferSource();hearSrc.buffer=s.abuf;hearSrc.connect(ac().destination);hearSrc.start();};
-$('delVoice').onclick=()=>{vDel(S[cur]);delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;delete S[cur].aiKey;refresh();};
+$('delVoice').onclick=()=>{delete S[cur].vo;vDel(S[cur]);delete S[cur].abuf;delete S[cur].audio;delete S[cur].ai;delete S[cur].aiKey;refresh();};
 
 // ---------- AI voice (Kokoro, runs in the browser; Apache-2.0)
 let worker=null, reqs={}, rid=0;
@@ -695,8 +739,8 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
 // ---------- start
 (async()=>{
  restore(); lastSnap=snap(); persist(lastSnap);
- vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);}});
- await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...CHARS.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
+ vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
+ await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...POSES.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
  refresh(); requestAnimationFrame(loop);
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
  if(!seen)$('help').classList.add('on');
