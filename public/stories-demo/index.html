@@ -166,10 +166,11 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <p class="muted" style="margin-top:0">If the AI voice says a word wrong, write the word, an equals sign, then how it sounds. One word per line. Captions keep your spelling.</p>
       <textarea id="pron" style="min-height:70px" placeholder="Example:&#10;Mochi = Mowchee&#10;Lucia = Loo-SEE-ah"></textarea>
       <div class="row" style="margin-top:8px">
-        <button class="btn primary sm" id="pronApply">✓ Update voices with these sounds</button>
+        <button class="btn primary sm" id="pronApply">💾 Save &amp; update voices</button>
         <button class="btn sm" id="pronTry">▶ Hear the words</button>
       </div>
       <p class="muted" id="pronInfo"></p>
+      <p class="muted" style="font-size:12px;margin-top:18px">App version: 2 Nov 2026, 11:45 pm</p>
       <h3>Scene length</h3>
       <div class="row"><input type="range" id="dur" min="3" max="20" step="0.5"><span id="durLbl"></span></div>
       <p class="muted">With a recording, the scene lasts as long as your voice plus a short pause.</p>
@@ -603,7 +604,8 @@ function tick(){if(!aiBusy)return;const s=Math.round((performance.now()-aiT)/100
 function busy(on){aiBusy=on; keepAwake(on); clearInterval(aiTimer); if(on){aiT=performance.now();aiTimer=setInterval(tick,1000);}
  $('aiOne').disabled=$('aiAll').disabled=$('playBtn').disabled=$('exportBtn').disabled=on;
  if(!playing)playLabels(); else $('playBtn').disabled=$('exportBtn').disabled=true;}
-function aiMsg(html,pct){$('aiInfo').innerHTML=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');}
+let pronRun=false;
+function aiMsg(html,pct){const h=html+(pct!=null?`<span class="aibar"><i style="width:${pct}%"></i></span>`:'');$('aiInfo').innerHTML=h;if(pronRun)$('pronInfo').innerHTML=h;}
 async function runAI(list){
  if(aiBusy||!list.length)return; busy(true);
  aiStage=worker?'Making the voice…':'Starting the AI voice…'; aiPct=0; tick();
@@ -633,9 +635,10 @@ $('pronApply').onclick=()=>{
  const has=s=>{const t=[s.title,s.text].join(' ').toLowerCase();return words.some(w=>new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(t));};
  const list=S.map((s,i)=>i).filter(i=>{const s=S[i];return spoken(s)&&!(s.abuf&&!s.ai)&&has(s)&&!(s.ai&&s.aiKey===aiKey(s));});
  const missing=u.filter(([a])=>!S.some(s=>new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test([s.title,s.text].join(' '))));
+try{localStorage.setItem('ts-pron',$('pron').value)}catch(_){}
  if(!list.length){$('pronInfo').innerHTML=missing.length?`I couldn't find <b>${esc(missing.map(m=>m[0]).join(', '))}</b> in your story's words. Check the spelling matches the caption.`:'<span class="pill ok">Done</span> Those scenes already use these sounds.';return;}
- $('pronInfo').innerHTML=`Remaking the voice for ${list.length} scene${list.length>1?'s':''} (${list.map(i=>i+1).join(', ')}). Progress shows above, under the AI voice buttons.`;
- runAI(list);};
+ $('pronInfo').innerHTML=`Saved. Remaking the voice for ${list.length} scene${list.length>1?'s':''} (${list.map(i=>i+1).join(', ')})…`;
+ pronRun=true; runAI(list).finally(()=>{pronRun=false;if(!list.every(i=>S[i].aiKey===aiKey(S[i])))return;$('pronInfo').innerHTML='<span class="pill ok">Saved and updated</span> Scene'+(list.length>1?'s ':' ')+list.map(i=>i+1).join(', ')+' now use'+(list.length>1?'':'s')+' the new sound. Press ▶ Play this scene to hear it.';});};
 $('pronTry').onclick=async()=>{const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = Mowchee</b>.';return;}
  if(aiBusy){$('pronInfo').textContent='Voices are being made. Try again when they finish.';return;}
  $('pronTry').disabled=true;$('pronInfo').textContent='Making a quick sample…';
