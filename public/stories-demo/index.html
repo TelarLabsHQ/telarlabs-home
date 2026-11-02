@@ -80,6 +80,13 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .aibar{display:block;height:6px;background:var(--line);border-radius:9px;margin-top:8px;overflow:hidden}.aibar i{display:block;height:100%;background:#ff8fa3;transition:width .4s}
 .btn:disabled{opacity:.55;cursor:default}
 .scenebar{display:flex;align-items:center;gap:12px;margin:10px 0 0;flex-wrap:wrap}.scenebar .muted{font-size:14px}
+.storybar{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:10px}
+.sb-l{display:block;font-weight:800;font-size:14px;margin-bottom:8px}
+.sb-chips{display:flex;flex-wrap:wrap;gap:8px}
+.sb-chips button{flex:none;background:var(--bg3);color:var(--fg);border:2px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+.sb-chips button.on{border-color:var(--accent);background:#3a2230;color:#fff}
+.sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
+.sb-confirm span{flex:1 1 220px}
 </style>
 </head>
 <body>
@@ -94,6 +101,11 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 
 <div class="wrap">
   <main>
+    <div class="storybar" id="storyBar">
+      <span class="sb-l">📚 Ready-made stories</span>
+      <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="blank">＋ Blank story</button></div>
+      <div class="sb-confirm" id="sbConfirm" hidden><span>Replace your current story with <b id="sbName"></b>?</span><button class="btn primary sm" id="sbYes">Load it</button><button class="btn sm" id="sbNo">Cancel</button></div>
+    </div>
     <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
     <div class="selbar" id="selBar" hidden>
       <b id="selName">Character</b>
@@ -102,6 +114,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <button class="btn sm" id="selBigger">+ Bigger</button>
       <button class="btn sm" id="selFront">Bring to front</button>
       <select id="selMove" title="Movement"><option value="still">Movement: steady (no motion)</option><option value="idle">Movement: gentle breathing</option><option value="walk">Movement: walk across</option><option value="hop">Movement: hop</option></select>
+      <select id="selLight" title="Light"><option value="day">Light: day</option><option value="dusk">Light: sunset</option><option value="night">Light: night</option></select>
       <button class="btn sm" id="selDel">🗑 Remove</button>
       <button class="btn sm" id="selDone" title="Close this toolbar (deselect the character)">✓ Close</button>
     </div>
@@ -175,9 +188,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <p class="muted" id="musicInfo">The built-in tracks are original and free to use. You can also choose <b>My own music file</b> to use any song you have the right to use (MP3 or M4A).</p>
       <div class="row" style="margin-top:8px">
         <button class="btn sm" id="newStory">Start a blank story</button>
-        <select id="storyPick" style="background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
-          <option value="mira">Mira and the Rainy Day</option><option value="xmas">The First Christmas</option></select>
-        <button class="btn sm" id="loadSample">Load this ready-made story</button>
+
       </div>
     </section>
 
@@ -235,7 +246,8 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 const W=1280,H=720,FPS=30,TAU=Math.PI*2;
 const A='assets/';
 const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitchen','Kitchen'],['garden-rainbow','Garden & rainbow'],['village-park','Village park'],
- ['nazareth-house','House in Nazareth'],['road-bethlehem','Road to Bethlehem'],['bethlehem-street','Bethlehem street'],['stable','Inside the stable'],['fields-night','Fields at night'],['stable-star','Stable & star']];
+ ['nazareth-house','House in Nazareth'],['road-bethlehem','Road to Bethlehem'],['bethlehem-street','Bethlehem street'],['stable','Inside the stable'],['fields-night','Fields at night'],['stable-star','Stable & star'],
+ ['pasture','Green pasture'],['ravine-dusk','Rocky hills at sunset'],['ravine-night','Rocky hills at night'],['village-night','Village at night']];
 const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
  ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow'],
@@ -246,7 +258,10 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['donkey-walking','Donkey · walk',280,1],['donkey-standing','Donkey · stand',280,1],['baby-manger','Baby in manger',170],
  ['gabriel-standing','Angel Gabriel',440],['gabriel-hand','Gabriel · greet',440],['gabriel-arms','Gabriel · speak',440],['gabriel-floating','Gabriel · float',420],
  ['angel-choir','Angel choir',220],['shepherd-boy-surprised','Shepherd boy · wow',330],['shepherd-boy-lamb','Shepherd boy & lamb',330],
- ['shepherd-old-looking','Old shepherd · look',380],['shepherd-old-kneeling','Old shepherd · kneel',330]];
+ ['shepherd-old-looking','Old shepherd · look',380],['shepherd-old-kneeling','Old shepherd · kneel',330],
+ ['#','The Lost Sheep'],
+ ['shepherd-standing','Shepherd · stand',380],['shepherd-walking','Shepherd · walk',380],['shepherd-worried','Shepherd · worried',380],['shepherd-surprised','Shepherd · listen',380],
+ ['shepherd-hugging-lamb','Shepherd · hug lamb',380],['shepherd-carrying-lamb','Shepherd · carry lamb',385],['lamb-sad','Little lamb',200],['flock','Flock of sheep',210]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
 function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src;});}
@@ -290,7 +305,22 @@ function firstChristmas(){return [
  {bg:'stable-star',cam:'in',text:"They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas. The End.",dur:9,vo:'first-christmas/s10',
   chars:[ch('shepherd-old-kneeling',290,705,290),ch('mary-baby',560,705,300),ch('joseph-standing',760,705,370,{move:'still'}),ch('shepherd-boy-lamb',1010,705,300,{flip:true})]},
 ];}
-const STORIES={mira:{name:'Mira and the Rainy Day',build:sample,vo:'mira'},xmas:{name:'The First Christmas',build:firstChristmas}};
+function lostSheep(){const N={light:'night'};return withVo('lost-sheep',[
+ {bg:'pasture',cam:'in',title:'The Lost Sheep',text:'A story Jesus told. Luke 15.',dur:5,chars:[ch('flock',787,673,220),ch('shepherd-standing',373,680,373)]},
+ {bg:'pasture',cam:'out',text:'Once there was a shepherd boy who loved his sheep. Every evening, he counted them one by one.',dur:7,chars:[ch('flock',767,673,220),ch('shepherd-standing',347,680,373)]},
+ {bg:'pasture',cam:'in',text:'Ninety-seven, ninety-eight, ninety-nine. But wait! Where was the littlest lamb? One sheep was missing!',dur:7,chars:[ch('flock',867,673,200),ch('shepherd-worried',373,680,387)]},
+ {bg:'pasture',cam:'in',text:'He made sure the ninety-nine were safe inside the fold. Then he went out to look for the one that was lost.',dur:7,chars:[ch('flock',900,640,173),ch('shepherd-walking',200,687,373,{move:'walk'})]},
+ {bg:'ravine-dusk',cam:'in',text:'He searched the rocky hills and the thorny bushes as the sun went down.',dur:6,chars:[ch('shepherd-walking',1000,693,347,{flip:true,move:'walk',light:'dusk'})]},
+ {bg:'ravine-night',cam:'out',text:'Night came. The path was dark and cold, but the shepherd did not give up.',dur:6,chars:[ch('shepherd-worried',507,693,360,N)]},
+ {bg:'ravine-night',cam:'in',text:'Then he heard a tiny sound. Baa... baa...',dur:5,chars:[ch('shepherd-surprised',427,693,360,N)]},
+ {bg:'ravine-night',cam:'in',text:'There, by a big rock, was the little lamb, alone and afraid.',dur:5,chars:[ch('lamb-sad',920,640,200,N)]},
+ {bg:'ravine-night',cam:'out',text:'He picked it up and held it close. "I found you!"',dur:5,chars:[ch('shepherd-hugging-lamb',640,693,373,N)]},
+ {bg:'village-night',cam:'in',text:'Full of joy, he carried the lamb home on his shoulders.',dur:5,chars:[ch('shepherd-carrying-lamb',267,693,373,{move:'walk',light:'night'})]},
+ {bg:'village-night',cam:'in',text:'He called his friends and neighbors. "Be glad with me! I found my lost sheep!"',dur:6,chars:[ch('shepherd-carrying-lamb',640,693,387,N)]},
+ {bg:'pasture',cam:'out',text:'God is like that shepherd. He looks for every one of us, and He is full of joy when even one is found. (Luke 15:3-7)',dur:8,chars:[ch('flock',833,673,200),ch('shepherd-carrying-lamb',413,680,387)]},
+]);}
+const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},
+ blank:{name:'a blank story',build:()=>[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}]}};
 let S=sample(), cur=0, sel=null;
 
 // ---------- voice storage (IndexedDB): finished voices survive a refresh or closed tab
@@ -330,8 +360,13 @@ function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'nul
 function sceneDur(s){return s.abuf? Math.max(3,s.abuf.duration+1.2): s.dur;}
 function wrap(text,maxW){const words=text.split(/\s+/);const lines=[];let l='';
  for(const w of words){const t=l?l+' '+w:w; if(cx.measureText(t).width>maxW&&l){lines.push(l);l=w}else l=t;} if(l)lines.push(l); return lines;}
+const TINTS={dusk:'rgb(250,219,209)',night:'rgb(158,168,184)'}, TC={};
+function tinted(im,k,light){const key=k+'|'+light; if(TC[key])return TC[key];
+ const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');
+ g.drawImage(im,0,0);g.globalCompositeOperation='multiply';g.fillStyle=TINTS[light];g.fillRect(0,0,c.width,c.height);
+ g.globalCompositeOperation='destination-in';g.drawImage(im,0,0);return TC[key]=c;}
 function drawChar(c,t,dur,selected){
- const im=IMG[c.pose]; if(!im)return;
+ let im=IMG[c.pose]; if(!im)return; if(c.light&&TINTS[c.light])im=tinted(im,c.pose,c.light);
  const k=c.h/im.height, w=im.width*k, h=c.h;
  let x=c.x, y=c.y, sy=1+0.012*(0.5+0.5*Math.sin(TAU*t/3.2)), ang=1.2*Math.sin(TAU*t/4)*Math.PI/180;
  if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*((!!c.flip!==FACE_L.has(c.pose))?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
@@ -397,7 +432,7 @@ function refresh(){
  $('title').value=s.title||'';
  const c=s.chars.find(c=>c.id===sel);
  $('selBar').hidden=!c; $('hint').hidden=!!c;
- if(c){$('selName').textContent=nameOf(c.pose);$('selMove').value=c.move||'idle';}
+ if(c){$('selName').textContent=nameOf(c.pose);$('selMove').value=c.move||'idle';$('selLight').value=c.light||'day';}
  const L=$('inScene'); L.innerHTML='';
  if(!s.chars.length) L.innerHTML='<p class="muted">No characters yet. Tap a pose above to add one.</p>';
  s.chars.forEach(x=>{const r=document.createElement('div');r.className='row';
@@ -414,6 +449,7 @@ $('dur').oninput=e=>{S[cur].dur=+e.target.value;$('durLbl').textContent=(+e.targ
 document.querySelectorAll('input[name=cam]').forEach(r=>r.onchange=()=>{S[cur].cam=r.value;save();});
 const selC=()=>S[cur].chars.find(c=>c.id===sel);
 $('selMove').onchange=e=>{const c=selC();if(c){c.move=e.target.value;save();}};
+$('selLight').onchange=e=>{const c=selC();if(c){c.light=e.target.value==='day'?undefined:e.target.value;save();}};
 $('selBigger').onclick=()=>{const c=selC();if(c){c.h=Math.min(680,Math.round(c.h*1.12));save();}};
 $('selSmaller').onclick=()=>{const c=selC();if(c){c.h=Math.max(60,Math.round(c.h/1.12));save();}};
 $('selDone').onclick=()=>{sel=null;refresh();};
@@ -425,14 +461,19 @@ $('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...
 $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,cur-1);sel=null;refresh();save();};
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
-$('newStory').onclick=()=>{if(!confirmIn('Start a blank story? Your current scenes will be replaced.'))return;S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();};
-async function loadStory(id){const st=STORIES[id]||STORIES.mira;S=st.build();cur=0;sel=null;refresh();save();await attachVo();}
+$('newStory').onclick=()=>{pickId='blank';$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
+async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;S=st.build();cur=0;sel=null;refresh();save();await attachVo();}
 // ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
 async function attachVo(){let n=0;
  await Promise.all(S.map(async s=>{if(!s.vo||s.abuf)return;try{const r=await fetch(A+'voice/'+s.vo+'.m4a');if(!r.ok)return;
   const buf=await ac().decodeAudioData(await r.arrayBuffer());s.abuf=buf;s.ai=true;s.aiKey=aiKey(s);snap();vPut(s);n++;}catch(e){}}));
  if(n){refresh();aiMsg(`<span class="pill ok">Ready</span> This story already has its voice. Press ▶ Play to watch it.`);}}
-$('loadSample').onclick=()=>{if(!confirmIn('Load "'+STORIES[$('storyPick').value].name+'"? Your current scenes will be replaced.'))return;loadStory($('storyPick').value);};
+let pickId=null;
+function markStory(){let k=null;try{k=localStorage.getItem('ts-story')}catch(e){}document.querySelectorAll('.sb-chips button').forEach(b=>b.classList.toggle('on',b.dataset.s===k));}
+document.querySelectorAll('.sb-chips button').forEach(b=>b.onclick=()=>{pickId=b.dataset.s;$('sbName').textContent=STORIES[pickId].name;$('sbConfirm').hidden=false;});
+$('sbNo').onclick=()=>{$('sbConfirm').hidden=true;pickId=null;};
+$('sbYes').onclick=async()=>{$('sbConfirm').hidden=true;if(!pickId)return;const id=pickId;pickId=null;try{localStorage.setItem('ts-story',id)}catch(e){}markStory();await loadStory(id);};
+markStory();
 let confirmArmed=0;
 function confirmIn(msg){ // simple two-tap confirm without browser dialogs
  const now=Date.now(); if(now-confirmArmed<4000){confirmArmed=0;return true;}
