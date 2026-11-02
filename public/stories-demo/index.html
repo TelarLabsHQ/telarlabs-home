@@ -163,8 +163,13 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       </div>
       <p class="muted" id="voiceInfo">No recording yet. Read your line aloud, then press Stop.</p>
       <h3>Pronunciation help (optional)</h3>
-      <textarea id="pron" style="min-height:60px" placeholder="One per line, e.g.  Mochi = Mowchee"></textarea>
-      <p class="muted">If the AI voice says a name wrong, write how it sounds. Captions keep your spelling.</p>
+      <p class="muted" style="margin-top:0">If the AI voice says a word wrong, write the word, an equals sign, then how it sounds. One word per line. Captions keep your spelling.</p>
+      <textarea id="pron" style="min-height:70px" placeholder="Example:&#10;Mochi = Mowchee&#10;Lucia = Loo-SEE-ah"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn primary sm" id="pronApply">✓ Update voices with these sounds</button>
+        <button class="btn sm" id="pronTry">▶ Hear the words</button>
+      </div>
+      <p class="muted" id="pronInfo"></p>
       <h3>Scene length</h3>
       <div class="row"><input type="range" id="dur" min="3" max="20" step="0.5"><span id="durLbl"></span></div>
       <p class="muted">With a recording, the scene lasts as long as your voice plus a short pause.</p>
@@ -579,7 +584,10 @@ async function speak(text){
  try{return await speakWorker(text);}
  catch(e){if(alive||!/worker/.test(e.message))throw e; console.warn('worker failed, using main thread',e); useMain=true; if(worker){try{worker.terminate()}catch(_){}} worker=null; return speakMain(text);}
 }
-function pronMap(){return ($('pron').value||'').split('\n').map(l=>l.split('=')).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
+// built-in names always get their sound; the box adds the user's own (accepts =, :, → or " - ")
+const PRON_BUILTIN=[['Mochi','Mowchee']];
+function pronUser(){return ($('pron').value||'').split('\n').map(l=>l.split(/\s*(?:=|:|→|->|\s-\s)\s*/)).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
+function pronMap(){const u=pronUser(),k=new Set(u.map(x=>x[0].toLowerCase()));return [...u,...PRON_BUILTIN.filter(x=>!k.has(x[0].toLowerCase()))];}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
  for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
  return t.replace(/["“”]/g,'').trim();}
@@ -616,8 +624,25 @@ $('aiAll').onclick=()=>{
  const list=S.map((s,i)=>i).filter(i=>{const s=S[i];return spoken(s)&&!(s.abuf&&!s.ai)&&!(s.ai&&s.aiKey===aiKey(s));});
  if(!list.length){aiMsg(`<span class="pill ok">Done</span> Every scene already has a voice${own?' (your own recordings were kept)':''}.`);return;}
  runAI(list);};
-$('pron').oninput=e=>{try{localStorage.setItem('ts-pron',e.target.value)}catch(_){}};
-try{const v=localStorage.getItem('ts-pron');$('pron').value=v!==null?v:'Mochi = Mowchee';}catch(_){$('pron').value='Mochi = Mowchee';}
+$('pron').oninput=e=>{try{localStorage.setItem('ts-pron',e.target.value)}catch(_){}; $('pronInfo').textContent='';};
+try{let v=localStorage.getItem('ts-pron')||'';if(v.trim()==='Mochi = Mowchee')v='';$('pron').value=v;}catch(_){}
+$('pronApply').onclick=()=>{
+ const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = Mowchee</b>.';return;}
+ if(aiBusy){$('pronInfo').textContent='Voices are being made. Wait until they finish, then try again.';return;}
+ const words=u.map(x=>x[0].toLowerCase());
+ const has=s=>{const t=[s.title,s.text].join(' ').toLowerCase();return words.some(w=>new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(t));};
+ const list=S.map((s,i)=>i).filter(i=>{const s=S[i];return spoken(s)&&!(s.abuf&&!s.ai)&&has(s)&&!(s.ai&&s.aiKey===aiKey(s));});
+ const missing=u.filter(([a])=>!S.some(s=>new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test([s.title,s.text].join(' '))));
+ if(!list.length){$('pronInfo').innerHTML=missing.length?`I couldn't find <b>${esc(missing.map(m=>m[0]).join(', '))}</b> in your story's words. Check the spelling matches the caption.`:'<span class="pill ok">Done</span> Those scenes already use these sounds.';return;}
+ $('pronInfo').innerHTML=`Remaking the voice for ${list.length} scene${list.length>1?'s':''} (${list.map(i=>i+1).join(', ')}). Progress shows above, under the AI voice buttons.`;
+ runAI(list);};
+$('pronTry').onclick=async()=>{const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = Mowchee</b>.';return;}
+ if(aiBusy){$('pronInfo').textContent='Voices are being made. Try again when they finish.';return;}
+ $('pronTry').disabled=true;$('pronInfo').textContent='Making a quick sample…';
+ try{const m=await speak(u.map(x=>x[1]).join('. ')+'.');const b=ac().createBuffer(1,m.audio.length,m.sr);b.copyToChannel(m.audio,0);
+  const src=ac().createBufferSource();src.buffer=b;src.connect(ac().destination);src.start();$('pronInfo').innerHTML='Playing: <b>'+esc(u.map(x=>x[0]).join(', '))+'</b>. Sounds right? Press <b>Update voices</b>.';}
+ catch(e){$('pronInfo').textContent='The AI voice could not load. Try again on Wi-Fi.';}
+ $('pronTry').disabled=false;};
 try{const v=localStorage.getItem('ts-voice');if(v)$('aiVoice').value=v;}catch(_){}
 $('aiVoice').onchange=e=>{try{localStorage.setItem('ts-voice',e.target.value)}catch(_){}};
 
