@@ -270,7 +270,14 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['ben-standing','Mr. Ben · stand',400],['ben-sad','Mr. Ben · armchair',340],['ben-card','Mr. Ben · card',400],['ben-singing','Mr. Ben · sing',400]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-function load(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src;});}
+const AV='v=20261102b';
+function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
+async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
+const PEND={};
+function need(key){ // load a background ('bg:x') or pose on demand, once at a time
+ if(IMG[key]||PEND[key])return PEND[key]; const src=key.startsWith('bg:')?A+'bg/'+key.slice(3)+'.webp':A+'ch/'+key+'.webp';
+ return PEND[key]=load(src).then(i=>{if(i)IMG[key]=i;delete PEND[key];return i;});}
+function needStory(list){return Promise.all(list.flatMap(s=>[need('bg:'+s.bg),...s.chars.map(c=>need(c.pose))]));}
 
 const cv=document.getElementById('cv'),cx=cv.getContext('2d');
 const $=id=>document.getElementById(id);
@@ -384,7 +391,7 @@ function tinted(im,k,light){const key=k+'|'+light; if(TC[key])return TC[key];
  g.drawImage(im,0,0);g.globalCompositeOperation='multiply';g.fillStyle=TINTS[light];g.fillRect(0,0,c.width,c.height);
  g.globalCompositeOperation='destination-in';g.drawImage(im,0,0);return TC[key]=c;}
 function drawChar(c,t,dur,selected){
- let im=IMG[c.pose]; if(!im)return; if(c.light&&TINTS[c.light])im=tinted(im,c.pose,c.light);
+ let im=IMG[c.pose]; if(!im){need(c.pose);return;} if(c.light&&TINTS[c.light])im=tinted(im,c.pose,c.light);
  const k=c.h/im.height, w=im.width*k, h=c.h;
  let x=c.x, y=c.y, sy=1+0.012*(0.5+0.5*Math.sin(TAU*t/3.2)), ang=1.2*Math.sin(TAU*t/4)*Math.PI/180;
  if(c.move==='walk'){x=c.x+Math.min(1,t/Math.max(1,dur-0.5))*420*((!!c.flip!==FACE_L.has(c.pose))?-1:1); y-=Math.abs(Math.sin(Math.PI*t*2.2))*7; ang=0;}
@@ -403,7 +410,8 @@ function drawScene(s,t,{caption=true,fade=false,editing=false}={}){
  const dur=sceneDur(s), u=Math.min(1,t/dur), e=0.5-0.5*Math.cos(Math.PI*u);
  const z = s.cam==='in'?1+0.05*e : s.cam==='out'?1.05-0.05*e : 1;
  cx.save(); cx.translate(W/2,H/2); cx.scale(z,z); cx.translate(-W/2,-H/2);
- const bg=IMG['bg:'+s.bg]; if(bg)cx.drawImage(bg,0,0,W,H); else{cx.fillStyle='#222';cx.fillRect(0,0,W,H);}
+ const bg=IMG['bg:'+s.bg]; if(bg)cx.drawImage(bg,0,0,W,H); else{need('bg:'+s.bg);cx.fillStyle='#2a2433';cx.fillRect(0,0,W,H);
+  cx.save();cx.fillStyle='#bdb3c9';cx.font='600 34px system-ui,sans-serif';cx.textAlign='center';cx.fillText('Loading picture…',W/2,H/2);cx.restore();}
  for(const c of s.chars) drawChar(c,t,dur,editing&&sel===c.id);
  cx.restore();
  if(s.title){cx.save();cx.font='700 64px Georgia,"Times New Roman",serif';cx.textAlign='center';cx.fillStyle='#fff4dc';cx.shadowColor='rgba(0,0,0,.7)';cx.shadowBlur=18;
@@ -429,7 +437,7 @@ function loop(now){ requestAnimationFrame(loop); if(playing||document.hidden||no
 function strip(){
  const el=$('strip'); el.innerHTML='';
  S.forEach((s,i)=>{const b=document.createElement('button');b.className='scene'+(i===cur?' on':'');
-  b.innerHTML=`<img src="${A}bg/${s.bg}-t.webp" alt=""><span class="n">${i+1}</span>${s.abuf?'<span class="mic">🎙</span>':''}<p>${esc(s.title||s.text||'(no words)')}</p>`;
+  b.innerHTML=`<img src="${A}bg/${s.bg}-t.webp?${AV}" alt=""><span class="n">${i+1}</span>${s.abuf?'<span class="mic">🎙</span>':''}<p>${esc(s.title||s.text||'(no words)')}</p>`;
   b.onclick=()=>{cur=i;sel=null;refresh();}; el.appendChild(b);});
  const add=document.createElement('button');add.className='add';add.textContent='+ Scene';
  add.onclick=()=>{const p=S[cur];S.splice(cur+1,0,{bg:p.bg,cam:'in',text:'',dur:5,chars:[]});cur++;sel=null;refresh();save();};
@@ -480,7 +488,7 @@ $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,c
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
 $('newStory').onclick=()=>{pickId='blank';$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
-async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;S=st.build();cur=0;sel=null;refresh();save();await attachVo();}
+async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');await needStory(L);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
 // ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
 async function attachVo(){let n=0;
  await Promise.all(S.map(async s=>{if(!s.vo||s.abuf)return;try{const r=await fetch(A+'voice/'+s.vo+'.m4a');if(!r.ok)return;
@@ -498,11 +506,11 @@ function confirmIn(msg){ // simple two-tap confirm without browser dialogs
  confirmArmed=now; const h=$('hint'),old=h.innerHTML; h.hidden=false; h.innerHTML='<b>'+msg+'</b> Tap the button again to confirm.'; setTimeout(()=>{h.innerHTML=old;refresh();},4000); return false;}
 
 // backgrounds & characters grids
-BGS.forEach(([k,n])=>{const b=document.createElement('button');b.dataset.k=k;b.title=n;b.innerHTML=`<img src="${A}bg/${k}-t.webp" alt="${n}">`;
+BGS.forEach(([k,n])=>{const b=document.createElement('button');b.dataset.k=k;b.title=n;b.innerHTML=`<img src="${A}bg/${k}-t.webp?${AV}" alt="${n}">`;
  b.onclick=()=>{S[cur].bg=k;refresh();save();};$('bgGrid').appendChild(b);});
 CHARS.forEach(([k,n,h])=>{
  if(k==='#'){const d=document.createElement('div');d.className='ghead';d.textContent=n;$('charGrid').appendChild(d);return;}
- const b=document.createElement('button');b.innerHTML=`<img src="${A}ch/${k}.webp" alt="${n}" loading="lazy"><small>${n}</small>`;
+ const b=document.createElement('button');b.innerHTML=`<img src="${A}ch/${k}.webp?${AV}" alt="${n}" loading="lazy"><small>${n}</small>`;
  b.onclick=()=>{const isCat=k.startsWith('mochi');const c=ch(k,W/2,690,h||(isCat?150:360));S[cur].chars.push(c);sel=c.id;refresh();save();};
  $('charGrid').appendChild(b);});
 
@@ -696,7 +704,7 @@ function play({dest=null,onProgress=null,only=null}={}){
  });
 }
 function playLabels(){$('playBtn').textContent=aiBusy?'⏳ Making voices…':'▶ Play';$('playScene').textContent='▶ Play this scene';$('playScene').disabled=false;$('playBtn').disabled=$('exportBtn').disabled=aiBusy;}
-$('playBtn').onclick=()=>{if(aiBusy)return;if(playing){playing.stop();refresh();return;}$('playBtn').textContent='■ Stop';$('playScene').disabled=true;play();};
+$('playBtn').onclick=async()=>{if(aiBusy)return;if(playing){playing.stop();refresh();return;}await needStory(S);$('playBtn').textContent='■ Stop';$('playScene').disabled=true;play();};
 $('playScene').onclick=()=>{if(playing){playing.stop();refresh();return;}$('playScene').textContent='■ Stop';$('playBtn').disabled=true;play({only:cur});};
 
 // ---------- export to video
@@ -780,7 +788,7 @@ async function exportFast(){
  $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.mp4">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
  $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
 }
-$('exportBtn').onclick=async()=>{if(aiBusy)return;
+$('exportBtn').onclick=async()=>{if(aiBusy)return;await needStory(S);
  if(playing)return;
  if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);}}
  await exportRealtime();
@@ -799,8 +807,9 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
 (async()=>{
  restore(); lastSnap=snap(); persist(lastSnap);
  vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
- await Promise.all([...BGS.map(([k])=>load(A+'bg/'+k+'.webp').then(i=>IMG['bg:'+k]=i)),...POSES.map(([k])=>load(A+'ch/'+k+'.webp').then(i=>IMG[k]=i))]);
- refresh(); requestAnimationFrame(loop);
+ await needStory(S); refresh(); requestAnimationFrame(loop);
+ // the rest in the background, a few at a time
+ (async()=>{const keys=[...BGS.map(([k])=>'bg:'+k),...POSES.map(([k])=>k)];for(let i=0;i<keys.length;i+=4)await Promise.all(keys.slice(i,i+4).map(need));})();
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
  if(!seen)$('help').classList.add('on');
 })();
