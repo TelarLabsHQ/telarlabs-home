@@ -103,7 +103,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   <main>
     <div class="storybar" id="storyBar">
       <span class="sb-l">📚 Ready-made stories</span>
-      <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="noah">Noah's Ark</button><button data-s="blank">＋ Blank story</button></div>
+      <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="noah">Noah's Ark</button><button data-s="friends">Friends Around the World</button><button data-s="blank">＋ Blank story</button></div>
       <div class="sb-confirm" id="sbConfirm" hidden><span>Replace your current story with <b id="sbName"></b>?</span><button class="btn primary sm" id="sbYes">Load it</button><button class="btn sm" id="sbNo">Cancel</button></div>
     </div>
     <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
@@ -255,7 +255,8 @@ const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitche
  ['nazareth-house','House in Nazareth'],['road-bethlehem','Road to Bethlehem'],['bethlehem-street','Bethlehem street'],['stable','Inside the stable'],['fields-night','Fields at night'],['stable-star','Stable & star'],
  ['pasture','Green pasture'],['ravine-dusk','Rocky hills at sunset'],['ravine-night','Rocky hills at night'],['village-night','Village at night'],
  ['snowy-street','Snowy street'],['lily-bedroom','Cozy bedroom'],['toy-shop','Toy shop'],['gift-kitchen','Christmas kitchen'],['ben-door','Front door in snow'],['ben-living','Living room & fireplace'],
- ['noah-village','Village on the hills'],['ark-hill','Ark & rainbow'],['ark-building','Building the ark'],['ark-storm','Ark in the rain'],['ark-inside','Inside the ark'],['ark-mountain','Ark on the mountain']];
+ ['noah-village','Village on the hills'],['ark-hill','Ark & rainbow'],['ark-building','Building the ark'],['ark-storm','Ark in the rain'],['ark-inside','Inside the ark'],['ark-mountain','Ark on the mountain'],
+ ['school-gate','School gate'],['classroom-map','Classroom & world map'],['school-lunch','School lunch room'],['playground','Playground']];
 const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
  ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow'],
@@ -279,10 +280,15 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['noah-standing','Noah · stand',390],['noah-heart','Noah · listen',390],['noah-pray-stand','Noah · pray (standing)',390],['noah-welcome','Noah · welcome',390],['noah-hammer','Noah · hammer',400],['noah-dove','Noah · holding dove',390],['noah-praying','Noah · pray',320],['noah-sitting','Noah · sit',360],
  ['wife-standing','Noah\'s wife · stand',380],['wife-talking','Noah\'s wife · talk',380],['wife-basket','Noah\'s wife · basket',380],
  ['noah-family','Noah\'s family',230],['lions','Lions (pair)',190],['elephants','Elephants (pair)',200],['zebras','Zebras (pair)',190],['giraffes','Giraffes (pair)',230],
- ['sheep-pair','Sheep (pair)',160],['rabbits','Rabbits (pair)',130],['dove','Dove & olive leaf',190]];
+ ['sheep-pair','Sheep (pair)',160],['rabbits','Rabbits (pair)',130],['dove','Dove & olive leaf',190],
+ ['#','Friends Around the World'],
+ ['amara-shy','Amara · shy',330],['amara-jollof','Amara · jollof rice',330],['paolo-pancit','Paolo · pancit',340],['paolo-wave','Paolo · wave',340],
+ ['zofia-wave','Zofia · wave',330],['zofia-pierogi','Zofia · pierogi',330],['ayaan-samosa','Ayaan · samosas',340],['ayaan-heart','Ayaan · hello',340],
+ ['lena-pretzel','Lena · pretzel',330],['lena-wave','Lena · wave',330],['rose-welcome','Ms. Rose · welcome',450],['rose-hands','Ms. Rose · smile',450],
+ ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261104c';
+const AV='v=20261104d';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -369,7 +375,19 @@ function noahsArk(){return withVo('noah',[
  {bg:'ark-hill',cam:'out',text:'Everyone came out onto dry land. God put a rainbow in the sky as a promise. "Every time you see a rainbow, remember: God keeps His promises." The End.',dur:11,
   chars:[ch('noah-praying',230,715,300),ch('wife-talking',420,715,360),ch('noah-family',760,718,210),ch('lions',1090,720,150),ch('rabbits',1150,720,95)]},
 ]);}
-const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},gift:{name:'The Christmas Gift',build:christmasGift},noah:{name:"Noah's Ark",build:noahsArk},
+function friendsWorld(){return withVo('friends',[
+ {bg:'classroom-map',cam:'in',title:'Friends Around the World',text:'',dur:4,chars:[ch('kids-wave',640,715,310)]},
+ {bg:'school-gate',cam:'in',text:"It was Amara's first day at a new school. Her family had just moved from Nigeria, and she didn't know anyone yet.",dur:8,chars:[ch('amara-shy',640,715,340)]},
+ {bg:'classroom-map',cam:'in',text:'"Class, this is Amara," said Ms. Rose. "Tomorrow is Share Your Home Day. Bring something special from your family\'s country!"',dur:8,chars:[ch('rose-welcome',420,715,450),ch('amara-shy',820,715,320)]},
+ {bg:'classroom-map',cam:'in',text:'The next day, Paolo went first. "Kumusta! That\'s hello in Filipino. My lola makes pancit, long noodles for a long and happy life!"',dur:9,chars:[ch('paolo-pancit',640,715,350)]},
+ {bg:'classroom-map',cam:'in',text:'Zofia waved. "Cześć! That\'s hi in Polish. These are pierogi, little dumplings my grandma fills with potato and cheese."',dur:9,chars:[ch('zofia-pierogi',640,715,340)]},
+ {bg:'classroom-map',cam:'in',text:'Ayaan smiled. "Assalam-o-alaikum! That means peace be with you, in Urdu. In Pakistan, we share samosas with friends."',dur:9,chars:[ch('ayaan-samosa',640,715,350)]},
+ {bg:'classroom-map',cam:'in',text:'Lena held up a big pretzel. "Hallo! That\'s hello in German. In Germany, we love soft pretzels for a snack."',dur:8,chars:[ch('lena-pretzel',640,715,340)]},
+ {bg:'classroom-map',cam:'in',text:'Then it was Amara\'s turn. Her voice was small. "Bawo ni! That\'s hello in Yoruba, one of the languages of Nigeria. This is jollof rice. My mom makes it for every celebration."',dur:12,chars:[ch('rose-hands',330,715,440),ch('amara-jollof',720,715,340)]},
+ {bg:'school-lunch',cam:'in',text:'Everyone wanted to try it! "This is delicious!" said Paolo. At lunch, they shared all the food, and Amara laughed for the first time all week.',dur:10,chars:[ch('kids-lunch',640,720,340,{move:'still'})]},
+ {bg:'playground',cam:'out',text:'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world. The End.',dur:9,chars:[ch('kids-hands',640,715,320)]},
+]);}
+const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},gift:{name:'The Christmas Gift',build:christmasGift},noah:{name:"Noah's Ark",build:noahsArk},friends:{name:'Friends Around the World',build:friendsWorld},
  blank:{name:'a blank story',build:()=>[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}]}};
 let S=sample(), cur=0, sel=null;
 
@@ -605,7 +623,7 @@ async function speak(text){
  catch(e){if(alive||!/worker/.test(e.message))throw e; console.warn('worker failed, using main thread',e); useMain=true; if(worker){try{worker.terminate()}catch(_){}} worker=null; return speakMain(text);}
 }
 // built-in names always get their sound; the box adds the user's own (accepts =, :, → or " - ")
-const PRON_BUILTIN=[['Mochi','Mowchee']];
+const PRON_BUILTIN=[['Mochi','Mowchee'],['Kumusta','koo-MOOS-tah'],['Cześć','cheshch'],['pierogi','pyeh-ROH-ghee'],['Assalam-o-alaikum','ah-sah-LAHM oh ah-LAY-koom'],['Bawo ni','BAH-woh nee'],['jollof','JOL-uf'],['Zofia','ZOH-fyah'],['Ayaan','ah-YAHN'],['Amara','ah-MAH-rah']];
 function pronUser(){return ($('pron').value||'').split('\n').map(l=>l.split(/\s*(?:=|:|→|->|\s-\s)\s*/)).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function pronMap(){const u=pronUser(),k=new Set(u.map(x=>x[0].toLowerCase()));return [...u,...PRON_BUILTIN.filter(x=>!k.has(x[0].toLowerCase()))];}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
