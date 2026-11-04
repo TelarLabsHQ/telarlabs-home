@@ -278,11 +278,11 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['#',"Noah's Ark"],
  ['noah-standing','Noah · stand',390],['noah-praying','Noah · pray',320],['noah-sitting','Noah · sit',360],
  ['wife-standing','Noah\'s wife · stand',380],['wife-talking','Noah\'s wife · talk',380],['wife-basket','Noah\'s wife · basket',380],
- ['noah-family','Noah\'s family',230],['lions','Lions (pair)',190],['elephants','Elephants (pair)',200],['zebras','Zebras (pair)',190],
+ ['noah-family','Noah\'s family',230],['lions','Lions (pair)',190],['elephants','Elephants (pair)',200],['zebras','Zebras (pair)',190],['giraffes','Giraffes (pair)',230],
  ['sheep-pair','Sheep (pair)',160],['rabbits','Rabbits (pair)',130],['dove','Dove & olive leaf',190]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261104a';
+const AV='v=20261104b';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -361,7 +361,7 @@ function noahsArk(){return withVo('noah',[
  {bg:'noah-village',cam:'in',text:'Long ago, many people forgot to be kind, and forgot about God. But Noah loved God and always tried to do what was right.',dur:8,chars:[ch('noah-praying',640,715,330)]},
  {bg:'noah-village',cam:'out',text:'God said to Noah, "Build a very big boat called an ark. A great flood is coming, and I will keep you and your family safe."',dur:8,chars:[ch('noah-standing',520,715,400,{move:'still'})]},
  {bg:'ark-building',cam:'in',text:'So Noah and his family worked hard, day after day. They cut wood, hammered nails and built the ark just as God said.',dur:8,chars:[ch('noah-family',780,715,230,{move:'walk'}),ch('noah-standing',230,715,380)]},
- {bg:'ark-hill',cam:'in',text:'Then the animals came, two by two. Lions and elephants, giraffes and zebras, sheep and rabbits, all walking toward the ark!',dur:8,chars:[ch('elephants',1030,718,200),ch('zebras',650,718,180),ch('lions',260,718,180)]},
+ {bg:'ark-hill',cam:'in',text:'Then the animals came, two by two. Lions and elephants, giraffes and zebras, sheep and rabbits, all walking toward the ark!',dur:8,chars:[ch('elephants',1090,718,190),ch('giraffes',820,718,220),ch('zebras',520,718,170),ch('lions',220,718,170)]},
  {bg:'ark-hill',cam:'in',text:"Noah's family and all the animals went inside the ark. Then God closed the door.",dur:6,chars:[ch('noah-standing',250,715,380),ch('wife-basket',430,715,370),ch('sheep-pair',800,718,150),ch('rabbits',1080,720,120)]},
  {bg:'ark-storm',cam:'out',text:'The rain began to fall. It rained for forty days and forty nights, and water covered the whole earth.',dur:7,chars:[]},
  {bg:'ark-inside',cam:'in',text:'But inside the ark, everyone was safe and dry. Noah took care of the animals, and God took care of them all.',dur:7,chars:[ch('noah-sitting',420,712,330),ch('wife-standing',650,712,360),ch('sheep-pair',920,718,140),ch('rabbits',1130,720,110)]},
