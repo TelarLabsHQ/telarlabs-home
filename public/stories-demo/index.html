@@ -103,7 +103,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   <main>
     <div class="storybar" id="storyBar">
       <span class="sb-l">📚 Ready-made stories</span>
-      <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="blank">＋ Blank story</button></div>
+      <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="noah">Noah's Ark</button><button data-s="blank">＋ Blank story</button></div>
       <div class="sb-confirm" id="sbConfirm" hidden><span>Replace your current story with <b id="sbName"></b>?</span><button class="btn primary sm" id="sbYes">Load it</button><button class="btn sm" id="sbNo">Cancel</button></div>
     </div>
     <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
@@ -254,7 +254,8 @@ const A='assets/';
 const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitchen','Kitchen'],['garden-rainbow','Garden & rainbow'],['village-park','Village park'],
  ['nazareth-house','House in Nazareth'],['road-bethlehem','Road to Bethlehem'],['bethlehem-street','Bethlehem street'],['stable','Inside the stable'],['fields-night','Fields at night'],['stable-star','Stable & star'],
  ['pasture','Green pasture'],['ravine-dusk','Rocky hills at sunset'],['ravine-night','Rocky hills at night'],['village-night','Village at night'],
- ['snowy-street','Snowy street'],['lily-bedroom','Cozy bedroom'],['toy-shop','Toy shop'],['gift-kitchen','Christmas kitchen'],['ben-door','Front door in snow'],['ben-living','Living room & fireplace']];
+ ['snowy-street','Snowy street'],['lily-bedroom','Cozy bedroom'],['toy-shop','Toy shop'],['gift-kitchen','Christmas kitchen'],['ben-door','Front door in snow'],['ben-living','Living room & fireplace'],
+ ['noah-village','Village on the hills'],['ark-hill','Ark & rainbow'],['ark-building','Building the ark'],['ark-storm','Ark in the rain'],['ark-inside','Inside the ark'],['ark-mountain','Ark on the mountain']];
 const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
  ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow'],
@@ -273,10 +274,15 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['lily-standing','Lily · stand',330],['lily-gift','Lily · gift',330],['lily-walking','Lily · walk',320],['lily-asking','Lily · ask',330],['lily-cookies','Lily · cookies',330],
  ['lily-coins','Lily · coins',280],['lily-thinking','Lily · think',280],['lily-stirring','Lily · stir',280],['lily-baking','Lily · bake (table)',330],['lily-window','Lily · shop window',420],
  ['mom-explaining','Mom · talk',470],['mom-rolling','Mom · bake (table)',420],['mom-singing','Mom · sing',470],
- ['ben-standing','Mr. Ben · stand',400],['ben-sad','Mr. Ben · armchair',340],['ben-card','Mr. Ben · card',400],['ben-singing','Mr. Ben · sing',400]];
+ ['ben-standing','Mr. Ben · stand',400],['ben-sad','Mr. Ben · armchair',340],['ben-card','Mr. Ben · card',400],['ben-singing','Mr. Ben · sing',400],
+ ['#',"Noah's Ark"],
+ ['noah-standing','Noah · stand',390],['noah-praying','Noah · pray',320],['noah-sitting','Noah · sit',360],
+ ['wife-standing','Noah\'s wife · stand',380],['wife-talking','Noah\'s wife · talk',380],['wife-basket','Noah\'s wife · basket',380],
+ ['noah-family','Noah\'s family',230],['lions','Lions (pair)',190],['elephants','Elephants (pair)',200],['zebras','Zebras (pair)',190],
+ ['sheep-pair','Sheep (pair)',160],['rabbits','Rabbits (pair)',130],['dove','Dove & olive leaf',190]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261102b';
+const AV='v=20261104a';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -350,7 +356,20 @@ function christmasGift(){return withVo('christmas-gift',[
  {bg:'ben-living',cam:'in',text:'Mr. Ben smiled the biggest smile. "This is the best gift I\'ve had in years," he said. Together, they sang Christmas songs.',dur:9,chars:[ch('ben-card',330,715,400),ch('lily-standing',660,715,320),ch('mom-singing',1000,760,470,{flip:true})]},
  {bg:'snowy-street',cam:'out',text:'Lily never bought the snow globe. But that Christmas she learned something better: the best gifts come from the heart. The End.',dur:8,chars:[ch('mom-singing',290,760,460),ch('lily-gift',640,710,330),ch('ben-singing',960,710,400,{flip:true})]},
 ]);}
-const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},gift:{name:'The Christmas Gift',build:christmasGift},
+function noahsArk(){return withVo('noah',[
+ {bg:'ark-hill',cam:'in',title:"Noah's Ark",text:'A story from the Bible.',dur:5,chars:[ch('noah-standing',300,715,390)]},
+ {bg:'noah-village',cam:'in',text:'Long ago, many people forgot to be kind, and forgot about God. But Noah loved God and always tried to do what was right.',dur:8,chars:[ch('noah-praying',640,715,330)]},
+ {bg:'noah-village',cam:'out',text:'God said to Noah, "Build a very big boat called an ark. A great flood is coming, and I will keep you and your family safe."',dur:8,chars:[ch('noah-standing',520,715,400,{move:'still'})]},
+ {bg:'ark-building',cam:'in',text:'So Noah and his family worked hard, day after day. They cut wood, hammered nails and built the ark just as God said.',dur:8,chars:[ch('noah-family',780,715,230,{move:'walk'}),ch('noah-standing',230,715,380)]},
+ {bg:'ark-hill',cam:'in',text:'Then the animals came, two by two. Lions and elephants, giraffes and zebras, sheep and rabbits, all walking toward the ark!',dur:8,chars:[ch('elephants',1030,718,200),ch('zebras',650,718,180),ch('lions',260,718,180)]},
+ {bg:'ark-hill',cam:'in',text:"Noah's family and all the animals went inside the ark. Then God closed the door.",dur:6,chars:[ch('noah-standing',250,715,380),ch('wife-basket',430,715,370),ch('sheep-pair',800,718,150),ch('rabbits',1080,720,120)]},
+ {bg:'ark-storm',cam:'out',text:'The rain began to fall. It rained for forty days and forty nights, and water covered the whole earth.',dur:7,chars:[]},
+ {bg:'ark-inside',cam:'in',text:'But inside the ark, everyone was safe and dry. Noah took care of the animals, and God took care of them all.',dur:7,chars:[ch('noah-sitting',420,712,330),ch('wife-standing',650,712,360),ch('sheep-pair',920,718,140),ch('rabbits',1130,720,110)]},
+ {bg:'ark-mountain',cam:'in',text:'At last the rain stopped. Noah sent out a dove, and it came back with an olive leaf. The land was drying!',dur:7,chars:[ch('noah-standing',260,715,350),ch('dove',860,380,190,{move:'hop'})]},
+ {bg:'ark-hill',cam:'out',text:'Everyone came out onto dry land. God put a rainbow in the sky as a promise. "Every time you see a rainbow, remember: God keeps His promises." The End.',dur:11,
+  chars:[ch('noah-praying',230,715,300),ch('wife-talking',420,715,360),ch('noah-family',760,718,210),ch('lions',1090,720,150),ch('rabbits',1150,720,95)]},
+]);}
+const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},gift:{name:'The Christmas Gift',build:christmasGift},noah:{name:"Noah's Ark",build:noahsArk},
  blank:{name:'a blank story',build:()=>[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}]}};
 let S=sample(), cur=0, sel=null;
 
