@@ -72,7 +72,7 @@ def home():
 <section class="hero"><div class="wrap">
   <p class="eyebrow">Free · No sign-up · Works on any device</p>
   <h1>Small, free tools for teachers and creators</h1>
-  <p class="lead">{E(ST)} is an independent studio making simple web apps that work on the devices people already have: a classroom board, a quiz monitor, a writing recorder and a library of free video backgrounds.</p>
+  <p class="lead">{E(ST)} is an independent studio making simple web apps that work on the devices people already have: a classroom board, a quiz monitor, a writing recorder, a library of free video backgrounds, and event tickets and bookings paid directly to organizers.</p>
   <div class="cta"><a class="btn" href="#apps">See the apps</a><a class="btn ghost" href="/about/">About the studio</a></div>
 </div></section>
 <section class="wrap section" id="apps">
@@ -85,7 +85,7 @@ def home():
   <div><h3>Built for real classrooms</h3><p>Big buttons, works on phones and old laptops, keeps working when the Wi-Fi drops, and available in English, Spanish and Chinese where it matters.</p></div>
 </section>'''
     page('/', f'{ST} – Free Tools for Teachers and Creators',
-         'Telar Labs makes free web apps for teachers and creators: PizarraPad online board, QuizPolice quiz monitor, DraftTrail writing recorder and Telar Clips free video backgrounds.', body)
+         'Telar Labs makes free web apps for teachers and creators: PizarraPad online board, QuizPolice quiz monitor, DraftTrail writing recorder, Telar Clips free video backgrounds and Tixward event tickets and bookings.', body)
 
 def prose(path, title, desc, inner):
     page(path, title, desc, f'<article class="wrap prose">{inner}</article>')

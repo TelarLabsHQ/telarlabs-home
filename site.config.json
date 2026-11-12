@@ -38,6 +38,14 @@
       "blurb": "A writing recorder that replays how an essay was written, step by step, so teachers can see the process, not just the result."
     },
     {
+      "name": "Tixward",
+      "url": "https://tixward.telarlabs.net",
+      "img": "tixward.webp",
+      "color": "#FF8A4C",
+      "for": "For organizers",
+      "blurb": "Sell event tickets and take bookings for courts and rooms. Buyers pay you directly by e-wallet, bank QR, card link or cash, and get QR tickets. Free for most events."
+    },
+    {
       "name": "Telar Stories",
       "img": "stories.webp",
       "color": "#ff8fa3",
