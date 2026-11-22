@@ -7,7 +7,7 @@ OUT = '/home/claude/telarlabs-home/public/stories-demo/assets/voice/friends/'
 IPA = {   # word as written -> how it should sound
  'Amara': 'ɐmˈɑːɹə', 'Paolo': 'pˈaʊloʊ', 'Zofia': 'zˈoʊfiːjɑː', 'Ayaan': 'ɑːjˈɑːɑːn', 'Lena': 'lˈeɪnə',
  'Kumusta': 'kuːmˈuːstɑː', 'lola': 'lˈɔːlɑː', 'pancit': 'pɑːnsˈɪt', 'Cześć': 'tʃˈɛʃtʃ', 'pierogi': 'pɪɹˈoʊɡi',
- 'Assalam-o-alaikum': 'ɑːsɑːlˈɑːm mɑːlˈeɪkɔm', 'Hallo': 'hɑːlˈuː', 'Bawo ni': 'bˈɑːwoʊ nˈiː', 'jollof': 'dʒˈɑːləf',
+ 'Assalam-o-alaikum': 'ɑːsɑːlˈɑːm mɑːlˈeɪkɔm', 'Hallo': 'hɑːlˈuː', 'Bawo ni': 'bˈɔː nɪ', 'jollof': 'dʒˈɑːləf',
  'Yoruba': 'jˈɔːɹʊbə', 'Urdu': 'ˈʊɹduː', 'samosas': 'səmˈoʊsəz', 'Ms.': 'mˈɪz',
 }
 SCENES = [

@@ -624,7 +624,7 @@ async function speak(text){
 }
 // built-in names always get their sound; the box adds the user's own (accepts =, :, → or " - ")
 // Sound-alike spellings, all lowercase: capital letters make the voice spell words out like acronyms.
-const PRON_BUILTIN=[['Mochi','mowchee'],['lola','law-lah'],['Zofia','zoh-fee-yah'],['Kumusta','ku-moosta'],['Cześć','cheshch'],['Assalam-o-alaikum','ah-sah-lahm mah-lay-kom'],['Bawo ni','bah-woh nee'],['Amara','uh-mahra'],['Ayaan','ah-yah-ahn'],['Hallo','hah-loo'],['Lena','laynah'],['pancit','pahnsit'],['Ms.','miz']];
+const PRON_BUILTIN=[['Mochi','mowchee'],['lola','law-lah'],['Zofia','zoh-fee-yah'],['Kumusta','ku-moosta'],['Cześć','cheshch'],['Assalam-o-alaikum','ah-sah-lahm mah-lay-kom'],['Bawo ni','baw-nih'],['Amara','uh-mahra'],['Ayaan','ah-yah-ahn'],['Hallo','hah-loo'],['Lena','laynah'],['pancit','pahnsit'],['Ms.','miz']];
 function pronUser(){return ($('pron').value||'').split('\n').map(l=>l.split(/\s*(?:=|:|→|->|\s-\s)\s*/)).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function pronMap(){const u=pronUser(),k=new Set(u.map(x=>x[0].toLowerCase()));return [...u,...PRON_BUILTIN.filter(x=>!k.has(x[0].toLowerCase()))];}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
