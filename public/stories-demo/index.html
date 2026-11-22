@@ -293,7 +293,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261122a';
+const AV='v=20261122b';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};

@@ -13,10 +13,12 @@ SCENES = {
 def phonemes(text):
     text = re.sub('["“”]', '', text).replace('Mr. Ben', 'Mister Ben')
     s = K.tokenizer.phonemize(text, 'en-us').strip()
-    return s
+    return s.replace('lˈaɪvz', 'lˈɪvz')   # verb 'lives' (his family lives far away), not 'lives' as in 'nine lives'
 if __name__ == '__main__':
     import sys
+    only = [int(x) for x in sys.argv[1:]]
     for i, t in SCENES.items():
+        if only and i not in only: continue
         ph = phonemes(t); print(i, ph)
         a, sr = K.create(ph, voice='af_heart', speed=0.95, lang='en-us', is_phonemes=True)
         sf.write(f'/tmp/cg{i}.wav', a, sr)
