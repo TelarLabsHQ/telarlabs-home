@@ -85,7 +85,9 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .sb-l{display:block;font-weight:800;font-size:14px;margin-bottom:8px}
 .sb-chips{display:flex;flex-wrap:wrap;gap:8px}
 .sb-chips button{flex:none;background:var(--bg3);color:var(--fg);border:2px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
-.sb-chips button.on{border-color:var(--accent);background:#3a2230;color:#fff}
+.sb-chips button.on{border-color:#5aa9ff;background:#163a66;color:#fff}
+.sb-chips button.pick{border-color:#7cc0ff;background:#1d4f8c;color:#fff;box-shadow:0 0 0 3px rgba(90,169,255,.3)}
+.sb-chips button:active{transform:scale(.97)}
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
 </style>
@@ -533,7 +535,7 @@ $('dupScene').onclick=()=>{const s=S[cur];const c=JSON.parse(JSON.stringify({...
 $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,cur-1);sel=null;refresh();save();};
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
-$('newStory').onclick=()=>{pickId='blank';$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
+$('newStory').onclick=()=>{pickId='blank';markPick(null);$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
 async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');await needStory(L);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
 // ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
 async function attachVo(){let n=0;
@@ -542,9 +544,10 @@ async function attachVo(){let n=0;
  if(n){refresh();aiMsg(`<span class="pill ok">Ready</span> This story already has its voice. Press ▶ Play to watch it.`);}}
 let pickId=null;
 function markStory(){let k=null;try{k=localStorage.getItem('ts-story')}catch(e){}document.querySelectorAll('.sb-chips button').forEach(b=>b.classList.toggle('on',b.dataset.s===k));}
-document.querySelectorAll('.sb-chips button').forEach(b=>b.onclick=()=>{pickId=b.dataset.s;$('sbName').textContent=STORIES[pickId].name;$('sbConfirm').hidden=false;});
-$('sbNo').onclick=()=>{$('sbConfirm').hidden=true;pickId=null;};
-$('sbYes').onclick=async()=>{$('sbConfirm').hidden=true;if(!pickId)return;const id=pickId;pickId=null;try{localStorage.setItem('ts-story',id)}catch(e){}markStory();await loadStory(id);};
+const markPick=id=>document.querySelectorAll('.sb-chips button').forEach(x=>x.classList.toggle('pick',!!id&&x.dataset.s===id));   // blue while the user decides
+document.querySelectorAll('.sb-chips button').forEach(b=>b.onclick=()=>{pickId=b.dataset.s;markPick(pickId);$('sbName').textContent=STORIES[pickId].name;$('sbConfirm').hidden=false;});
+$('sbNo').onclick=()=>{$('sbConfirm').hidden=true;pickId=null;markPick(null);};
+$('sbYes').onclick=async()=>{$('sbConfirm').hidden=true;if(!pickId)return;const id=pickId;pickId=null;markPick(null);try{localStorage.setItem('ts-story',id)}catch(e){}markStory();await loadStory(id);};
 markStory();
 let confirmArmed=0;
 function confirmIn(msg){ // simple two-tap confirm without browser dialogs
