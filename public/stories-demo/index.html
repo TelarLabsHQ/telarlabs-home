@@ -880,7 +880,7 @@ async function exportFast(way=VWAYS[0],note=''){
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
  await ve.flush(); await ae.flush(); if(err)throw err;
  muxer.finalize(); keepAwake(false);
- finishVideo(joinParts(parts,'video/mp4'),'mp4',`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`);
+ finishVideo(joinParts(parts,'video/mp4'),'mp4',`MP4, ${Math.round(total)} seconds. ${way.mux==='vp9'?'It plays on Android phones, computers and YouTube; a few older apps may not open it.':'It plays on phones, TVs and in CapCut.'}`);
 }
 }
 // put the streamed pieces together; a later write (the header fixed at the end) replaces what was there
