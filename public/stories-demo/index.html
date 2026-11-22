@@ -88,6 +88,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .sb-chips button.on{border-color:var(--accent);background:#3a2230;color:#fff}
 .sb-chips button.pick{border-color:#7cc0ff;background:#1d4f8c;color:#fff;box-shadow:0 0 0 3px rgba(90,169,255,.3)}
 .sb-chips button:active{transform:scale(.97)}
+[hidden]{display:none!important}
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
 </style>
@@ -807,12 +808,7 @@ async function exportRealtime(){
  await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null;
  if(cancelled||!ok){$('ov').classList.remove('on');refresh();return;}
  const type=mr.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
- const url=URL.createObjectURL(new Blob(chunks,{type}));
- $('ovTitle').textContent='Your video is ready';
- $('ovText').textContent=ext==='mp4'?'Saved as MP4. It plays on phones, TVs and in CapCut.':'Saved as WebM. It plays in Chrome and YouTube; to use it in CapCut on some phones, convert it to MP4 first.';
- $('ovBar').style.width='100%';
- $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.${ext}">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
- $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
+ finishVideo(new Blob(chunks,{type}),ext,ext==='mp4'?'It plays on phones, TVs and in CapCut.':'It is a WebM video: it plays in Chrome and YouTube; to use it in CapCut on some phones, convert it to MP4 first.');
 }
 
 // ---------- fast, reliable export: render every frame, encode with WebCodecs, mux to MP4
@@ -836,7 +832,8 @@ async function renderAudio(total){
 }
 async function exportFast(){
  const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0), nFrames=Math.ceil(total*FPS);
- $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML='Putting your story together. This is usually faster than the story itself. You can keep using your phone; no scenes will be skipped.';
+ $('ovTitle').textContent='Making your video…'; const MSG='<b>Keep this screen open</b> until it finishes. It is usually faster than the story itself. If you switch apps or lock your phone, it pauses and continues when you come back.';
+ $('ovText').innerHTML=MSG; keepAwake(true);
  $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
  const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H,frameRate:FPS},
@@ -854,6 +851,9 @@ async function exportFast(){
  sel=null; let lastUI=0;
  for(let f=0;f<nFrames;f++){
   if(cancelled||err)break;
+  if(document.hidden){$('ovText').innerHTML='<b>Paused.</b> Come back to this screen to finish your video.';
+   await new Promise(r=>{const h=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',h);r();}};document.addEventListener('visibilitychange',h);});
+   $('ovText').innerHTML=MSG; keepAwake(true);}
   const t=f/FPS; let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
   drawScene(S[i],t-a,{fade:true});
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
@@ -863,11 +863,23 @@ async function exportFast(){
  }
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
  await ve.flush(); await ae.flush(); if(err)throw err;
- muxer.finalize();
- const url=URL.createObjectURL(new Blob([muxer.target.buffer],{type:'video/mp4'}));
- $('ovTitle').textContent='Your video is ready'; $('ovText').textContent=`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`;
+ muxer.finalize(); keepAwake(false);
+ finishVideo(new Blob([muxer.target.buffer],{type:'video/mp4'}),'mp4',`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`);
+}
+// a unique, readable file name so phones don't ask "download again?" for the same name
+function videoName(ext){const t=(S.find(x=>x.title)||{}).title||'my story';const d=new Date(),z=n=>String(n).padStart(2,'0');
+ return (t.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'my-story')+`-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}.${ext}`;}
+function finishVideo(blob,ext,info){
+ const name=videoName(ext), url=URL.createObjectURL(blob), mb=(blob.size/1048576).toFixed(1);
+ const save=()=>{const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
+ save();
+ $('ovTitle').textContent='✅ Your video is saved';
+ $('ovText').innerHTML=`Look for <b>${esc(name)}</b> (${mb} MB) in your <b>Downloads</b>. On a phone, open the Files app or your browser's Downloads. ${esc(info)}<br><span style="font-size:.9em">Nothing downloaded? Tap <b>Save again</b>.</span>`;
  $('ovBar').style.width='100%';
- $('ovBtns').innerHTML=`<a class="btn primary" href="${url}" download="my-telar-story.mp4">⬇ Download video</a><button class="btn" id="ovClose">Close</button>`;
+ const file=new File([blob],name,{type:blob.type}); const canShare=navigator.canShare&&navigator.canShare({files:[file]});
+ $('ovBtns').innerHTML=(canShare?'<button class="btn primary" id="ovShare">📤 Share or save to phone</button>':'')+'<button class="btn" id="ovSave">⬇ Save again</button><button class="btn" id="ovClose">Close</button>';
+ $('ovSave').onclick=save;
+ if(canShare)$('ovShare').onclick=()=>navigator.share({files:[file],title:name}).catch(()=>{});
  $('ovClose').onclick=()=>{$('ov').classList.remove('on');refresh();};
 }
 $('exportBtn').onclick=async()=>{if(aiBusy)return;await needStory(S);
