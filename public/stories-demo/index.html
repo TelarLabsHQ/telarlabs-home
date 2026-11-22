@@ -702,9 +702,14 @@ const STYLES={
 function note(ctx,out,f,t,len,wave,g,att=.02){const o=ctx.createOscillator(),v=ctx.createGain();o.type=wave;o.frequency.value=f;
  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.exponentialRampToValueAtTime(0.0008,t+len);o.connect(v);v.connect(out);o.start(t);o.stop(t+len+.05);return o;}
 let customBuf=null;
+// Built-in music: original loops made for Telar Stories (assets/music). Loaded when first needed.
+const MUSIC_FILES={gentle:1,happy:1,dreamy:1,adventure:1}, musicBuf={};
+async function loadMusic(style){if(!MUSIC_FILES[style])return null; if(musicBuf[style])return musicBuf[style];
+ try{const r=await fetch('assets/music/'+style+'.m4a'); musicBuf[style]=await ac().decodeAudioData(await r.arrayBuffer());}catch(e){console.warn('music',e)} return musicBuf[style]||null;}
 function startMusic(ctx,dest,total,style){
- if(style==='custom'){ if(!customBuf)return()=>{};
-  const g=ctx.createGain(),src=ctx.createBufferSource();src.buffer=customBuf;src.loop=true;src.connect(g);g.connect(dest);
+ const fileBuf=style==='custom'?customBuf:musicBuf[style];
+ if(style==='custom'||fileBuf){ if(!fileBuf)return()=>{};
+  const g=ctx.createGain(),src=ctx.createBufferSource();src.buffer=fileBuf;src.loop=true;src.connect(g);g.connect(dest);
   const n=ctx.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(0.22,n+1.5);g.gain.setValueAtTime(0.22,n+Math.max(1.5,total-2.5));g.gain.linearRampToValueAtTime(0,n+total);
   src.start(n);src.stop(n+total+0.1);return()=>{try{src.stop()}catch(e){}try{g.disconnect()}catch(e){}};}
  const st=STYLES[style]; if(!st)return()=>{};
@@ -724,10 +729,10 @@ function startMusic(ctx,dest,total,style){
  return()=>{nodes.forEach(n=>{try{n.stop()}catch(e){}});try{out.disconnect()}catch(e){}};
 }
 let musicStop=null;
-$('musicPrev').onclick=()=>{if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';return;}
- const ctx=ac();if(ctx.state==='suspended')ctx.resume();musicStop=startMusic(ctx,ctx.destination,8,$('music').value);$('musicPrev').textContent='■ Stop';
+$('musicPrev').onclick=async()=>{if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';return;}
+ await loadMusic($('music').value); const ctx=ac();if(ctx.state==='suspended')ctx.resume();musicStop=startMusic(ctx,ctx.destination,8,$('music').value);$('musicPrev').textContent='■ Stop';
  setTimeout(()=>{if(musicStop){musicStop=null;$('musicPrev').textContent='▶ Preview';}},8000);};
-$('music').onchange=e=>{const v=e.target.value; if(v==='custom'&&!customBuf){$('musicFile').click();}
+$('music').onchange=e=>{const v=e.target.value; loadMusic(v); if(v==='custom'&&!customBuf){$('musicFile').click();}
  if(v!=='custom'){try{localStorage.setItem('ts-music',v)}catch(_){}}};
 $('musicFile').onchange=async e=>{const f=e.target.files[0]; if(!f){if(!customBuf)$('music').value='gentle';return;}
  try{customBuf=await ac().decodeAudioData(await f.arrayBuffer());$('musicInfo').innerHTML='<span class="pill ok">Using: '+esc(f.name)+'</span> It plays softly under your voice and loops if the story is longer. <a href="#" id="musicChange">Choose another file</a>';
@@ -759,6 +764,7 @@ function play({dest=null,onProgress=null,only=null}={}){
   const start=ctx.currentTime+0.15; const srcs=[];
   let acc=0; L.forEach((s,i)=>{if(s.abuf){const b=ctx.createBufferSource();b.buffer=s.abuf;b.connect(out);b.start(start+acc+0.5);srcs.push(b);}acc+=durs[i];});
   if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';}
+  await loadMusic($('music').value);
   const stopMusic=startMusic(ctx,out,total+0.2,$('music').value);
   playing={stop(){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();res(false);}};
   sel=null; $('selBar').hidden=true;
@@ -819,6 +825,7 @@ async function renderAudio(total){
  const SR=48000, off=new OfflineAudioContext(2,Math.ceil(SR*(total+0.3)),SR);
  const durs=S.map(sceneDur); let acc=0;
  S.forEach((s,i)=>{if(s.abuf){const b=off.createBufferSource();b.buffer=s.abuf;b.connect(off.destination);b.start(acc+0.5);}acc+=durs[i];});
+ await loadMusic($('music').value);
  startMusic(off,off.destination,total+0.2,$('music').value);
  return await off.startRendering();
 }
