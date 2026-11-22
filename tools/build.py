@@ -47,7 +47,7 @@ def page(path, title, desc, body, ads_on=True, head_extra='', og_type='website')
   <p class="muted">Small, free tools for teachers and creators.</p></div>
   <div class="foot-cols">
     <div><h4>Apps</h4>{''.join(f'<a href="{E(a["url"])}">{E(a["name"])}</a>' for a in CFG["apps"] if a.get("url"))}</div>
-    <div><h4>{E(ST)}</h4><a href="/guides/">Guides</a><a href="/about/">About</a><a href="/privacy/">Privacy policy</a><a href="/contact/">Contact</a></div>
+    <div><h4>{E(ST)}</h4><a href="/guides/">Guides</a><a href="/about/">About</a><a href="/privacy/">Privacy policy</a><a href="/terms/">Terms of use</a><a href="/contact/">Contact</a></div>
   </div>
 </div><div class="wrap fine">&copy; {date.today().year} {E(ST)}.</div></footer>
 </body>
@@ -91,20 +91,42 @@ def home(G=()):
          'Telar Labs makes free web apps for teachers and creators: PizarraPad online board, QuizPolice quiz monitor, DraftTrail writing recorder, Telar Clips free video backgrounds and Tixward event tickets and bookings.', body)
 
 def prose(path, title, desc, inner, ads_on=True):
-    if path in ('/contact/', '/privacy/'): ads_on = False   # no ads on short utility pages
+    if path in ('/contact/', '/privacy/', '/terms/'): ads_on = False   # no ads on short utility pages
     page(path, title, desc, f'<article class="wrap prose">{inner}</article>', ads_on=ads_on)
 
 def pages():
     apps_li = ''.join(f'<li><b>{E(a["name"])}</b>: {E(a["blurb"])}{"" if a.get("soon") else f" <a href=\"{E(a["url"])}\">{E(a["url"].replace("https://", ""))}</a>"}</li>' for a in CFG['apps'])
-    prose('/about/', 'About', f'About {ST}, an independent studio making free tools for teachers and creators.', f'''
+    prose('/about/', 'About', f'About {ST}, an independent studio making simple, free web tools for teachers, event organizers and creators.', f'''
 <h1>About {E(ST)}</h1>
-<p class="lead">{E(ST)} is a small, independent studio that builds simple, free web tools for teachers, students and content creators.</p>
-<p>We started with a simple observation: many classrooms have a projector or TV but no expensive interactive board, many online quizzes are easy to cheat on, and creators everywhere keep needing the same holiday and greeting backgrounds. Good tools exist, but they often need sign-ups, subscriptions or fast internet. We try to make tools that just open and work.</p>
+<p class="lead">{E(ST)} is a small, independent studio that builds simple web tools for teachers, students, event organizers and content creators. Most of what we make is free, works on any phone or laptop, and opens without an account.</p>
+<h2>Why we build these tools</h2>
+<p>Our apps start from everyday problems we keep hearing about from schools, churches, clubs and small teams:</p>
+<ul>
+<li><b>Classrooms</b> often have a projector or TV but no interactive board, and the internet isn't always reliable. Online quizzes are easy to cheat on, and AI has made it harder to know how an essay was written.</li>
+<li><b>Small organizers</b> running reunions, fun runs, fitness classes or church concerts end up juggling group chats, spreadsheets and payment screenshots, while big ticketing platforms take a cut of every ticket.</li>
+<li><b>Creators and volunteers</b> who make greeting, school and church videos keep needing the same backgrounds, overlays and holiday clips, in the right sizes for each platform.</li>
+</ul>
+<p>Good tools exist for all of this, but many need sign-ups, subscriptions, fast internet or a big budget. We try to make tools that just open and work.</p>
 <h2>What we make</h2>
 <ul>{apps_li}</ul>
-<h2>How we work</h2>
-<ul><li>Free versions with no sign-up.</li><li>Data stays on your device wherever possible.</li><li>No ads inside the tools while you teach or create; information pages show a few ads to pay for hosting.</li>
-<li>We use AI assistance in parts of our design and illustration work, and review everything we publish.</li></ul>
+<h2>What we promise</h2>
+<ul>
+<li><b>Free to start, no sign-up.</b> Teachers and students don't need accounts. Organizers get a private link instead of a password.</li>
+<li><b>Your data stays small and short-lived.</b> PizarraPad saves boards in your own browser. DraftTrail recordings stay on the student's device until they hand in the file. QuizPolice deletes quiz data 30 days after a quiz is created. Tixward removes payment screenshots 30 days after an event and the rest of the event data after 90 days.</li>
+<li><b>Money goes where it should.</b> On Tixward, buyers pay organizers directly. We never take a percentage of ticket sales.</li>
+<li><b>No ads inside the tools.</b> Students taking a quiz, teachers at the board and buyers paying for tickets never see ads. Some information pages and guides may show a few ads to help pay for hosting.</li>
+<li><b>Built for ordinary devices.</b> We test on phones as well as laptops, and on slow connections. Where we can, tools keep working offline.</li>
+<li><b>Honest about limits.</b> No monitor catches every kind of cheating, and no recorder can prove who wrote something. We say so in our apps and guides.</li>
+</ul>
+<h2>How we're funded</h2>
+<p>We keep the core tools free. Hosting and development are paid for by a small number of ads on information pages and by Tixward's one-time fee for larger events (events with up to 300 paid tickets are free, and free tickets are always free). Telar Clips are free to download and use.</p>
+<h2>How we make things</h2>
+<ul>
+<li>Every app is designed, built and tested by the {E(ST)} team, then improved based on feedback from the people using it.</li>
+<li>We use AI assistance in parts of our design, illustration and writing work. Everything is reviewed by the team before it's published.</li>
+<li>Our motion graphics are original: generated in code or illustrated for {E(ST)}, never copied from other libraries.</li>
+<li>Screenshots in our guides use sample data with made-up names, never real users' information.</li>
+</ul>
 <h2>Our guides</h2>
 <p>Alongside the apps, we publish <a href="/guides/">practical guides</a> for teachers, event organizers and creators: how to reduce cheating in online quizzes, teach with a projector, sell tickets when buyers pay you directly, plan a reunion, or size a video for each platform. Each guide comes from the problems people bring to us while using our tools.</p>
 <ul><li>Guides are written and reviewed by the {E(ST)} team, and dated so you know how current they are.</li>
@@ -112,7 +134,7 @@ def pages():
 <li>When a guide mentions one of our apps, we say so plainly. The advice works with other tools too.</li>
 <li>When a setting or price changes, we update the guide. If you spot something out of date, please tell us.</li></ul>
 <h2>Get in touch</h2>
-<p>Ideas, feedback, corrections or partnership questions: <a href="mailto:{E(MAIL)}">{E(MAIL)}</a>.</p>''')
+<p>Ideas, feedback, corrections or partnership questions: <a href="mailto:{E(MAIL)}">{E(MAIL)}</a>. We usually reply within two to three working days.</p>''')
     prose('/contact/', 'Contact', f'Contact {ST}.', f'''
 <h1>Contact us</h1>
 <p class="lead">Questions, feedback, bug reports or ideas for a new tool? We'd love to hear from you.</p>
@@ -133,6 +155,24 @@ def pages():
 <h2>Contact</h2>
 <p>Questions about privacy: <a href="mailto:{E(MAIL)}">{E(MAIL)}</a></p>
 <p class="muted">Last updated {E(CFG["updated"])}.</p>''')
+    prose('/terms/', 'Terms of Use', f'Terms of use for the {ST} website.', f'''
+<h1>Terms of use</h1>
+<p class="lead">These terms cover telarlabs.net, including our guides. Each of our apps has its own terms page with details for that app.</p>
+<h2>Using this site</h2>
+<p>You're welcome to read, share and link to our pages and guides. Please don't copy whole guides onto other websites; a short quote with a link back is fine.</p>
+<h2>Our guides</h2>
+<p>Our guides are general information, written in good faith and checked when published. Tools, settings, prices and rules change, so check the details that matter for your situation, especially for money, safety, permissions and school or local policies. The guides are not legal, financial or professional advice.</p>
+<h2>Our apps</h2>
+<p>Each app (Telar Clips, PizarraPad, QuizPolice, DraftTrail and Tixward) has its own terms and privacy page, linked from that app's footer. Those terms apply when you use the app.</p>
+<h2>Links to other sites</h2>
+<p>We sometimes link to other websites and services. We don't control them and aren't responsible for their content or practices.</p>
+<h2>No warranty</h2>
+<p>This site is provided as is. We work to keep it accurate and available, but we can't promise it will always be error-free or online.</p>
+<h2>Changes</h2>
+<p>We may update these terms. The date below shows the latest version.</p>
+<h2>Contact</h2>
+<p>Questions: <a href="mailto:{E(MAIL)}">{E(MAIL)}</a></p>
+<p class="muted">Last updated November 22, 2026.</p>''')
     page('/404.html', 'Page not found', 'This page does not exist.',
          '<section class="wrap prose"><h1>Page not found</h1><p class="lead">That page doesn\'t exist.</p><p><a class="btn" href="/">Go to the homepage</a> <a class="btn ghost" href="/guides/">Read our guides</a></p></section>', ads_on=False)
 
@@ -212,7 +252,7 @@ def guides():
 
 def extras(GUIDES=()):
     open(os.path.join(PUB, 'favicon.svg'), 'w').write(LOGO.replace('class="logo-mark" ', 'xmlns="http://www.w3.org/2000/svg" '))
-    urls = ['/', '/guides/', '/about/', '/contact/', '/privacy/'] + [f'/guides/{g["slug"]}/' for g in GUIDES]
+    urls = ['/', '/guides/', '/about/', '/contact/', '/privacy/', '/terms/'] + [f'/guides/{g["slug"]}/' for g in GUIDES]
     open(os.path.join(PUB, 'sitemap.xml'), 'w').write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + ''.join(f'<url><loc>{URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     open(os.path.join(PUB, 'robots.txt'), 'w').write(f'User-agent: *\nAllow: /\nSitemap: {URL}/sitemap.xml\n')
