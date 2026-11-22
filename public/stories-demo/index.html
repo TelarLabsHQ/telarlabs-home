@@ -757,7 +757,7 @@ async function keepAwake(on){try{if(on&&'wakeLock' in navigator&&!wake){wake=awa
  else if(!on&&wake&&!aiBusy&&!playing){await wake.release();wake=null;}}catch(e){}}
 // If the page is hidden (phone locked, app switched), freeze the story clock and the recorder,
 // so no scenes are skipped; continue when the page comes back.
-let activeRec=null, pausedByHide=false;
+let activeRec=null, pausedByHide=false, recTrack=null;
 document.addEventListener('visibilitychange',async()=>{
  if(aiBusy&&!document.hidden)keepAwake(true);
  if(!playing)return; const ctx=ac();
@@ -783,7 +783,7 @@ function play({dest=null,onProgress=null,only=null}={}){
    const t=ctx.currentTime-start;
    if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();refresh();res(true);return;}
    let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-   drawScene(L[i],Math.max(0,t-a),{fade:true});
+   drawScene(L[i],Math.max(0,t-a),{fade:true}); if(recTrack&&dest)recTrack.requestFrame();
    if(onProgress)onProgress(Math.max(0,t)/total);
    requestAnimationFrame(frame);
   })();
@@ -801,7 +801,8 @@ async function exportRealtime(why=''){
  if(!cv.captureStream||!window.MediaRecorder){showDone('Not supported here','This browser cannot record video. Please try Chrome on Android or a computer.');return;}
  const ctx=ac(); if(ctx.state==='suspended')await ctx.resume();
  const dest=ctx.createMediaStreamDestination();
- const stream=new MediaStream([...cv.captureStream(FPS).getVideoTracks(),...dest.stream.getAudioTracks()]);
+ const vt=cv.captureStream(0).getVideoTracks()[0]; recTrack=vt&&vt.requestFrame?vt:null;
+ const stream=new MediaStream([recTrack||cv.captureStream(FPS).getVideoTracks()[0],...dest.stream.getAudioTracks()]);
  const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
  const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
  $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML=(why?'<b>Switching to the steady way.</b> The quick way stopped on this phone, so the video is now recorded while the story plays. ':'')+'<b>Keep this screen open</b> until it finishes. It takes as long as the story. If you leave the page, recording pauses and continues when you come back.'+(why?`<br><span style="font-size:.8em;opacity:.7">Reason: ${esc(why).slice(0,160)}</span>`:'');
@@ -810,7 +811,7 @@ async function exportRealtime(why=''){
  activeRec=mr; drawScene(S[0],0,{fade:true}); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
  mr.start(1000);
  const ok=await play({dest,onProgress:ovProg});
- await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null;
+ await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null; recTrack=null;
  if(cancelled||!ok){$('ov').classList.remove('on');refresh();return;}
  const type=mr.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
  finishVideo(new Blob(chunks,{type}),ext,ext==='mp4'?'It plays on phones, TVs and in CapCut.':'It is a WebM video: it plays in Chrome and YouTube; to use it in CapCut on some phones, convert it to MP4 first.');
@@ -818,14 +819,19 @@ async function exportRealtime(why=''){
 
 // ---------- fast, reliable export: render every frame, encode with WebCodecs, mux to MP4
 let AUD={codec:'mp4a.40.2',mux:'aac'};
-async function canFastExport(){
- if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return false;
- try{const v=await VideoEncoder.isConfigSupported({codec:'avc1.42001f',width:W,height:H,bitrate:2_500_000,framerate:FPS});
-  if(!v.supported)return false;
+// ways to encode, tried in order: the phone's video chip, then the browser's own encoder (slower but steadier on some phones)
+const VWAYS=[{codec:'avc1.42001f',mux:'avc'},{codec:'avc1.42001f',mux:'avc',hardwareAcceleration:'prefer-software'},
+ {codec:'vp09.00.31.08',mux:'vp9',hardwareAcceleration:'prefer-software'}];
+const vcfg=w=>{const c={codec:w.codec,width:W,height:H,bitrate:2_500_000,framerate:FPS};if(w.hardwareAcceleration)c.hardwareAcceleration=w.hardwareAcceleration;return c;};
+async function fastWays(){
+ if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return [];
+ try{let audio=false;
   for(const [codec,mux] of [['mp4a.40.2','aac'],['opus','opus']]){
    const a=await AudioEncoder.isConfigSupported({codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
-   if(a.supported){AUD={codec,mux};return true;}}
-  return false;}catch(e){return false;}
+   if(a.supported){AUD={codec,mux};audio=true;break;}}
+  if(!audio)return [];
+  const ok=[];for(const w of VWAYS){try{if((await VideoEncoder.isConfigSupported(vcfg(w))).supported)ok.push(w);}catch(e){}}
+  return ok;}catch(e){return [];}
 }
 async function renderAudio(total){
  const SR=48000, off=new OfflineAudioContext(2,Math.ceil(SR*(total+0.3)),SR);
@@ -835,20 +841,20 @@ async function renderAudio(total){
  startMusic(off,off.destination,total+0.2,$('music').value);
  return await off.startRendering();
 }
-async function exportFast(){
+async function exportFast(way=VWAYS[0],note=''){
  const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0), nFrames=Math.ceil(total*FPS);
  $('ovTitle').textContent='Making your video…'; const MSG='<b>Keep this screen open</b> until it finishes. It is usually faster than the story itself. If you switch apps or lock your phone, it pauses and continues when you come back.';
- $('ovText').innerHTML=MSG; keepAwake(true);
+ $('ovText').innerHTML=note+MSG; keepAwake(true);
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
  exporting=true; try{ return await exportFastRun(); } finally{ exporting=false; }
  async function exportFastRun(){
  const parts=[]; const target=new Mp4Muxer.StreamTarget({chunked:true,chunkSize:2**21,onData:(d,pos)=>parts.push({s:pos,e:pos+d.byteLength,b:new Blob([d])})});
- const muxer=new Mp4Muxer.Muxer({target,video:{codec:'avc',width:W,height:H,frameRate:FPS},
+ const muxer=new Mp4Muxer.Muxer({target,video:{codec:way.mux,width:W,height:H,frameRate:FPS},
    audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:false});
  let err=null;
  const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});
- ve.configure({codec:'avc1.42001f',width:W,height:H,bitrate:2_500_000,framerate:FPS});
+ ve.configure(vcfg(way));
  const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});
  ae.configure({codec:AUD.codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
  // audio first (quick)
@@ -861,7 +867,7 @@ async function exportFast(){
   if(cancelled||err)break;
   if(document.hidden){$('ovText').innerHTML='<b>Paused.</b> Come back to this screen to finish your video.';
    await new Promise(r=>{const h=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',h);r();}};document.addEventListener('visibilitychange',h);});
-   $('ovText').innerHTML=MSG; keepAwake(true);}
+   $('ovText').innerHTML=note+MSG; keepAwake(true);}
   const t=f/FPS; let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
   drawScene(S[i],t-a,{fade:true});
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
@@ -901,8 +907,10 @@ function finishVideo(blob,ext,info){
 }
 $('exportBtn').onclick=async()=>{if(aiBusy)return;await needStory(S);
  if(playing)return;
- let why='';
- if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);why=((e&&e.name)||'Error')+': '+((e&&e.message)||e);}}
+ let why=''; const ways=await fastWays();
+ for(let k=0;k<ways.length;k++){
+  const note=why?`<b>Trying again another way (${k+1} of ${ways.length}).</b> The last try stopped on this phone, so it starts again from 0%.<br><span style="font-size:.8em;opacity:.7">Reason: ${esc(why).slice(0,160)}</span><br>`:'';
+  try{await exportFast(ways[k],note);return;}catch(e){console.warn('fast export failed',e);why=((e&&e.name)||'Error')+': '+((e&&e.message)||e);}}
  await exportRealtime(why);
 };
 function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('ovBtns').innerHTML='<button class="btn" id="ovClose">Close</button>';$('ov').classList.add('on');$('ovClose').onclick=()=>$('ov').classList.remove('on');}
