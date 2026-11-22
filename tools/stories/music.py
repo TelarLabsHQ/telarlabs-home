@@ -253,5 +253,39 @@ def playful():
     play_mel(tr, mel, beat, lambda f, d: marimba(f, .85), -.25, reps=2)
     reverb(tr, 1.8, .22); finish(tr, 'playful')
 
+def sunday():
+    """like Picnic: warm bouncy piano with soft claps, in G, a different tune"""
+    bpm = 86; beat = 60 / bpm; bar = 4 * beat
+    ch = chords_of(['G3 B3 D4', 'E3 G3 B3', 'C3 E3 G3', 'D3 F#3 A3'])
+    mel = ['D5 2', 'B4 1', 'D5 1', 'G5 2', 'F#5 2', 'E5 2', 'D5 2', 'B4 4', 'C5 2', 'E5 2', 'D5 2', 'C5 2', 'B4 2', 'A4 2', 'B4 4',
+           'D5 2', 'B4 1', 'D5 1', 'G5 2', 'A5 2', 'B5 2', 'A5 2', 'G5 4', 'E5 2', 'G5 2', 'F#5 2', 'D5 2', 'G5 6', '- 2']
+    bars = 16; tr = Track(bars * bar)
+    for k in range(bars):
+        c = ch[k % 4]; t0 = k * bar
+        for i in range(4):
+            tr.add(t0 + i * beat, piano(mf(c[0] - 12 if i % 2 == 0 else c[2] - 12), beat * .9, .5), -.2)
+            if i % 2 == 1:
+                for x in c: tr.add(t0 + i * beat, piano(mf(x), beat * .6, .3), .1)
+                tr.add(t0 + i * beat, clap(.7), .2)
+            tr.add(t0 + i * beat + beat / 2, piano(mf(c[2] + 12), beat * .3, .16), .3)
+    play_mel(tr, mel, beat, lambda f, d: piano(f, d, .68), .05, reps=2)
+    reverb(tr, 1.8, .22); finish(tr, 'sunday')
+
+def garden():
+    """like Playful: marimba tune over pizzicato and a very soft kick, in A, a different tune"""
+    bpm = 94; beat = 60 / bpm; bar = 4 * beat
+    ch = chords_of(['A2 C#3 E3', 'F#2 A2 C#3', 'D3 F#3 A3', 'E3 G#3 B3'])
+    mel = ['E5 1', 'C#5 1', 'E5 2', 'A5 2', 'G#5 1', 'F#5 1', 'E5 4', 'C#5 2', 'D5 2', 'F#5 2', 'A5 2', 'B5 2', 'G#5 4', 'E5 2', '- 4',
+           'E5 1', 'C#5 1', 'E5 2', 'A5 2', 'B5 1', 'C#6 1', 'B5 4', 'A5 2', 'F#5 2', 'D5 2', 'E5 2', 'G#5 2', 'A5 6', '- 4']
+    bars = 16; tr = Track(bars * bar)
+    for k in range(bars):
+        c = ch[k % 4]; t0 = k * bar
+        for i, j in enumerate([0, 2, 1, 2, 0, 2, 1, 2]):
+            tr.add(t0 + i * beat / 2, pluck(mf(c[j] + 12), beat * .25, .42, .15), .35)
+        tr.add(t0, marimba(mf(c[0] - 12), .8), -.1); tr.add(t0 + 1.5 * beat, marimba(mf(c[2] - 12), .5), -.1); tr.add(t0 + 2.5 * beat, marimba(mf(c[0] - 12), .6), -.1)
+        tr.add(t0, kick(.32), 0); tr.add(t0 + 2 * beat, kick(.22), 0)
+    play_mel(tr, mel, beat, lambda f, d: marimba(f, .85), -.25, reps=2)
+    reverb(tr, 1.8, .22); finish(tr, 'garden')
+
 if __name__ == '__main__':
     for f in (sys.argv[1:] or ['gentle', 'happy', 'dreamy', 'adventure']): globals()[f]()
