@@ -852,33 +852,41 @@ async function exportFast(way=VWAYS[0],note=''){
  const parts=[]; const target=new Mp4Muxer.StreamTarget({chunked:true,chunkSize:2**21,onData:(d,pos)=>parts.push({s:pos,e:pos+d.byteLength,b:new Blob([d])})});
  const muxer=new Mp4Muxer.Muxer({target,video:{codec:way.mux,width:W,height:H,frameRate:FPS},
    audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:false});
- let err=null;
- const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});
+ // Some phones fail when the encoder is asked to finish ("Flushing error") even though every frame was already made.
+ // So: count what comes out, add half a second of padding at the end, and accept the video if the story itself is complete.
+ let err=null, aerr=null, vOut=0;
+ const PAD=Math.round(FPS/2), nAll=nFrames+PAD;
+ const ve=new VideoEncoder({output:(c,m)=>{vOut++;muxer.addVideoChunk(c,m);},error:e=>err=e});
  ve.configure(vcfg(way));
- const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});
+ const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>aerr=e});
  ae.configure({codec:AUD.codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
  // audio first (quick)
- {const ab=await renderAudio(total); const L=ab.getChannelData(0),Rr=ab.getChannelData(1),N=Math.min(ab.length,Math.ceil(48000*total)),CH=4800;
+ {const ab=await renderAudio(total); const L=ab.getChannelData(0),Rr=ab.getChannelData(1),N=Math.min(ab.length,Math.ceil(48000*(total+0.25))),CH=4800;
  for(let o=0;o<N;o+=CH){const n=Math.min(CH,N-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
-  const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();} await ae.flush();}   // block: the rendered audio can be freed once encoded
+  const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();} try{await ae.flush();}catch(e){console.warn('audio flush',e);}}   // block: the rendered audio can be freed once encoded
  // video frames, drawn one by one (independent of the clock)
  sel=null; let lastUI=0;
- for(let f=0;f<nFrames;f++){
+ for(let f=0;f<nAll;f++){
   if(cancelled||err)break;
   if(document.hidden){$('ovText').innerHTML='<b>Paused.</b> Come back to this screen to finish your video.';
    await new Promise(r=>{const h=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',h);r();}};document.addEventListener('visibilitychange',h);});
    $('ovText').innerHTML=note+MSG; keepAwake(true);}
-  const t=f/FPS; let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
+  const t=Math.min(f/FPS,total-0.001); let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
   drawScene(S[i],t-a,{fade:true});
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
   ve.encode(vf,{keyFrame:f%(FPS*2)===0}); vf.close();
   // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
   // let the queue grow until the page runs out of memory
   while(ve.encodeQueueSize>3&&!err) await new Promise(r=>{const t=setTimeout(r,15);ve.addEventListener('dequeue',()=>{clearTimeout(t);r();},{once:true});});
-  const now=performance.now(); if(now-lastUI>120){lastUI=now;ovProg(f/nFrames);await new Promise(r=>setTimeout(r,0));}
+  const now=performance.now(); if(now-lastUI>120){lastUI=now;ovProg(f/nAll);await new Promise(r=>setTimeout(r,0));}
  }
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
- await ve.flush(); await ae.flush(); if(err)throw err;
+ if(!err){try{await ve.flush();}catch(e){err=e;}}
+ if(err){ // give late frames a moment, then decide
+  for(let k=0;k<40&&vOut<nFrames;k++)await new Promise(r=>setTimeout(r,50));
+  console.warn('video flush',err,vOut,'of',nFrames);
+  if(vOut<nFrames)throw err;}
+ try{ve.close();}catch(e){} try{ae.close();}catch(e){}
  muxer.finalize(); keepAwake(false);
  finishVideo(joinParts(parts,'video/mp4'),'mp4',`MP4, ${Math.round(total)} seconds. ${way.mux==='vp9'?'It plays on Android phones, computers and YouTube; a few older apps may not open it.':'It plays on phones, TVs and in CapCut.'}`);
 }
