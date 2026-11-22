@@ -5,9 +5,9 @@ from kokoro_onnx import Kokoro
 K = Kokoro('/tmp/kok/kokoro-v1.0.onnx', '/tmp/kok/voices-v1.0.bin')
 OUT = '/home/claude/telarlabs-home/public/stories-demo/assets/voice/friends/'
 IPA = {   # word as written -> how it should sound
- 'Amara': 'ɐmˈɑːɹə', 'Paolo': 'pˈaʊloʊ', 'Zofia': 'zˈoʊfjə', 'Ayaan': 'ɑːjˈɑːn', 'Lena': 'lˈeɪnə',
- 'Kumusta': 'kuːmˈuːstɑː', 'lola': 'lˈoʊlə', 'pancit': 'pɑːnsˈɪt', 'Cześć': 'tʃˈɛʃtʃ', 'pierogi': 'pɪɹˈoʊɡi',
- 'Assalam-o-alaikum': 'ɐsɐlˈɑːm oʊ ɐlˈeɪkʊm', 'Hallo': 'hˈɑːloʊ', 'Bawo ni': 'bˈɑːwoʊ nˈiː', 'jollof': 'dʒˈɑːləf',
+ 'Amara': 'ɐmˈɑːɹə', 'Paolo': 'pˈaʊloʊ', 'Zofia': 'zˈoʊfiːjɑː', 'Ayaan': 'ɑːjˈɑːɑːn', 'Lena': 'lˈeɪnə',
+ 'Kumusta': 'kuːmˈuːstɑː', 'lola': 'lˈɔːlɑː', 'pancit': 'pɑːnsˈɪt', 'Cześć': 'tʃˈɛʃtʃ', 'pierogi': 'pɪɹˈoʊɡi',
+ 'Assalam-o-alaikum': 'ɑːsɑːlˈɑːm mɑːlˈeɪkɔm', 'Hallo': 'hɑːlˈuː', 'Bawo ni': 'bˈɑːwoʊ nˈiː', 'jollof': 'dʒˈɑːləf',
  'Yoruba': 'jˈɔːɹʊbə', 'Urdu': 'ˈʊɹduː', 'samosas': 'səmˈoʊsəz', 'Ms.': 'mˈɪz',
 }
 SCENES = [
@@ -20,7 +20,7 @@ SCENES = [
  'Lena held up a big pretzel. "Hallo! That\'s hello in German. In Germany, we love soft pretzels for a snack."',
  'Then it was Amara\'s turn. Her voice was small. "Bawo ni! That\'s hello in Yoruba, one of the languages of Nigeria. This is jollof rice. My mom makes it for every celebration."',
  'Everyone wanted to try it! "This is delicious!" said Paolo. At lunch, they shared all the food, and Amara laughed for the first time all week.',
- 'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world. The End.',
+ 'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world.',
 ]
 PAT = re.compile(r"((?:" + '|'.join(sorted(map(re.escape, IPA), key=len, reverse=True)) + r")(?:'s)?)(?=\W|$)")
 def phonemes(text):

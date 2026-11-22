@@ -312,7 +312,7 @@ function sample(){return withVo('mira',[
  {bg:'reading-nook',cam:'in',text:'The book was full of stories about faraway places, brave animals and wonderful friends.',dur:7,chars:[ch('mira-reading',400,700,315),ch('mochi-sleeping',633,703,100)]},
  {bg:'garden-rainbow',cam:'in',text:'When she looked up, the rain was stopping, and a rainbow filled the sky!',dur:6.5,chars:[ch('mira-pointing',833,693,375),ch('mochi-sitting',1013,693,140)]},
  {bg:'garden-rainbow',cam:'in',text:'Mira jumped for joy. "Come on, Mochi! Let\'s go outside!"',dur:5.5,chars:[ch('mira-jumping',600,687,385,{move:'hop'}),ch('mochi-meow',800,693,140)]},
- {bg:'village-park',cam:'out',title:'The End',text:'A rainy day can become a great adventure when you open a book.',dur:7,chars:[ch('mira-wave-smile',506,673,385),ch('mochi-meow',700,673,140)]},
+ {bg:'village-park',cam:'out',text:'A rainy day can become a great adventure when you open a book.',dur:7,chars:[ch('mira-wave-smile',506,673,385),ch('mochi-meow',700,673,140)]},
 ]);}
 function withVo(id,list){list.forEach((s,i)=>{if(!s.vo)s.vo=id+'/s'+(i+1);});return list;}
 function firstChristmas(){return [
@@ -333,7 +333,7 @@ function firstChristmas(){return [
   chars:[ch('shepherd-boy-lamb',330,705,320),ch('shepherd-old-looking',620,705,370),ch('gabriel-floating',1000,540,380)]},
  {bg:'fields-night',cam:'out',text:'Then the sky filled with angels, singing, "Glory to God in the highest, and peace on earth!" The shepherds hurried off to Bethlehem.',dur:9,vo:'first-christmas/s9',
   chars:[ch('angel-choir',640,330,210),ch('shepherd-boy-surprised',330,705,320),ch('shepherd-old-looking',930,705,370,{flip:true})]},
- {bg:'stable-star',cam:'in',text:"They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas. The End.",dur:9,vo:'first-christmas/s10',
+ {bg:'stable-star',cam:'in',text:"They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas.",dur:9,vo:'first-christmas/s10',
   chars:[ch('shepherd-old-kneeling',290,705,290),ch('mary-baby',560,705,300),ch('joseph-standing',760,705,370,{move:'still'}),ch('shepherd-boy-lamb',1010,705,300,{flip:true})]},
 ];}
 function lostSheep(){const N={light:'night'};return withVo('lost-sheep',[
@@ -360,7 +360,7 @@ function christmasGift(){return withVo('christmas-gift',[
  {bg:'gift-kitchen',cam:'in',text:'Lily used her coins to buy flour, sugar and sprinkles. She and Mom baked a big plate of star cookies, and Lily made a card.',dur:9,chars:[ch('mom-rolling',880,760,430),ch('lily-stirring',360,720,280)]},
  {bg:'ben-door',cam:'in',text:'On Christmas Eve, Lily knocked on Mr. Ben\'s door. The card said: "Merry Christmas, Mr. Ben! You are not alone."',dur:8,chars:[ch('lily-cookies',760,715,330)]},
  {bg:'ben-living',cam:'in',text:'Mr. Ben smiled the biggest smile. "This is the best gift I\'ve had in years," he said. Together, they sang Christmas songs.',dur:9,chars:[ch('ben-card',330,715,400),ch('lily-standing',660,715,320),ch('mom-singing',1000,760,470,{flip:true})]},
- {bg:'snowy-street',cam:'out',text:'Lily never bought the snow globe. But that Christmas she learned something better: the best gifts come from the heart. The End.',dur:8,chars:[ch('mom-singing',290,760,460),ch('lily-gift',640,710,330),ch('ben-singing',960,710,400,{flip:true})]},
+ {bg:'snowy-street',cam:'out',text:'Lily never bought the snow globe. But that Christmas she learned something better: the best gifts come from the heart.',dur:8,chars:[ch('mom-singing',290,760,460),ch('lily-gift',640,710,330),ch('ben-singing',960,710,400,{flip:true})]},
 ]);}
 function noahsArk(){return withVo('noah',[
  {bg:'ark-hill',cam:'in',title:"Noah's Ark",text:'A story from the Bible.',dur:5,chars:[ch('noah-standing',300,715,390)]},
@@ -372,7 +372,7 @@ function noahsArk(){return withVo('noah',[
  {bg:'ark-storm',cam:'out',text:'The rain began to fall. It rained for forty days and forty nights, and water covered the whole earth.',dur:7,chars:[]},
  {bg:'ark-inside',cam:'in',text:'But inside the ark, everyone was safe and dry. Noah took care of the animals, and God took care of them all.',dur:7,chars:[ch('noah-sitting',420,712,330),ch('wife-standing',650,712,360),ch('sheep-pair',920,718,140),ch('rabbits',1130,720,110)]},
  {bg:'ark-mountain',cam:'in',text:'At last the rain stopped. Noah sent out a dove, and it came back with an olive leaf. The land was drying!',dur:7,chars:[ch('noah-dove',280,715,360)]},
- {bg:'ark-hill',cam:'out',text:'Everyone came out onto dry land. God put a rainbow in the sky as a promise. "Every time you see a rainbow, remember: God keeps His promises." The End.',dur:11,
+ {bg:'ark-hill',cam:'out',text:'Everyone came out onto dry land. God put a rainbow in the sky as a promise. "Every time you see a rainbow, remember: God keeps His promises."',dur:11,
   chars:[ch('noah-praying',230,715,300),ch('wife-talking',420,715,360),ch('noah-family',760,718,210),ch('lions',1090,720,150),ch('rabbits',1150,720,95)]},
 ]);}
 function friendsWorld(){return withVo('friends',[
@@ -385,7 +385,7 @@ function friendsWorld(){return withVo('friends',[
  {bg:'classroom-map',cam:'in',text:'Lena held up a big pretzel. "Hallo! That\'s hello in German. In Germany, we love soft pretzels for a snack."',dur:8,chars:[ch('lena-pretzel',640,715,340)]},
  {bg:'classroom-map',cam:'in',text:'Then it was Amara\'s turn. Her voice was small. "Bawo ni! That\'s hello in Yoruba, one of the languages of Nigeria. This is jollof rice. My mom makes it for every celebration."',dur:13,chars:[ch('rose-hands',330,715,440),ch('amara-jollof',720,715,340)]},
  {bg:'school-lunch',cam:'in',text:'Everyone wanted to try it! "This is delicious!" said Paolo. At lunch, they shared all the food, and Amara laughed for the first time all week.',dur:10,chars:[ch('kids-lunch',640,720,340,{move:'still'})]},
- {bg:'playground',cam:'out',text:'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world. The End.',dur:9,chars:[ch('kids-hands',640,715,320)]},
+ {bg:'playground',cam:'out',text:'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world.',dur:9,chars:[ch('kids-hands',640,715,320)]},
 ]);}
 const STORIES={mira:{name:'Mira and the Rainy Day',build:sample},xmas:{name:'The First Christmas',build:firstChristmas},sheep:{name:'The Lost Sheep',build:lostSheep},gift:{name:'The Christmas Gift',build:christmasGift},noah:{name:"Noah's Ark",build:noahsArk},friends:{name:'Friends Around the World',build:friendsWorld},
  blank:{name:'a blank story',build:()=>[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}]}};
@@ -624,7 +624,7 @@ async function speak(text){
 }
 // built-in names always get their sound; the box adds the user's own (accepts =, :, → or " - ")
 // Sound-alike spellings, all lowercase: capital letters make the voice spell words out like acronyms.
-const PRON_BUILTIN=[['Mochi','mowchee'],['Kumusta','ku-moosta'],['Cześć','cheshch'],['Assalam-o-alaikum','assalahm oh alaykoom'],['Bawo ni','bah-woh nee'],['Amara','uh-mahra'],['Ayaan','ah-yahn'],['Hallo','hahlo'],['Lena','laynah'],['pancit','pahnsit'],['Ms.','miz']];
+const PRON_BUILTIN=[['Mochi','mowchee'],['lola','law-lah'],['Zofia','zoh-fee-yah'],['Kumusta','ku-moosta'],['Cześć','cheshch'],['Assalam-o-alaikum','ah-sah-lahm mah-lay-kom'],['Bawo ni','bah-woh nee'],['Amara','uh-mahra'],['Ayaan','ah-yah-ahn'],['Hallo','hah-loo'],['Lena','laynah'],['pancit','pahnsit'],['Ms.','miz']];
 function pronUser(){return ($('pron').value||'').split('\n').map(l=>l.split(/\s*(?:=|:|→|->|\s-\s)\s*/)).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function pronMap(){const u=pronUser(),k=new Set(u.map(x=>x[0].toLowerCase()));return [...u,...PRON_BUILTIN.filter(x=>!k.has(x[0].toLowerCase()))];}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');

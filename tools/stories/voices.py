@@ -26,7 +26,7 @@ XMAS = [
  ('', 'That night, baby Jesus was born. Mary wrapped him in soft cloths and laid him in a manger.'),
  ('', 'Out in the fields, shepherds were watching their sheep. Suddenly, an angel appeared! "I bring you good news of great joy. Today a Savior is born!"'),
  ('', 'Then the sky filled with angels, singing, "Glory to God in the highest, and peace on earth!" The shepherds hurried off to Bethlehem.'),
- ('', "They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas. The End."),
+ ('', "They found baby Jesus, just as the angel said. He was God's greatest gift to the world. And that is why we celebrate Christmas."),
 ]
 MIRA = [
  ('Mira and the Rainy Day', ''),
@@ -38,7 +38,7 @@ MIRA = [
  ('', 'The book was full of stories about faraway places, brave animals and wonderful friends.'),
  ('', 'When she looked up, the rain was stopping, and a rainbow filled the sky!'),
  ('', 'Mira jumped for joy. "Come on, Mochi! Let\'s go outside!"'),
- ('The End', 'A rainy day can become a great adventure when you open a book.'),
+ ('', 'A rainy day can become a great adventure when you open a book.'),
 ]
 if __name__ == '__main__':
     make('first-christmas', XMAS); make('mira', MIRA)
