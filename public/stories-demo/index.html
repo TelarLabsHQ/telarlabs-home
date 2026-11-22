@@ -163,8 +163,8 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       </div>
       <p class="muted" id="voiceInfo">No recording yet. Read your line aloud, then press Stop.</p>
       <h3>Pronunciation help (optional)</h3>
-      <p class="muted" style="margin-top:0">If the AI voice says a word wrong, write the word, an equals sign, then how it sounds. One word per line. Captions keep your spelling.</p>
-      <textarea id="pron" style="min-height:70px" placeholder="Example:&#10;Mochi = Mowchee&#10;Lucia = Loo-SEE-ah"></textarea>
+      <p class="muted" style="margin-top:0">If the AI voice says a word wrong, write the word, an equals sign, then how it sounds, in small letters (capital letters get spelled out). One word per line. Captions keep your spelling.</p>
+      <textarea id="pron" style="min-height:70px" placeholder="Example:&#10;Mochi = mowchee&#10;Lucia = loo-see-ah"></textarea>
       <div class="row" style="margin-top:8px">
         <button class="btn primary sm" id="pronApply">💾 Save &amp; update voices</button>
         <button class="btn sm" id="pronTry">▶ Hear the words</button>
@@ -383,7 +383,7 @@ function friendsWorld(){return withVo('friends',[
  {bg:'classroom-map',cam:'in',text:'Zofia waved. "Cześć! That\'s hi in Polish. These are pierogi, little dumplings my grandma fills with potato and cheese."',dur:9,chars:[ch('zofia-pierogi',640,715,340)]},
  {bg:'classroom-map',cam:'in',text:'Ayaan smiled. "Assalam-o-alaikum! That means peace be with you, in Urdu. In Pakistan, we share samosas with friends."',dur:9,chars:[ch('ayaan-samosa',640,715,350)]},
  {bg:'classroom-map',cam:'in',text:'Lena held up a big pretzel. "Hallo! That\'s hello in German. In Germany, we love soft pretzels for a snack."',dur:8,chars:[ch('lena-pretzel',640,715,340)]},
- {bg:'classroom-map',cam:'in',text:'Then it was Amara\'s turn. Her voice was small. "Bawo ni! That\'s hello in Yoruba, one of the languages of Nigeria. This is jollof rice. My mom makes it for every celebration."',dur:12,chars:[ch('rose-hands',330,715,440),ch('amara-jollof',720,715,340)]},
+ {bg:'classroom-map',cam:'in',text:'Then it was Amara\'s turn. Her voice was small. "Bawo ni! That\'s hello in Yoruba, one of the languages of Nigeria. This is jollof rice. My mom makes it for every celebration."',dur:13,chars:[ch('rose-hands',330,715,440),ch('amara-jollof',720,715,340)]},
  {bg:'school-lunch',cam:'in',text:'Everyone wanted to try it! "This is delicious!" said Paolo. At lunch, they shared all the food, and Amara laughed for the first time all week.',dur:10,chars:[ch('kids-lunch',640,720,340,{move:'still'})]},
  {bg:'playground',cam:'out',text:'We come from different places, but a smile means hello everywhere. And that is how Amara found friends from around the world. The End.',dur:9,chars:[ch('kids-hands',640,715,320)]},
 ]);}
@@ -623,11 +623,13 @@ async function speak(text){
  catch(e){if(alive||!/worker/.test(e.message))throw e; console.warn('worker failed, using main thread',e); useMain=true; if(worker){try{worker.terminate()}catch(_){}} worker=null; return speakMain(text);}
 }
 // built-in names always get their sound; the box adds the user's own (accepts =, :, → or " - ")
-const PRON_BUILTIN=[['Mochi','Mowchee'],['Kumusta','koo-MOOS-tah'],['Cześć','cheshch'],['pierogi','pyeh-ROH-ghee'],['Assalam-o-alaikum','ah-sah-LAHM oh ah-LAY-koom'],['Bawo ni','BAH-woh nee'],['jollof','JOL-uf'],['Zofia','ZOH-fyah'],['Ayaan','ah-YAHN'],['Amara','ah-MAH-rah']];
+// Sound-alike spellings, all lowercase: capital letters make the voice spell words out like acronyms.
+const PRON_BUILTIN=[['Mochi','mowchee'],['Kumusta','ku-moosta'],['Cześć','cheshch'],['Assalam-o-alaikum','assalahm oh alaykoom'],['Bawo ni','bah-woh nee'],['Amara','uh-mahra'],['Ayaan','ah-yahn'],['Hallo','hahlo'],['Lena','laynah'],['pancit','pahnsit'],['Ms.','miz']];
 function pronUser(){return ($('pron').value||'').split('\n').map(l=>l.split(/\s*(?:=|:|→|->|\s-\s)\s*/)).filter(p=>p.length===2&&p[0].trim()&&p[1].trim()).map(p=>[p[0].trim(),p[1].trim()]);}
 function pronMap(){const u=pronUser(),k=new Set(u.map(x=>x[0].toLowerCase()));return [...u,...PRON_BUILTIN.filter(x=>!k.has(x[0].toLowerCase()))];}
 function spoken(s){let t=[s.title,s.text].filter(Boolean).join('. ');
- for(const [a,b] of pronMap()) t=t.replace(new RegExp('\\b'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','gi'),b);
+ // whole words only, including words with accents (Cześć) or a final dot (Ms.); respellings are lowercased
+ for(const [a,b] of pronMap()) t=t.replace(new RegExp('(?<![\\p{L}\\p{N}])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','giu'),b.toLowerCase());
  return t.replace(/["“”]/g,'').trim();}
 const aiKey=s=>spoken(s)+'|'+$('aiVoice').value+'|'+$('aiSpeed').value;
 async function aiFor(i){
@@ -666,7 +668,7 @@ $('aiAll').onclick=()=>{
 $('pron').oninput=e=>{try{localStorage.setItem('ts-pron',e.target.value)}catch(_){}; $('pronInfo').textContent='';};
 try{let v=localStorage.getItem('ts-pron')||'';if(v.trim()==='Mochi = Mowchee')v='';$('pron').value=v;}catch(_){}
 $('pronApply').onclick=()=>{
- const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = Mowchee</b>.';return;}
+ const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = mowchee</b>.';return;}
  if(aiBusy){$('pronInfo').textContent='Voices are being made. Wait until they finish, then try again.';return;}
  const words=u.map(x=>x[0].toLowerCase());
  const has=s=>{const t=[s.title,s.text].join(' ').toLowerCase();return words.some(w=>new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(t));};
@@ -676,7 +678,7 @@ try{localStorage.setItem('ts-pron',$('pron').value)}catch(_){}
  if(!list.length){$('pronInfo').innerHTML=missing.length?`I couldn't find <b>${esc(missing.map(m=>m[0]).join(', '))}</b> in your story's words. Check the spelling matches the caption.`:'<span class="pill ok">Done</span> Those scenes already use these sounds.';return;}
  $('pronInfo').innerHTML=`Saved. Remaking the voice for ${list.length} scene${list.length>1?'s':''} (${list.map(i=>i+1).join(', ')})…`;
  pronRun=true; runAI(list).finally(()=>{pronRun=false;if(!list.every(i=>S[i].aiKey===aiKey(S[i])))return;$('pronInfo').innerHTML='<span class="pill ok">Saved and updated</span> Scene'+(list.length>1?'s ':' ')+list.map(i=>i+1).join(', ')+' now use'+(list.length>1?'':'s')+' the new sound. Press ▶ Play this scene to hear it.';});};
-$('pronTry').onclick=async()=>{const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = Mowchee</b>.';return;}
+$('pronTry').onclick=async()=>{const u=pronUser(); if(!u.length){$('pronInfo').innerHTML='Type a word first, like <b>Mochi = mowchee</b>.';return;}
  if(aiBusy){$('pronInfo').textContent='Voices are being made. Try again when they finish.';return;}
  $('pronTry').disabled=true;$('pronInfo').textContent='Making a quick sample…';
  try{const m=await speak(u.map(x=>x[1]).join('. ')+'.');const b=ac().createBuffer(1,m.audio.length,m.sr);b.copyToChannel(m.audio,0);
