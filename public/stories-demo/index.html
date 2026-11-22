@@ -60,6 +60,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .dlg{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:440px;width:100%}
 .dlg h2{margin:0 0 8px;font-size:20px}
 .bar{height:8px;background:var(--bg3);border-radius:99px;overflow:hidden;margin:14px 0}
+.barrow{display:flex;align-items:center;gap:12px;margin:14px 0}.barrow .bar{flex:1;margin:0}#ovPct{min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);font-size:1.05rem}
 .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
 .pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted)}
 .pill.ok{background:#173a2a;color:var(--ok)}
@@ -248,7 +249,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   <div class="dlg">
     <h2 id="ovTitle">Making your video…</h2>
     <p class="muted" id="ovText">Keep this tab open. The video is recorded in real time, so it takes as long as the story.</p>
-    <div class="bar"><i id="ovBar"></i></div>
+    <div class="barrow"><div class="bar"><i id="ovBar"></i></div><b id="ovPct">0%</b></div>
     <div class="row" id="ovBtns"></div>
   </div>
 </div>
@@ -790,6 +791,7 @@ $('playBtn').onclick=async()=>{if(aiBusy)return;if(playing){playing.stop();refre
 $('playScene').onclick=()=>{if(playing){playing.stop();refresh();return;}$('playScene').textContent='■ Stop';$('playBtn').disabled=true;play({only:cur});};
 
 // ---------- export to video
+function ovProg(p){p=Math.max(0,Math.min(1,p));$('ovBar').style.width=(p*100).toFixed(1)+'%';$('ovPct').textContent=Math.floor(p*100)+'%';}
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
  for(const m of c){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;}return '';}
 async function exportRealtime(){
@@ -800,11 +802,11 @@ async function exportRealtime(){
  const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
  const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
  $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML='<b>Keep this screen open</b> until it finishes. The video is recorded in real time, so it takes as long as the story. If you leave the page, recording pauses and continues when you come back.';
- $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
+ ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;playing&&playing.stop();};
  activeRec=mr; drawScene(S[0],0,{fade:true}); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
  mr.start(1000);
- const ok=await play({dest,onProgress:p=>$('ovBar').style.width=(p*100).toFixed(1)+'%'});
+ const ok=await play({dest,onProgress:ovProg});
  await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null;
  if(cancelled||!ok){$('ov').classList.remove('on');refresh();return;}
  const type=mr.mimeType||mime||'video/webm'; const ext=type.includes('mp4')?'mp4':'webm';
@@ -834,7 +836,7 @@ async function exportFast(){
  const durs=S.map(sceneDur), total=durs.reduce((a,b)=>a+b,0), nFrames=Math.ceil(total*FPS);
  $('ovTitle').textContent='Making your video…'; const MSG='<b>Keep this screen open</b> until it finishes. It is usually faster than the story itself. If you switch apps or lock your phone, it pauses and continues when you come back.';
  $('ovText').innerHTML=MSG; keepAwake(true);
- $('ovBar').style.width='0'; $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
+ ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
  const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H,frameRate:FPS},
    audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
@@ -859,7 +861,7 @@ async function exportFast(){
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
   ve.encode(vf,{keyFrame:f%(FPS*2)===0}); vf.close();
   if(ve.encodeQueueSize>8) await new Promise(r=>setTimeout(r,0));
-  const now=performance.now(); if(now-lastUI>120){lastUI=now;$('ovBar').style.width=(f/nFrames*100).toFixed(1)+'%';await new Promise(r=>setTimeout(r,0));}
+  const now=performance.now(); if(now-lastUI>120){lastUI=now;ovProg(f/nFrames);await new Promise(r=>setTimeout(r,0));}
  }
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
  await ve.flush(); await ae.flush(); if(err)throw err;
@@ -875,7 +877,7 @@ function finishVideo(blob,ext,info){
  save();
  $('ovTitle').textContent='✅ Your video is saved';
  $('ovText').innerHTML=`Look for <b>${esc(name)}</b> (${mb} MB) in your <b>Downloads</b>. On a phone, open the Files app or your browser's Downloads. ${esc(info)}<br><span style="font-size:.9em">Nothing downloaded? Tap <b>Save again</b>.</span>`;
- $('ovBar').style.width='100%';
+ ovProg(1);
  const file=new File([blob],name,{type:blob.type}); const canShare=navigator.canShare&&navigator.canShare({files:[file]});
  $('ovBtns').innerHTML=(canShare?'<button class="btn primary" id="ovShare">📤 Share or save to phone</button>':'')+'<button class="btn" id="ovSave">⬇ Save again</button><button class="btn" id="ovClose">Close</button>';
  $('ovSave').onclick=save;
