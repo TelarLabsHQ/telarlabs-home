@@ -303,6 +303,8 @@ const PEND={};
 function need(key){ // load a background ('bg:x') or pose on demand, once at a time
  if(IMG[key]||PEND[key])return PEND[key]; const src=key.startsWith('bg:')?A+'bg/'+key.slice(3)+'.webp':A+'ch/'+key+'.webp';
  return PEND[key]=load(src).then(i=>{if(i)IMG[key]=i;delete PEND[key];return i;});}
+function prune(list){const keep=new Set(list.flatMap(s=>['bg:'+s.bg,...s.chars.map(c=>c.pose)]));
+ for(const k in IMG)if(!keep.has(k))delete IMG[k]; for(const k in TC)if(!keep.has(k.split('|')[0]))delete TC[k];}
 function needStory(list){return Promise.all(list.flatMap(s=>[need('bg:'+s.bg),...s.chars.map(c=>need(c.pose))]));}
 
 const cv=document.getElementById('cv'),cx=cv.getContext('2d');
@@ -540,7 +542,7 @@ $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,c
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
 $('newStory').onclick=()=>{pickId='blank';markPick(null);$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
-async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');const slow=setTimeout(()=>aiMsg('Still loading the story pictures… A stronger internet connection makes this faster.'),8000);await needStory(L);clearTimeout(slow);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
+async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');const slow=setTimeout(()=>aiMsg('Still loading the story pictures… A stronger internet connection makes this faster.'),8000);prune(L);await needStory(L);clearTimeout(slow);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
 // ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
 async function attachVo(){let n=0;
  await Promise.all(S.map(async s=>{if(!s.vo||s.abuf)return;try{const r=await fetch(A+'voice/'+s.vo+'.m4a?'+AV);if(!r.ok)return;
@@ -817,7 +819,7 @@ async function exportRealtime(){
 let AUD={codec:'mp4a.40.2',mux:'aac'};
 async function canFastExport(){
  if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return false;
- try{const v=await VideoEncoder.isConfigSupported({codec:'avc1.42001f',width:W,height:H,bitrate:4_000_000,framerate:FPS});
+ try{const v=await VideoEncoder.isConfigSupported({codec:'avc1.42001f',width:W,height:H,bitrate:2_500_000,framerate:FPS});
   if(!v.supported)return false;
   for(const [codec,mux] of [['mp4a.40.2','aac'],['opus','opus']]){
    const a=await AudioEncoder.isConfigSupported({codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
@@ -838,17 +840,18 @@ async function exportFast(){
  $('ovText').innerHTML=MSG; keepAwake(true);
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
- const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H,frameRate:FPS},
-   audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+ const parts=[]; const target=new Mp4Muxer.StreamTarget({chunked:true,chunkSize:2**21,onData:(d,pos)=>parts.push({s:pos,e:pos+d.byteLength,b:new Blob([d])})});
+ const muxer=new Mp4Muxer.Muxer({target,video:{codec:'avc',width:W,height:H,frameRate:FPS},
+   audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:false});
  let err=null;
  const ve=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>err=e});
- ve.configure({codec:'avc1.42001f',width:W,height:H,bitrate:4_000_000,framerate:FPS});
+ ve.configure({codec:'avc1.42001f',width:W,height:H,bitrate:2_500_000,framerate:FPS});
  const ae=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>err=e});
  ae.configure({codec:AUD.codec,sampleRate:48000,numberOfChannels:2,bitrate:128000});
  // audio first (quick)
- const ab=await renderAudio(total); const L=ab.getChannelData(0),Rr=ab.getChannelData(1),N=Math.min(ab.length,Math.ceil(48000*total)),CH=4800;
+ {const ab=await renderAudio(total); const L=ab.getChannelData(0),Rr=ab.getChannelData(1),N=Math.min(ab.length,Math.ceil(48000*total)),CH=4800;
  for(let o=0;o<N;o+=CH){const n=Math.min(CH,N-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
-  const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();}
+  const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();} await ae.flush();}   // block: the rendered audio can be freed once encoded
  // video frames, drawn one by one (independent of the clock)
  sel=null; let lastUI=0;
  for(let f=0;f<nFrames;f++){
@@ -866,8 +869,14 @@ async function exportFast(){
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
  await ve.flush(); await ae.flush(); if(err)throw err;
  muxer.finalize(); keepAwake(false);
- finishVideo(new Blob([muxer.target.buffer],{type:'video/mp4'}),'mp4',`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`);
+ finishVideo(joinParts(parts,'video/mp4'),'mp4',`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`);
 }
+// put the streamed pieces together; a later write (the header fixed at the end) replaces what was there
+function joinParts(parts,type){let segs=[];
+ for(const p of parts){const out=[];for(const g of segs){if(g.e<=p.s||g.s>=p.e){out.push(g);continue;}
+   if(g.s<p.s)out.push({s:g.s,e:p.s,b:g.b.slice(0,p.s-g.s)}); if(g.e>p.e)out.push({s:p.e,e:g.e,b:g.b.slice(p.e-g.s)});}
+  out.push(p);segs=out;}
+ segs.sort((a,b)=>a.s-b.s); return new Blob(segs.map(g=>g.b),{type});}
 // a unique, readable file name so phones don't ask "download again?" for the same name
 function videoName(ext){const t=(S.find(x=>x.title)||{}).title||'my story';const d=new Date(),z=n=>String(n).padStart(2,'0');
  return (t.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'my-story')+`-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}.${ext}`;}
@@ -904,8 +913,7 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
  restore(); lastSnap=snap(); persist(lastSnap);
  vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
  await needStory(S); refresh(); requestAnimationFrame(loop);
- // the rest in the background, a few at a time
- (async()=>{const keys=[...BGS.map(([k])=>'bg:'+k),...POSES.map(([k])=>k)];for(let i=0;i<keys.length;i+=4)await Promise.all(keys.slice(i,i+4).map(need));})();
+ // other pictures load only when picked (preloading all of them used too much memory on phones)
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
  if(!seen)$('help').classList.add('on');
 })();
