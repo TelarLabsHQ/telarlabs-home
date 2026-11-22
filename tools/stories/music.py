@@ -288,4 +288,4 @@ def garden():
     reverb(tr, 1.8, .22); finish(tr, 'garden')
 
 if __name__ == '__main__':
-    for f in (sys.argv[1:] or ['gentle', 'happy', 'dreamy', 'adventure']): globals()[f]()
+    for f in (sys.argv[1:] or ['gentle', 'picnic', 'sunday', 'playful', 'garden']): globals()[f]()   # the five tracks in the app

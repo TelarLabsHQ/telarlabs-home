@@ -187,8 +187,8 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <div class="row">
         <span class="muted">Background music</span>
         <select id="music" style="flex:1;background:var(--bg3);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
-          <option value="gentle">Gentle (calm)</option><option value="happy">Happy (bouncy)</option><option value="sunny">Sunny (light and happy)</option><option value="picnic">Picnic (warm and happy)</option><option value="playful">Playful (easy and happy)</option><option value="sunday">Sunday (warm and happy)</option><option value="garden">Garden (easy and happy)</option>
-          <option value="dreamy">Dreamy (bedtime)</option><option value="adventure">Adventure</option><option value="custom">My own music file…</option><option value="none">No music</option>
+          <option value="gentle">Gentle: Soft piano</option><option value="picnic">Warm and happy: Picnic</option><option value="sunday">Warm and happy: Sunday</option><option value="playful">Easy and happy: Playful</option><option value="garden">Easy and happy: Garden</option>
+          <option value="custom">My own music file…</option><option value="none">No music</option>
         </select>
         <button class="btn sm" id="musicPrev">▶ Preview</button>
       </div>
@@ -703,7 +703,7 @@ function note(ctx,out,f,t,len,wave,g,att=.02){const o=ctx.createOscillator(),v=c
  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+att);v.gain.exponentialRampToValueAtTime(0.0008,t+len);o.connect(v);v.connect(out);o.start(t);o.stop(t+len+.05);return o;}
 let customBuf=null;
 // Built-in music: original loops made for Telar Stories (assets/music). Loaded when first needed.
-const MUSIC_FILES={gentle:1,happy:1,dreamy:1,adventure:1,sunny:1,picnic:1,playful:1,sunday:1,garden:1}, musicBuf={};
+const MUSIC_FILES={gentle:1,picnic:1,sunday:1,playful:1,garden:1}, musicBuf={};
 async function loadMusic(style){if(!MUSIC_FILES[style])return null; if(musicBuf[style])return musicBuf[style];
  try{const r=await fetch('assets/music/'+style+'.m4a'); musicBuf[style]=await ac().decodeAudioData(await r.arrayBuffer());}catch(e){console.warn('music',e)} return musicBuf[style]||null;}
 function startMusic(ctx,dest,total,style){
@@ -738,7 +738,7 @@ $('musicFile').onchange=async e=>{const f=e.target.files[0]; if(!f){if(!customBu
  try{customBuf=await ac().decodeAudioData(await f.arrayBuffer());$('musicInfo').innerHTML='<span class="pill ok">Using: '+esc(f.name)+'</span> It plays softly under your voice and loops if the story is longer. <a href="#" id="musicChange">Choose another file</a>';
   $('musicChange').onclick=ev=>{ev.preventDefault();$('musicFile').click();};}
  catch(err){customBuf=null;$('music').value='gentle';$('musicInfo').textContent='That file could not be read. Try an MP3 or M4A file.';}};
-try{const m=localStorage.getItem('ts-music');if(m&&(STYLES[m]||MUSIC_FILES[m])||m==='none')$('music').value=m;}catch(_){}
+try{const m=localStorage.getItem('ts-music');if(m&&(MUSIC_FILES[m]||m==='none'))$('music').value=m;}catch(_){}   // tracks that were removed fall back to Gentle
 
 // ---------- playback (preview & export share this)
 // Keep the screen awake while playing/recording (where supported)
