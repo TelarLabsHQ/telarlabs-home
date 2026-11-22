@@ -229,6 +229,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
     <h2>Make a story video in 4 steps</h2>
     <p style="margin:0 0 6px">📖 <b>Like a picture book that talks.</b> No editing skills needed: pictures, gentle movements, captions and a friendly narrator. No complicated effects or big animations.</p>
     <p class="muted">A sample story is already loaded. Use it as it is, or change anything you like. Need more help? <a href="guides/" style="color:#ff8fa3">Read the guides</a>.</p>
+    <p class="muted">📶 <b>Tip:</b> use a strong Wi-Fi or mobile data connection. The pictures, music and AI voice load faster, and the first visit downloads the most. After that, many things load from your device.</p>
     <ol class="steps">
       <li><b>Pick a scene</b> in the strip under the picture. Add more with <b>+ Scene</b>.</li>
       <li><b>Set the scene:</b> open <b>Background</b> to choose a place and <b>Characters</b> to add poses. Drag characters to move them; tap one to <b>flip</b>, resize or remove it.</li>
@@ -537,7 +538,7 @@ $('delScene').onclick=()=>{if(S.length<2)return;S.splice(cur,1);cur=Math.max(0,c
 $('moveL').onclick=()=>{if(cur>0){[S[cur-1],S[cur]]=[S[cur],S[cur-1]];cur--;refresh();save();}};
 $('moveR').onclick=()=>{if(cur<S.length-1){[S[cur+1],S[cur]]=[S[cur],S[cur+1]];cur++;refresh();save();}};
 $('newStory').onclick=()=>{pickId='blank';markPick(null);$('sbName').textContent=STORIES.blank.name;$('sbConfirm').hidden=false;$('storyBar').scrollIntoView({behavior:'smooth',block:'center'});};
-async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');await needStory(L);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
+async function loadStory(id){if(playing)playing.stop();const st=STORIES[id]||STORIES.mira;const L=st.build();aiMsg('Loading the story pictures…');const slow=setTimeout(()=>aiMsg('Still loading the story pictures… A stronger internet connection makes this faster.'),8000);await needStory(L);clearTimeout(slow);aiMsg('');S=L;cur=0;sel=null;refresh();save();await attachVo();}
 // ready-made narration: fetch the pre-made AI voice for scenes that have one and no voice yet
 async function attachVo(){let n=0;
  await Promise.all(S.map(async s=>{if(!s.vo||s.abuf)return;try{const r=await fetch(A+'voice/'+s.vo+'.m4a?'+AV);if(!r.ok)return;
@@ -604,7 +605,7 @@ function getWorker(){
  worker.onmessage=e=>{const m=e.data;
   if(m.type==='alive'){alive=true;aiStage='Loading the AI voice…';tick();return;}
   if(m.type==='ready'){aiStage='Voice loaded. Making the first voice…';tick();return;}
-  if(m.type==='progress'){aiStage=`Downloading the AI voice (one time)… ${m.pct!=null?m.pct+'% · ':''}${m.mb} MB`;if(m.pct!=null)aiPct=m.pct;tick();return;}
+  if(m.type==='progress'){aiStage=`Downloading the AI voice (one time, faster on strong Wi-Fi)… ${m.pct!=null?m.pct+'% · ':''}${m.mb} MB`;if(m.pct!=null)aiPct=m.pct;tick();return;}
   const r=reqs[m.id]; if(!r)return; delete reqs[m.id];
   m.type==='done'?r.ok(m):r.fail(new Error(m.msg));};
  worker.onerror=e=>{const msg='worker: '+(e.message||'could not start');for(const k in reqs){reqs[k].fail(new Error(msg));delete reqs[k];} worker=null;};
@@ -615,7 +616,7 @@ async function speakMain(text){
  if(!mainTTS){aiStage='Loading the AI voice (backup mode)…';tick();
   const mod=await import('./assets/kokoro.web.js'); mod.env.wasmPaths=new URL('./assets/ort-v2/',location.href).href;
   mainTTS=await mod.KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',
-   progress_callback:p=>{if(p.status==='progress'&&p.total){aiStage=`Downloading the AI voice (one time)… ${Math.round(p.loaded/p.total*100)}%`;tick();}}});
+   progress_callback:p=>{if(p.status==='progress'&&p.total){aiStage=`Downloading the AI voice (one time, faster on strong Wi-Fi)… ${Math.round(p.loaded/p.total*100)}%`;tick();}}});
   aiStage='Making the voice…';tick();}
  await new Promise(r=>setTimeout(r,50));
  const out=await mainTTS.generate(text,{voice:$('aiVoice').value,speed:+$('aiSpeed').value});
