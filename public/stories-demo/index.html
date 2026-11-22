@@ -118,7 +118,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <button class="btn sm" id="selBigger">+ Bigger</button>
       <button class="btn sm" id="selFront">Bring to front</button>
       <select id="selMove" title="Movement"><option value="still">Movement: steady (no motion)</option><option value="idle">Movement: gentle breathing</option><option value="walk">Movement: walk across</option><option value="hop">Movement: hop</option></select>
-      <select id="selLight" title="Light"><option value="day">Light: day</option><option value="dusk">Light: sunset</option><option value="night">Light: night</option></select>
+      <select id="selLight" title="Match the character to the light in the background"><option value="day">Light: daytime (normal)</option><option value="dusk">Light: sunset glow</option><option value="night">Light: night (darker)</option></select>
       <button class="btn sm" id="selDel">🗑 Remove</button>
       <button class="btn sm" id="selDone" title="Close this toolbar (deselect the character)">✓ Close</button>
     </div>
@@ -433,7 +433,8 @@ function restore(){try{const j=JSON.parse(localStorage.getItem('ts-proto')||'nul
 function sceneDur(s){return s.abuf? Math.max(3,s.abuf.duration+1.2): s.dur;}
 function wrap(text,maxW){const words=text.split(/\s+/);const lines=[];let l='';
  for(const w of words){const t=l?l+' '+w:w; if(cx.measureText(t).width>maxW&&l){lines.push(l);l=w}else l=t;} if(l)lines.push(l); return lines;}
-const TINTS={dusk:'rgb(250,219,209)',night:'rgb(158,168,184)'}, TC={};
+// Character light: tints a character so it matches a sunset or night background (multiply blend)
+const TINTS={dusk:'rgb(255,196,160)',night:'rgb(120,136,170)'}, TC={};
 function tinted(im,k,light){const key=k+'|'+light; if(TC[key])return TC[key];
  const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');
  g.drawImage(im,0,0);g.globalCompositeOperation='multiply';g.fillStyle=TINTS[light];g.fillRect(0,0,c.width,c.height);
