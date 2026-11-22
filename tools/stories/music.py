@@ -185,5 +185,73 @@ def adventure():
                 t += d
     reverb(tr, 2.2, .25); finish(tr, 'adventure')
 
+def glock(f, vel=1.0):
+    n = int(1.8 * SR); t = np.arange(n) / SR
+    s = np.sin(2 * np.pi * f * t) * np.exp(-t / .7) + .4 * np.sin(2 * np.pi * f * 2.76 * t) * np.exp(-t / .25) + .15 * np.sin(2 * np.pi * f * 5.4 * t) * np.exp(-t / .08)
+    return s * env(n, .001, None, .1) * vel * .28
+
+def clap(vel=1.0):
+    n = int(.2 * SR); t = np.arange(n) / SR; x = rng.uniform(-1, 1, n)
+    x = np.convolve(x, np.ones(4) / 4, 'same') - np.convolve(x, np.ones(30) / 30, 'same')
+    e = sum(np.exp(-np.maximum(0, t - d) / .012) * (t >= d) for d in (0, .008, .016)) / 3
+    return x * e * np.exp(-t / .08) * vel * .25
+
+def play_mel(tr, mel, beat, inst, pan=0, start=0.0, reps=1):
+    t = start
+    for _ in range(reps):
+        for ev in mel:
+            n, d = ev.split(); d = float(d) * beat / 2
+            if n != '-': tr.add(t, inst(mf(m(n)), d), pan)
+            t += d
+
+def sunny():
+    """light and happy: fingerpicked ukulele, glockenspiel tune, soft bass, no drums"""
+    bpm = 92; beat = 60 / bpm; bar = 4 * beat
+    ch = chords_of(['C3 E3 G3', 'G2 B2 D3', 'A2 C3 E3', 'F2 A2 C3'])
+    mel = ['E5 2', 'G5 2', 'C6 3', 'B5 1', 'A5 2', 'G5 2', 'E5 4', 'D5 2', 'E5 2', 'F5 2', 'A5 2', 'G5 6', '- 2',
+           'E5 2', 'G5 2', 'C6 3', 'D6 1', 'E6 2', 'D6 2', 'C6 4', 'A5 2', 'G5 2', 'F5 2', 'D5 2', 'C5 6', '- 2']
+    bars = 16; tr = Track(bars * bar)
+    for k in range(bars):
+        c = ch[k % 4]; t0 = k * bar
+        for i, j in enumerate([0, 2, 1, 2, 0, 2, 1, 2]):
+            tr.add(t0 + i * beat / 2, pluck(mf(c[j] + 12 + (12 if j == 2 and i % 4 == 1 else 0)), beat * .8, .55, .35), .3 - .05 * (i % 3))
+        tr.add(t0, pluck(mf(c[0] - 12), bar * .5, .8, .25), -.15); tr.add(t0 + 2 * beat, pluck(mf(c[0] - 12), bar * .5, .6, .25), -.15)
+    play_mel(tr, mel, beat, lambda f, d: glock(f, .8), -.2, reps=2)
+    reverb(tr, 2.0, .25); finish(tr, 'sunny')
+
+def picnic():
+    """warm and happy: bouncy piano, plucked bass, soft claps on 2 and 4"""
+    bpm = 88; beat = 60 / bpm; bar = 4 * beat
+    ch = chords_of(['F3 A3 C4', 'D3 F3 A3', 'A#2 D3 F3', 'C3 E3 G3'])
+    mel = ['A4 2', 'C5 2', 'F5 2', 'E5 1', 'D5 1', 'C5 4', 'A4 2', 'C5 2', 'D5 2', 'F5 2', 'E5 2', 'D5 2', 'C5 4', '- 4',
+           'A4 2', 'C5 2', 'F5 2', 'G5 1', 'A5 1', 'G5 4', 'F5 2', 'D5 2', 'C5 2', 'E5 2', 'F5 4', '- 8']
+    bars = 16; tr = Track(bars * bar)
+    for k in range(bars):
+        c = ch[k % 4]; t0 = k * bar
+        for i in range(4):
+            tr.add(t0 + i * beat, piano(mf(c[0] - 12 if i % 2 == 0 else c[0] - 5), beat * .9, .55), -.2)
+            if i % 2 == 1:
+                for x in c: tr.add(t0 + i * beat, piano(mf(x), beat * .6, .32), .1)
+                tr.add(t0 + i * beat, clap(.8), .2)
+            tr.add(t0 + i * beat + beat / 2, piano(mf(c[1] + 12), beat * .3, .18), .3)
+    play_mel(tr, mel, beat, lambda f, d: piano(f, d, .7) + 0, .05, reps=2)
+    reverb(tr, 1.8, .22); finish(tr, 'picnic')
+
+def playful():
+    """easy and happy: marimba bounce, pizzicato strings, very soft kick"""
+    bpm = 96; beat = 60 / bpm; bar = 4 * beat
+    ch = chords_of(['D3 F#3 A3', 'B2 D3 F#3', 'G2 B2 D3', 'A2 C#3 E3'])
+    mel = ['F#5 1', 'A5 1', 'B5 2', 'A5 2', 'F#5 2', 'E5 2', 'D5 2', 'E5 4', 'F#5 1', 'G5 1', 'A5 2', 'B5 2', 'A5 2', 'F#5 6', '- 2',
+           'D5 1', 'E5 1', 'F#5 2', 'A5 2', 'D6 2', 'C#6 2', 'B5 2', 'A5 4', 'G5 2', 'F#5 2', 'E5 2', 'C#5 2', 'D5 6', '- 2']
+    bars = 16; tr = Track(bars * bar)
+    for k in range(bars):
+        c = ch[k % 4]; t0 = k * bar
+        for i, j in enumerate([0, 1, 2, 1, 0, 1, 2, 1]):
+            tr.add(t0 + i * beat / 2, pluck(mf(c[j] + 12), beat * .25, .45, .15), .35)   # pizzicato
+        tr.add(t0, marimba(mf(c[0] - 12), .8), -.1); tr.add(t0 + 2.5 * beat, marimba(mf(c[0] - 12), .6), -.1)
+        tr.add(t0, kick(.35), 0); tr.add(t0 + 2 * beat, kick(.25), 0)
+    play_mel(tr, mel, beat, lambda f, d: marimba(f, .85), -.25, reps=2)
+    reverb(tr, 1.8, .22); finish(tr, 'playful')
+
 if __name__ == '__main__':
     for f in (sys.argv[1:] or ['gentle', 'happy', 'dreamy', 'adventure']): globals()[f]()
