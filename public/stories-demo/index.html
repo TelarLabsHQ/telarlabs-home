@@ -797,14 +797,14 @@ $('playScene').onclick=()=>{if(playing){playing.stop();refresh();return;}$('play
 function ovProg(p){p=Math.max(0,Math.min(1,p));$('ovBar').style.width=(p*100).toFixed(1)+'%';$('ovPct').textContent=Math.floor(p*100)+'%';}
 function pickMime(){const c=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
  for(const m of c){if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;}return '';}
-async function exportRealtime(){
+async function exportRealtime(why=''){
  if(!cv.captureStream||!window.MediaRecorder){showDone('Not supported here','This browser cannot record video. Please try Chrome on Android or a computer.');return;}
  const ctx=ac(); if(ctx.state==='suspended')await ctx.resume();
  const dest=ctx.createMediaStreamDestination();
  const stream=new MediaStream([...cv.captureStream(FPS).getVideoTracks(),...dest.stream.getAudioTracks()]);
  const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
  const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
- $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML='<b>Keep this screen open</b> until it finishes. The video is recorded in real time, so it takes as long as the story. If you leave the page, recording pauses and continues when you come back.';
+ $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML=(why?'<b>Switching to the steady way.</b> The quick way stopped on this phone, so the video is now recorded while the story plays. ':'')+'<b>Keep this screen open</b> until it finishes. It takes as long as the story. If you leave the page, recording pauses and continues when you come back.'+(why?`<br><span style="font-size:.8em;opacity:.7">Reason: ${esc(why).slice(0,160)}</span>`:'');
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;playing&&playing.stop();};
  activeRec=mr; drawScene(S[0],0,{fade:true}); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
@@ -901,8 +901,9 @@ function finishVideo(blob,ext,info){
 }
 $('exportBtn').onclick=async()=>{if(aiBusy)return;await needStory(S);
  if(playing)return;
- if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);}}
- await exportRealtime();
+ let why='';
+ if(await canFastExport()){try{await exportFast();return;}catch(e){console.warn('fast export failed',e);why=((e&&e.name)||'Error')+': '+((e&&e.message)||e);}}
+ await exportRealtime(why);
 };
 function showDone(t,x){$('ovTitle').textContent=t;$('ovText').textContent=x;$('ovBtns').innerHTML='<button class="btn" id="ovClose">Close</button>';$('ov').classList.add('on');$('ovClose').onclick=()=>$('ov').classList.remove('on');}
 
