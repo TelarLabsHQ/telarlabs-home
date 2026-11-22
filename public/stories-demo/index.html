@@ -485,7 +485,8 @@ function roundRect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w
 // ---------- editor rendering loop (gentle live motion)
 let playing=null; const t0=performance.now();
 let lastDraw=0;
-function loop(now){ requestAnimationFrame(loop); if(playing||document.hidden||now-lastDraw<33)return; lastDraw=now; drawScene(S[cur],((now-t0)/1000)%6,{editing:true}); }
+let exporting=false;
+function loop(now){ requestAnimationFrame(loop); if(playing||exporting||document.hidden||now-lastDraw<33)return; lastDraw=now; drawScene(S[cur],((now-t0)/1000)%6,{editing:true}); }
 
 // ---------- UI
 function strip(){
@@ -840,6 +841,8 @@ async function exportFast(){
  $('ovText').innerHTML=MSG; keepAwake(true);
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;};
+ exporting=true; try{ return await exportFastRun(); } finally{ exporting=false; }
+ async function exportFastRun(){
  const parts=[]; const target=new Mp4Muxer.StreamTarget({chunked:true,chunkSize:2**21,onData:(d,pos)=>parts.push({s:pos,e:pos+d.byteLength,b:new Blob([d])})});
  const muxer=new Mp4Muxer.Muxer({target,video:{codec:'avc',width:W,height:H,frameRate:FPS},
    audio:{codec:AUD.mux,numberOfChannels:2,sampleRate:48000},fastStart:false});
@@ -863,13 +866,16 @@ async function exportFast(){
   drawScene(S[i],t-a,{fade:true});
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
   ve.encode(vf,{keyFrame:f%(FPS*2)===0}); vf.close();
-  if(ve.encodeQueueSize>8) await new Promise(r=>setTimeout(r,0));
+  // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
+  // let the queue grow until the page runs out of memory
+  while(ve.encodeQueueSize>3&&!err) await new Promise(r=>{const t=setTimeout(r,15);ve.addEventListener('dequeue',()=>{clearTimeout(t);r();},{once:true});});
   const now=performance.now(); if(now-lastUI>120){lastUI=now;ovProg(f/nFrames);await new Promise(r=>setTimeout(r,0));}
  }
  if(cancelled){try{ve.close();ae.close();}catch(e){} $('ov').classList.remove('on');refresh();return;}
  await ve.flush(); await ae.flush(); if(err)throw err;
  muxer.finalize(); keepAwake(false);
  finishVideo(joinParts(parts,'video/mp4'),'mp4',`MP4, ${Math.round(total)} seconds. It plays on phones, TVs and in CapCut.`);
+}
 }
 // put the streamed pieces together; a later write (the header fixed at the end) replaces what was there
 function joinParts(parts,type){let segs=[];
