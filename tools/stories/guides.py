@@ -64,7 +64,7 @@ G = [
 <li>Read a little slower than you normally speak, and smile; listeners can hear it.</li>
 <li>Children, parents and grandparents can record their own lines for a family story.</li></ul>
 <h2>When the AI says a word wrong</h2>
-<p>Names and words from other languages are often hard for AI voices. Take Mochi, the puppy in our stories: the AI voice may say "MOH-chee" or "MOH-kee", but we want "mow-chee". Open <b>Pronunciation help</b>, then write the word, an equals sign, and how it sounds:</p>
+<p>Names and words from other languages are often hard for AI voices. Take Mochi, the cat in our stories: the AI voice may say "MOH-chee" or "MOH-kee", but we want "mow-chee". Open <b>Pronunciation help</b>, then write the word, an equals sign, and how it sounds:</p>
 <pre>Mochi = mowchee</pre>
 <p>Add more words the same way, one per line:</p>
 <pre>Mochi = mowchee
