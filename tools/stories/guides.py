@@ -64,11 +64,13 @@ G = [
 <li>Read a little slower than you normally speak, and smile; listeners can hear it.</li>
 <li>Children, parents and grandparents can record their own lines for a family story.</li></ul>
 <h2>When the AI says a word wrong</h2>
-<p>Names and words from other languages are often hard for AI voices. Open <b>Pronunciation help</b>, then write the word, an equals sign, and how it sounds, one word per line:</p>
-<pre>lola = law-lah
-Lucia = loo-see-ah
-Mochi = mowchee</pre>
-<ul><li><b>Use small letters only.</b> Capital letters make the voice spell the word out, like an acronym.</li>
+<p>Names and words from other languages are often hard for AI voices. Take Mochi, the puppy in our stories: the AI voice may say "MOH-chee" or "MOH-kee", but we want "mow-chee". Open <b>Pronunciation help</b>, then write the word, an equals sign, and how it sounds:</p>
+<pre>Mochi = mowchee</pre>
+<p>Add more words the same way, one per line:</p>
+<pre>Mochi = mowchee
+lola = law-lah
+Lucia = loo-see-ah</pre>
+<ul><li><b>Use small letters only.</b> Capital letters make the voice spell the word out, like an acronym: "MOW-chee" would come out as "M-O-W chee".</li>
 <li>Use hyphens to split syllables if it helps.</li>
 <li>Tap <b>▶ Hear the words</b> to test, then <b>Save & update voices</b>.</li>
 <li>Captions on the video keep your original spelling.</li></ul>'''),
