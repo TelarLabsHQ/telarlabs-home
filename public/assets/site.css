@@ -57,3 +57,6 @@ a.gcard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .appbox{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--radius);padding:16px 18px;margin:30px 0 0}
 .appbox b{color:var(--c)}.appbox p{margin:4px 0 0;font-size:15px;color:#d9d3e2}.appbox div{flex:1 1 260px}
 @media(max-width:430px){.logo span{white-space:nowrap}.logo{font-size:16px}.logo-mark{width:26px;height:26px}.nav{gap:10px;font-size:14px}}
+.gfig{margin:26px 0 30px}.gfig img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--bg2)}
+.gfig figcaption{color:var(--muted);font-size:14px;margin-top:9px;line-height:1.5}
+.gfig.phone{max-width:360px;margin-left:auto;margin-right:auto}.gfig.phone img{border-radius:20px}

@@ -182,7 +182,7 @@ def guides():
             {'@type': 'Article', 'headline': g['title'], 'description': g['desc'], 'datePublished': g['date'], 'dateModified': g['updated'],
              'author': {'@type': 'Organization', 'name': ST, 'url': URL + '/'},
              'publisher': {'@type': 'Organization', 'name': ST, 'url': URL + '/', 'logo': {'@type': 'ImageObject', 'url': URL + '/favicon.svg'}},
-             'mainEntityOfPage': url, 'wordCount': g['words']},
+             'mainEntityOfPage': url, 'wordCount': g['words'], **({'image': [URL + m.group(1)]} if (m := re.search(r'src="(/guides/img/[^"]+)"', g['body'])) else {})},
             {'@type': 'BreadcrumbList', 'itemListElement': [
                 {'@type': 'ListItem', 'position': 1, 'name': 'Guides', 'item': URL + '/guides/'},
                 {'@type': 'ListItem', 'position': 2, 'name': g['short'], 'item': url}]}]}
