@@ -584,7 +584,7 @@ $('bkSave').onclick=()=>{try{
   settings:{music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}})],{type:'application/json'});
  const name=videoName('json').replace(/\.json$/,'-telar-story-backup.json'), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
- bkMsg(`<span class="pill ok">Saved</span> <b>${esc(name)}</b> (${(blob.size/1048576).toFixed(1)} MB) is in your Downloads. Keep it somewhere safe, like Google Drive or email it to yourself. Open it later with <b>Open a backup</b>.`+(voices.length<S.length?' Scenes without a voice are saved without one.':'')+($('music').value==='custom'?' Your own music file isn’t included; choose it again after opening.':''));
+ bkMsg(`<span class="pill ok">Saved</span> <b>${esc(name)}</b> (${(blob.size/1048576).toFixed(1)} MB) is in your Downloads. Keep it somewhere safe, like Google Drive or email it to yourself. To bring the story back, use <b>Open a backup</b> here. (Opening the file by itself only shows computer code.)`+(voices.length<S.length?' Scenes without a voice are saved without one.':'')+($('music').value==='custom'?' Your own music file isn’t included; choose it again after opening.':''));
 }catch(e){bkMsg('The backup could not be saved. Try again, or free some space on your device.');}};
 let bkPending=null;
 $('bkOpen').onclick=()=>{if(playing||aiBusy){bkMsg('Wait until the story or voice finishes, then open the backup.');return;}$('bkFile').value='';$('bkFile').click();};
