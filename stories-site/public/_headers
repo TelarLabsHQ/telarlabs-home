@@ -1,0 +1,9 @@
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+/assets/ort-v2/*
+  Cache-Control: public, max-age=604800
+/assets/bg/*
+  Cache-Control: public, max-age=86400
+/assets/ch/*
+  Cache-Control: public, max-age=86400

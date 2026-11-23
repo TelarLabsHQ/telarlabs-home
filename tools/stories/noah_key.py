@@ -4,7 +4,7 @@ from PIL import Image, ImageFilter
 import numpy as np
 from scipy import ndimage
 SRC='/mnt/user-data/attachments/c4c42cf4-7f0e-5510-8275-f3b972cef798/0fc5a2ad-image.jpg'
-OUT='/home/claude/telarlabs-home/public/stories-demo/assets/ch/noah-dove.webp'
+OUT='/home/claude/telarlabs-home/stories-site/public/assets/ch/noah-dove.webp'
 a=np.asarray(Image.open(SRC).convert('RGB')).astype(float); r,g,b=a[...,0],a[...,1],a[...,2]
 d=g-np.maximum(r,b)
 lab,_=ndimage.label(d>25)

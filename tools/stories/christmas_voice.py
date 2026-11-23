@@ -2,7 +2,7 @@
 import re, subprocess, soundfile as sf
 from kokoro_onnx import Kokoro
 K = Kokoro('/tmp/kok/kokoro-v1.0.onnx', '/tmp/kok/voices-v1.0.bin')
-OUT = '/home/claude/telarlabs-home/public/stories-demo/assets/voice/christmas-gift/'
+OUT = '/home/claude/telarlabs-home/stories-site/public/assets/voice/christmas-gift/'
 SCENES = {
  4: 'On the way home, Lily saw Mr. Ben, her old neighbor. He was sitting by his window, all alone, just like every night.',
  5: '"Mom, why is Mr. Ben always alone?" Lily asked. "His family lives far away," said Mom. "Christmas can feel lonely for him."',

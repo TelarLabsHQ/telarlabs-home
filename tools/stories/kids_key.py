@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 from scipy import ndimage
 SRC='/mnt/user-data/attachments/c4c42cf4-7f0e-5510-8275-f3b972cef798/a111f586-image.png'
-OUT='/home/claude/telarlabs-home/public/stories-demo/assets/ch/kids-lunch.webp'
+OUT='/home/claude/telarlabs-home/stories-site/public/assets/ch/kids-lunch.webp'
 a=np.asarray(Image.open(SRC).convert('RGB')).astype(float); r,g,b=a[...,0],a[...,1],a[...,2]
 d=g-np.maximum(r,b)
 key=(g>160)&(d>85)                                   # the neon key colour

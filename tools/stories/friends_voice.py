@@ -3,7 +3,7 @@ Words in IPA are spliced into the phonemes, so the voice never spells them out l
 import re, subprocess, soundfile as sf
 from kokoro_onnx import Kokoro
 K = Kokoro('/tmp/kok/kokoro-v1.0.onnx', '/tmp/kok/voices-v1.0.bin')
-OUT = '/home/claude/telarlabs-home/public/stories-demo/assets/voice/friends/'
+OUT = '/home/claude/telarlabs-home/stories-site/public/assets/voice/friends/'
 IPA = {   # word as written -> how it should sound
  'Amara': 'ɐmˈɑːɹə', 'Paolo': 'pˈaʊloʊ', 'Zofia': 'zˈoʊfiːjɑː', 'Ayaan': 'ɑːjˈɑːɑːn', 'Lena': 'lˈeɪnə',
  'Kumusta': 'kuːmˈuːstɑː', 'lola': 'lˈɔːlɑː', 'pancit': 'pɑːnsˈɪt', 'Cześć': 'tʃˈɛʃtʃ', 'pierogi': 'pɪɹˈoʊɡi',

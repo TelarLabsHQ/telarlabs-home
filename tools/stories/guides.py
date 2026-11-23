@@ -1,6 +1,6 @@
-"""Short how-to guides inside the Telar Stories prototype (/stories-demo/guides/). Hidden from search until launch."""
+"""Short how-to guides inside the Telar Stories prototype (stories.telarlabs.net/guides/). Hidden from search until launch."""
 import os, html
-OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'public', 'stories-demo', 'guides')
+OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'stories-site', 'public', 'guides')
 E = html.escape
 G = [
  ('first-story-video', 'Make your first story video in five minutes', 'Use a ready-made story as it is, play it, and save the video.', '''

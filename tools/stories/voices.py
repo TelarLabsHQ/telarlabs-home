@@ -2,7 +2,7 @@
 import json, re, subprocess, sys, soundfile as sf
 from kokoro_onnx import Kokoro
 K = Kokoro('/tmp/kok/kokoro-v1.0.onnx', '/tmp/kok/voices-v1.0.bin')
-OUT = '/home/claude/telarlabs-home/public/stories-demo/assets/voice/'
+OUT = '/home/claude/telarlabs-home/stories-site/public/assets/voice/'
 PRON = {'Mochi': 'Mowchee'}
 def spoken(title, text):
     t = '. '.join(x for x in [title, text] if x)

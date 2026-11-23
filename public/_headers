@@ -5,3 +5,5 @@
   Cross-Origin-Embedder-Policy: require-corp
 /stories-demo/assets/ort-v2/*
   Cache-Control: public, max-age=604800
+/stories-demo/migrate.html
+  Cross-Origin-Resource-Policy: same-site

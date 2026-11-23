@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Telar Stories</title>
+<script>
+// Hands the story saved at telarlabs.net/stories-demo to the new home, stories.telarlabs.net (only to that page).
+(async()=>{const NEW='https://stories.telarlabs.net'; if(parent===window)return;
+ const ls={}; try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(k&&k.startsWith('ts-'))ls[k]=localStorage.getItem(k);}}catch(e){}
+ let voices=[]; try{voices=await new Promise(ok=>{const r=indexedDB.open('telar-stories',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('voices');
+  r.onerror=()=>ok([]); r.onsuccess=()=>{try{const db=r.result,st=db.transaction('voices').objectStore('voices'),ks=st.getAllKeys(),vs=st.getAll();
+   vs.onsuccess=()=>ok((ks.result||[]).map((k,i)=>({key:k,val:vs.result[i]})));vs.onerror=()=>ok([]);}catch(e){ok([]);}};});}catch(e){}
+ parent.postMessage({type:'ts-migrate',ls,voices},NEW);})();
+</script>

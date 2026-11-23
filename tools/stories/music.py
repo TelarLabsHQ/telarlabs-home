@@ -3,7 +3,7 @@ Everything is synthesized here (no samples), so the music is original and free t
 Notes that run past the end wrap round to the start, and the reverb is circular, so each file loops without a seam."""
 import numpy as np, subprocess, os, sys
 SR = 44100
-OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'public', 'stories-demo', 'assets', 'music')
+OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'stories-site', 'public', 'assets', 'music')
 rng = np.random.default_rng(7)
 mf = lambda m: 440 * 2 ** ((m - 69) / 12)
 NOTE = {n: i for i, n in enumerate(['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'])}
