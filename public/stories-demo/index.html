@@ -90,6 +90,8 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .sb-chips button.pick{border-color:#7cc0ff;background:#1d4f8c;color:#fff;box-shadow:0 0 0 3px rgba(90,169,255,.3)}
 .sb-chips button:active{transform:scale(.97)}
 [hidden]{display:none!important}
+.sb-backup{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.sb-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
 </style>
@@ -111,6 +113,14 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
       <span class="sb-l">📚 Ready-made stories</span>
       <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="noah">Noah's Ark</button><button data-s="friends">Friends Around the World</button><button data-s="blank">＋ Blank story</button></div>
       <div class="sb-confirm" id="sbConfirm" hidden><span>Replace your current story with <b id="sbName"></b>?</span><button class="btn primary sm" id="sbYes">Load it</button><button class="btn sm" id="sbNo">Cancel</button></div>
+      <div class="sb-backup">
+        <span class="sb-l" style="margin:0">💾 Keep your story safe</span>
+        <button class="btn sm" id="bkSave">Save a backup</button>
+        <button class="btn sm" id="bkOpen">Open a backup</button>
+        <input type="file" id="bkFile" accept=".telarstory,application/octet-stream" hidden>
+      </div>
+      <p class="sb-note" id="bkInfo">Your story is saved in this browser only. Save a backup file to keep it, or to continue on another phone or computer.</p>
+      <div class="sb-confirm" id="bkConfirm" hidden><span>Replace your current story with the backup <b id="bkName"></b>?</span><button class="btn primary sm" id="bkYes">Open it</button><button class="btn sm" id="bkNo">Cancel</button></div>
     </div>
     <div class="stage-box"><canvas id="cv" width="1280" height="720"></canvas></div>
     <div class="selbar" id="selBar" hidden>
@@ -556,6 +566,54 @@ document.querySelectorAll('.sb-chips button').forEach(b=>b.onclick=()=>{pickId=b
 $('sbNo').onclick=()=>{$('sbConfirm').hidden=true;pickId=null;markPick(null);};
 $('sbYes').onclick=async()=>{$('sbConfirm').hidden=true;if(!pickId)return;const id=pickId;pickId=null;markPick(null);try{localStorage.setItem('ts-story',id)}catch(e){}markStory();await loadStory(id);};
 markStory();
+
+// ---------- backup file (.telarstory): the story, its settings and its voices in one file
+// Layout: "TELARSTORY1\n", 4-byte header length, JSON header, then each voice as 16-bit audio.
+const BK_MAGIC='TELARSTORY1\n';
+function bkMsg(h){$('bkInfo').innerHTML=h;}
+$('bkSave').onclick=()=>{try{
+ snap(); const voices=[], parts=[];
+ S.forEach(sc=>{if(!sc.abuf)return; const d=sc.abuf.getChannelData(0), pcm=new Int16Array(d.length);
+  for(let i=0;i<d.length;i++){const v=Math.max(-1,Math.min(1,d[i]));pcm[i]=v<0?v*32768:v*32767;}
+  voices.push({sid:sc.sid,sr:sc.abuf.sampleRate,n:pcm.length,ai:!!sc.ai,aiKey:sc.aiKey||null}); parts.push(pcm);});
+ const head=new TextEncoder().encode(JSON.stringify({app:'telar-stories',v:1,saved:new Date().toISOString(),
+  title:(S.find(x=>x.title)||{}).title||'My Story', scenes:S.map(strip_), voices,
+  settings:{music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}}));
+ const len=new Uint8Array(4); new DataView(len.buffer).setUint32(0,head.length,true);
+ const blob=new Blob([BK_MAGIC,len,head,...parts],{type:'application/octet-stream'});
+ const name=videoName('telarstory'), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+ document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+ bkMsg(`<span class="pill ok">Saved</span> <b>${esc(name)}</b> (${(blob.size/1048576).toFixed(1)} MB) is in your Downloads. Keep it somewhere safe, like Google Drive or email it to yourself. Open it later with <b>Open a backup</b>.`+(voices.length<S.length?' Scenes without a voice are saved without one.':'')+($('music').value==='custom'?' Your own music file isn’t included; choose it again after opening.':''));
+}catch(e){bkMsg('The backup could not be saved. Try again, or free some space on your device.');}};
+let bkPending=null;
+$('bkOpen').onclick=()=>{if(playing||aiBusy){bkMsg('Wait until the story or voice finishes, then open the backup.');return;}$('bkFile').value='';$('bkFile').click();};
+$('bkFile').onchange=async e=>{const f=e.target.files[0]; if(!f)return;
+ try{const buf=await f.arrayBuffer(), u8=new Uint8Array(buf), m=new TextEncoder().encode(BK_MAGIC);
+  if(u8.length<m.length+4||!m.every((b,i)=>u8[i]===b))throw new Error('not a backup');
+  const hl=new DataView(buf,m.length,4).getUint32(0,true), head=JSON.parse(new TextDecoder().decode(u8.subarray(m.length+4,m.length+4+hl)));
+  if(head.app!=='telar-stories'||!Array.isArray(head.scenes)||!head.scenes.length)throw new Error('not a backup');
+  bkPending={head,buf,off:m.length+4+hl}; $('bkName').textContent='“'+(head.title||'My Story')+'”'; $('bkConfirm').hidden=false;
+ }catch(err){bkPending=null;bkMsg('That file isn’t a Telar Stories backup. Choose a file that ends in <b>.telarstory</b>.');}};
+$('bkNo').onclick=()=>{$('bkConfirm').hidden=true;bkPending=null;};
+$('bkYes').onclick=async()=>{$('bkConfirm').hidden=true; const P=bkPending; bkPending=null; if(!P)return;
+ try{if(playing)playing.stop(); const {head,buf}=P; let off=P.off;
+  const L=head.scenes.map(sc=>({...sc,chars:(sc.chars||[]).map(c=>({...c,id:uid++}))}));
+  const mx=Math.max(0,...L.map(x=>+x.sid||0)); uid=Math.max(uid,mx+1);
+  aiMsg('Opening your backup…'); prune(L); await needStory(L);
+  const bySid={}; L.forEach(x=>bySid[x.sid]=x);
+  for(const v of head.voices||[]){const bytes=v.n*2; const pcm=new Int16Array(buf.slice(off,off+bytes)); off+=bytes;
+   const sc=bySid[v.sid]; if(!sc)continue; const f32=new Float32Array(pcm.length); for(let i=0;i<pcm.length;i++)f32[i]=pcm[i]/32768;
+   const b=ac().createBuffer(1,f32.length,v.sr); b.copyToChannel(f32,0); sc.abuf=b; sc.ai=v.ai; sc.aiKey=v.aiKey;}
+  await vTx('readwrite',st=>st.clear()).catch(()=>{});
+  S=L; cur=0; sel=null; hist=[]; lastSnap=null; save(); S.forEach(vPut);
+  const st=head.settings||{};
+  if(st.music&&(MUSIC_FILES[st.music]||st.music==='none')){$('music').value=st.music;try{localStorage.setItem('ts-music',st.music)}catch(_){}}
+  if(st.voice){$('aiVoice').value=st.voice;try{localStorage.setItem('ts-voice',st.voice)}catch(_){}}
+  if(st.speed)$('aiSpeed').value=st.speed;
+  if(typeof st.pron==='string'){$('pron').value=st.pron;try{localStorage.setItem('ts-pron',st.pron)}catch(_){}}
+  try{localStorage.removeItem('ts-story')}catch(_){} markStory();
+  refresh(); aiMsg(''); bkMsg(`<span class="pill ok">Opened</span> “${esc(head.title||'My Story')}”, ${L.length} scene${L.length>1?'s':''}${(head.voices||[]).length?', with voices':''}. You can keep editing, play it or make the video.`);
+ }catch(err){console.warn(err);aiMsg('');bkMsg('That backup could not be opened. The file may be incomplete; try saving it again on the first device.');}};
 let confirmArmed=0;
 function confirmIn(msg){ // simple two-tap confirm without browser dialogs
  const now=Date.now(); if(now-confirmArmed<4000){confirmArmed=0;return true;}
