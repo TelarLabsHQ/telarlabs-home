@@ -280,6 +280,9 @@ const BGS=[['reading-nook','Reading nook'],['library','Library corner'],['kitche
 const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
  ['mochi-sitting','Mochi · sit'],['mochi-sleeping','Mochi · sleep'],['mochi-walking','Mochi · walk'],['mochi-book','Mochi · book'],['mochi-meow','Mochi · meow'],
+ ['#','Mei & her mom'],['mei-standing','Mei · stand',330],['mei-wave','Mei · wave',330],['mei-walking','Mei · walk',320],['mei-teddy','Mei · teddy (sit)',250],
+ ['mei-surprised','Mei · surprised',330],['mei-gift','Mei · gift',330],
+ ['mother-standing','Mei’s mom · stand',480],['mother-hug','Mei’s mom · hug',480],['mother-reading','Mei’s mom · read (sit)',380],['mother-walking','Mei’s mom · walk',470],
  ['#','The First Christmas'],
  ['mary-surprised','Mary · surprised',400],['mary-sweeping','Mary · sweep',400],['mary-praying','Mary · pray',330],['mary-kneeling','Mary · kneel',330],
  ['mary-tired','Mary · rest',310],['mary-baby','Mary · baby Jesus',330],['mary-donkey','Mary · on donkey',380,1],
@@ -308,7 +311,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261123a';
+const AV='v=20261123b';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
