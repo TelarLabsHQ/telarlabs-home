@@ -16,7 +16,22 @@ G = [
 <li>On a few phones the app uses a slower, steadier way to make the video. It tells you when it does; just keep the screen open a little longer.</li></ul>
 <h2>4. Share it</h2>
 <p>Send the video in your class or family group chat, show it on the classroom TV, or upload it to YouTube or Facebook. See <a href="../share-and-keep/">Sharing your video and keeping your work</a>.</p>
-<p class="tip"><b>Tip:</b> Using a sample exactly as it is is perfectly fine. Change only what you want, like a child's name, and leave the rest.</p>'''),
+<p class="tip"><b>Tip:</b> Using a sample exactly as it is is perfectly fine. Change only what you want, like a child's name, and leave the rest.</p>
+<h2>Which ready-made story to start with</h2>
+<table><tr><th>Story</th><th>Good for</th></tr>
+<tr><td><i>Mira and the Rainy Day</i></td><td>Young children, bedtime, and a gentle lesson about finding joy on a boring day.</td></tr>
+<tr><td><i>The First Christmas</i></td><td>Sunday school, Christmas programs and family devotions.</td></tr>
+<tr><td><i>The Lost Sheep</i></td><td>A short Bible parable about how much each person matters.</td></tr>
+<tr><td><i>The Christmas Gift</i></td><td>Kindness and giving, for classrooms and families in December.</td></tr>
+<tr><td><i>Noah's Ark</i></td><td>A favorite Bible story with animals, rain and a rainbow.</td></tr>
+<tr><td><i>Friends Around the World</i></td><td>Welcoming new classmates and learning hello in other languages.</td></tr></table>
+<h2>Small changes that make it yours</h2>
+<ul><li><b>Change a name.</b> Swap the main character's name for your child's or your class's name. The AI voice will read it the new way.</li>
+<li><b>Change the last scene.</b> Add a line for your class, like "Thank you, Grade 2, for listening!"</li>
+<li><b>Record the first line yourself.</b> A parent's or teacher's real voice at the start makes children pay attention.</li>
+<li><b>Pick different music.</b> Under <b>Whole story</b>, try another track; it changes the mood a lot.</li></ul>
+<h2>How long does it take?</h2>
+<p>Playing a ready-made story takes a minute or two. Making the video usually takes less time than the story itself on a computer, and a bit longer on an older phone. If you made changes to the words, making new AI voices takes up to a minute per scene the first time.</p>'''),
  ('write-a-story', 'Write a short story in ten scenes', 'A simple plan for a story children can follow, with tips for words that sound good read aloud.', '''
 <p class="lead">Most good picture-book stories follow the same shape: someone wants something, something gets in the way, and it works out in the end. Ten scenes of one to three sentences each make a story of about one and a half minutes.</p>
 <h2>A ten-scene plan</h2>
@@ -37,7 +52,25 @@ G = [
 <li><b>Repeat a line.</b> A phrase that comes back, like "But the rain would not stop," helps children follow along.</li>
 <li><b>End with something to remember.</b> A kind lesson, a Bible verse or a simple "Good night".</li></ul>
 <h2>Putting it in the app</h2>
-<p>Tap a scene in the strip, then type in <b>Words & voice</b>. Use <b>+ Scene</b> to add a scene, or <b>Duplicate</b> to copy the current one with its picture and characters. You can end the story however you like; nothing is added automatically.</p>'''),
+<p>Tap a scene in the strip, then type in <b>Words & voice</b>. Use <b>+ Scene</b> to add a scene, or <b>Duplicate</b> to copy the current one with its picture and characters. You can end the story however you like; nothing is added automatically.</p>
+<h2>An example: "Leo and the Big Puddle"</h2>
+<ol><li><b>Title:</b> Leo and the Big Puddle.</li>
+<li>Leo loved his new red boots. He wore them every day, even when the sun was shining.</li>
+<li>"I want to jump in a puddle," said Leo. But it had not rained for weeks.</li>
+<li>Leo looked in the garden. No puddles. He looked by the gate. No puddles.</li>
+<li>He tried to make a puddle with a cup of water. It was much too small.</li>
+<li>"Be patient," said Dad. "The rain will come."</li>
+<li>That night, Leo heard a sound on the window. Tap, tap, tap!</li>
+<li>In the morning, the biggest puddle he had ever seen was waiting by the door.</li>
+<li>SPLASH! Leo laughed and laughed.</li>
+<li>Some good things are worth waiting for.</li></ol>
+<p>Notice the repeated line ("No puddles"), the sound words ("Tap, tap, tap", "SPLASH!"), and the short lesson at the end.</p>
+<h2>Common mistakes</h2>
+<ul><li><b>Too many words in one scene.</b> If a caption fills more than three lines, split it into two scenes.</li>
+<li><b>Too many characters.</b> One hero and one or two helpers are enough for a short story.</li>
+<li><b>No problem to solve.</b> A story where nothing goes wrong is hard to remember. Even a small problem, like a missing toy, gives the story a shape.</li>
+<li><b>A rushed ending.</b> Give the happy moment its own scene, then add one calm scene to finish.</li></ul>
+<p>Next, choose pictures for each scene: <a href="../pictures-and-movement/">Choosing pictures, characters and gentle movement</a>.</p>'''),
  ('pictures-and-movement', 'Choosing pictures, characters and gentle movement', 'Set each scene with a background, characters, poses, light and a slow camera.', '''
 <p class="lead">Telar Stories is designed to look like a picture book that talks: calm pictures, small movements and nothing flashy. A few simple choices make each scene clear and easy to watch.</p>
 <h2>Backgrounds</h2>
@@ -51,7 +84,21 @@ G = [
 <ul><li><b>Movement:</b> <i>gentle breathing</i> for calm scenes, <i>hop</i> for happy moments, <i>walk across</i> when someone arrives or leaves, and <i>steady</i> for no motion at all.</li>
 <li><b>Light:</b> <i>day</i>, <i>sunset</i> or <i>night</i>, to match the background.</li>
 <li><b>Camera:</b> a <i>slow zoom in</i> draws attention to a moment, a <i>slow zoom out</i> works well at the end, and <i>still</i> keeps everything calm.</li></ul>
-<p class="tip"><b>Tip:</b> If a scene feels busy, remove a character or switch the camera to still. Simple scenes are easier for children to watch.</p>'''),
+<p class="tip"><b>Tip:</b> If a scene feels busy, remove a character or switch the camera to still. Simple scenes are easier for children to watch.</p>
+<h2>Characters you can use in any story</h2>
+<p>The <b>Characters</b> tab is grouped. Some groups belong to a ready-made story, like <i>Noah's Ark</i>, but every character can be used in your own stories too. For everyday stories, start with:</p>
+<ul><li><b>Mira &amp; Mochi:</b> a little girl and her cat, in many poses.</li>
+<li><b>Mei's family:</b> Mei, her mom and her dad, with poses for standing, waving, walking, hugging, reading and more.</li>
+<li><b>Friends Around the World:</b> five children and their teacher, Ms. Rose, for school stories.</li></ul>
+<p>Each pose is a separate picture. To show a character doing something new in the next scene, add the same character in a different pose, for example <i>Mei · walk</i> in one scene and <i>Mei · wave</i> in the next.</p>
+<h2>Backgrounds for every season</h2>
+<p>The <b>Background</b> tab has two groups. <b>Story places</b> are homes, schools, gardens and Bible settings. <b>From Telar Clips</b> are scenes from our free video library, good for seasons and celebrations: a snowy Christmas village, New Year fireworks, a crescent-moon town for Ramadan, temple steps with lamps for Diwali, green hills with a rainbow, an autumn park, a tropical beach and more.</p>
+<p class="tip"><b>Tip:</b> A few backgrounds have water across the bottom, like the harbour and the starry lake. Use them for opening or closing scenes without characters, or for words like "The stars came out over the lake."</p>
+<h2>Making characters look right together</h2>
+<ul><li><b>Keep sizes believable.</b> Children should be shorter than adults. Use <b>Smaller</b> and <b>Bigger</b> until they look right standing together.</li>
+<li><b>Put feet on the ground.</b> Drag characters so their feet sit on a floor, path or grass, not in the sky.</li>
+<li><b>Face each other when talking.</b> Use <b>Flip</b> so two characters look at each other.</li>
+<li><b>Match the light.</b> Use <i>sunset glow</i> or <i>night</i> on characters in evening scenes, so they don't look too bright.</li></ul>'''),
  ('voices-and-pronunciation', 'Voices: the AI storyteller, your own voice, and saying names right', 'Choose a narrator, record yourself, and fix words the AI voice says wrong.', '''
 <p class="lead">Every scene can have a voice. You can use a free AI storyteller voice, record your own, or mix both in one story.</p>
 <h2>The AI storyteller voice</h2>
@@ -74,7 +121,22 @@ Lucia = loo-see-ah</pre>
 <ul><li><b>Use small letters only.</b> Capital letters make the voice spell the word out, like an acronym: "MOW-chee" would come out as "M-O-W chee".</li>
 <li>Use hyphens to split syllables if it helps.</li>
 <li>Tap <b>▶ Hear the words</b> to test, then <b>Save & update voices</b>.</li>
-<li>Captions on the video keep your original spelling.</li></ul>'''),
+<li>Captions on the video keep your original spelling.</li></ul>
+<h2>Which voice to choose</h2>
+<table><tr><th>Voice</th><th>Good for</th></tr>
+<tr><td>Warm storyteller (female)</td><td>Most stories, bedtime and Bible stories. The voice used in our ready-made stories.</td></tr>
+<tr><td>Bright and cheerful (female)</td><td>Happy, lively stories for younger children.</td></tr>
+<tr><td>Calm storyteller (male)</td><td>Gentle stories and lessons, and a change of narrator.</td></tr>
+<tr><td>Deep voice (male)</td><td>Big moments, like a storm, a king or a giant.</td></tr>
+<tr><td>British (female and male)</td><td>Classic fairy-tale feel, or for listeners used to British English.</td></tr></table>
+<p>Use one narrator for the whole story so it feels like one person reading. Pick the speed for your listeners: <b>Slow</b> for young children and language learners, <b>Normal</b> for most stories.</p>
+<h2>Mixing voices</h2>
+<p>Each scene keeps its own voice, so you can mix: the AI voice reads the story and a child records the last line, or Dad records the father's words while the AI voice narrates. The scene strip shows a 🎙 on scenes that have a voice.</p>
+<h2>If the AI voice is slow or won't start</h2>
+<ul><li>The first time, wait for the download to finish; the progress shows in megabytes.</li>
+<li>Use a strong Wi-Fi connection for the first download.</li>
+<li>Close other tabs and apps on older phones.</li>
+<li>If it still won't start, record your own voice for that scene, or try on a computer.</li></ul>'''),
  ('share-and-keep', 'Sharing your video and keeping your work', 'Where your video and your story are saved, how to share them, and how not to lose them.', '''
 <p class="lead">Telar Stories works entirely in your browser. That keeps your stories private, but it also means a few things are worth knowing.</p>
 <h2>Where your work is saved</h2>
@@ -96,7 +158,135 @@ Lucia = loo-see-ah</pre>
 <p>Under <b>Whole story</b>, choose background music: <i>Gentle: Soft piano</i>, <i>Warm and happy: Picnic</i> or <i>Sunday</i>, <i>Easy and happy: Playful</i> or <i>Garden</i>, your own music file, or no music. Our music is made for Telar Stories and free to use in your videos. If you use your own music, make sure you're allowed to use it, especially on YouTube and Facebook.</p>
 <h2>Respect and privacy</h2>
 <ul><li>Use children's real names only when the family is happy for the video to be shared.</li>
-<li>For public posts, consider using a first name only, or a made-up name.</li></ul>'''),
+<li>For public posts, consider using a first name only, or a made-up name.</li></ul>
+<h2>Showing it to a group</h2>
+<ul><li><b>On a TV or projector,</b> play the downloaded MP4 file rather than the app itself. The video plays smoothly and doesn't need the internet.</li>
+<li><b>Check the sound</b> before the class or service. Narration is easier to hear through a speaker than from a laptop.</li>
+<li><b>Pause and ask questions.</b> Stop after a scene and ask, "What do you think happens next?"</li></ul>
+<h2>Internet and data</h2>
+<p>The first visit downloads the pictures you use, and the first AI voice downloads about 90 MB. After that, much of it loads from your device. Use Wi-Fi for the first AI voice if you can. Playing and saving your video doesn't use the internet.</p>'''),
+ ('bible-story-sunday-school', 'Make a Bible story video for Sunday school', 'Plan, write and narrate a short Bible story video children can follow, with tips for reading Scripture aloud.', '''
+<p class="lead">A short narrated video is a gentle way to open a Sunday school lesson, a children's message or a family devotion. Telar Stories includes three ready-made Bible stories, and you can make your own.</p>
+<h2>Start with a ready-made story</h2>
+<p><i>The First Christmas</i>, <i>The Lost Sheep</i> and <i>Noah's Ark</i> are ready to play. Each has pictures, words and a narrator. Use one as it is, or change the words to match the Bible version your church uses.</p>
+<h2>Choose a story for your own video</h2>
+<p>Pick a story with a clear beginning, middle and end, and one main lesson. Stories that work well for young children:</p>
+<ul><li><b>Parables:</b> the lost sheep, the lost coin, the good Samaritan, the mustard seed.</li>
+<li><b>Old Testament stories:</b> creation, Noah, Joseph's coat, baby Moses, David and Goliath, Daniel and the lions, Jonah.</li>
+<li><b>Jesus and children:</b> "Let the little children come to me", feeding the five thousand, calming the storm.</li></ul>
+<h2>Write it in eight to ten scenes</h2>
+<ol><li><b>Title</b> and where the story is found, for example "A story Jesus told. Luke 15."</li>
+<li><b>Setting:</b> who is there and where.</li>
+<li><b>The problem or the question.</b></li>
+<li><b>What happens next,</b> two or three scenes.</li>
+<li><b>The turning point:</b> God helps, Jesus speaks, someone chooses to obey.</li>
+<li><b>How it ends.</b></li>
+<li><b>One sentence to remember,</b> like a short verse or "God never stops looking for us."</li></ol>
+<p>Use simple words, and keep each scene to one to three sentences. Short sentences are easier for children to follow when they are read aloud.</p>
+<h2>Reading Scripture aloud</h2>
+<ul><li><b>Bible names:</b> the AI voice reads most names well. If one sounds wrong, add it to <b>Pronunciation help</b>, for example <code>Goliath = guh-lie-uth</code>. See <a href="../voices-and-pronunciation/">Voices and pronunciation</a>.</li>
+<li><b>Quoting a verse:</b> keep it short, and say where it comes from in the caption.</li>
+<li><b>Your own voice:</b> many teachers record the verse themselves and let the AI voice read the story. You can mix both in one video.</li></ul>
+<h2>Pictures</h2>
+<p>Use the Bible settings in <b>Story places</b>: the house in Nazareth, the road to Bethlehem, the stable, fields at night, rocky hills, the pasture and the ark scenes. Characters from the ready-made Bible stories, like the shepherds, Noah's family and the animals, can be reused in new stories.</p>
+<h2>Using it in class</h2>
+<ul><li>Play the video at the start, then ask two or three questions: "Who was lost? Who looked for it? How did the shepherd feel?"</li>
+<li>Pause before the last scene and ask the children to guess the ending.</li>
+<li>Send the video to parents afterwards, so families can talk about the story at home.</li></ul>
+<p class="tip"><b>Tip:</b> Keep videos between one and three minutes. Young children listen best to short stories they can watch more than once.</p>
+<h2>Questions Sunday school teachers ask</h2>
+<h3>Can I use the ready-made Bible stories in church?</h3><p>Yes. Play them in class, in children's church or in a service, and share them with families.</p>
+<h3>Which Bible version are the stories based on?</h3><p>The ready-made stories retell the Bible in simple words for children. Check the wording against your church's Bible and change any line you like before making your video.</p>
+<h3>Can children make their own Bible story?</h3><p>Yes. Older children can write a parable in their own words in six to eight scenes, choose the pictures, and record the narration together.</p>'''),
+ ('bedtime-story-for-your-child', 'Make a personal bedtime story for your child', 'Turn your child into the hero of a short narrated story, with their name, their pet and a calm ending for bedtime.', '''
+<p class="lead">Children love hearing stories about themselves. With Telar Stories you can make a short bedtime story where your child is the hero, read in a gentle voice, with soft music and a calm ending.</p>
+<h2>Pick the ingredients</h2>
+<ul><li><b>Your child's name,</b> and a friend, sibling or pet who joins the adventure.</li>
+<li><b>Something your child loves:</b> rain, stars, animals, the beach, building things, helping in the kitchen.</li>
+<li><b>A small worry or a wish:</b> being afraid of the dark, missing a grandparent, starting school, wanting a puppy.</li>
+<li><b>A warm ending:</b> feeling safe, being proud, falling asleep.</li></ul>
+<h2>A simple bedtime plan</h2>
+<ol><li><b>Title:</b> "Ella and the Sleepy Stars."</li>
+<li>Your child at home in the evening.</li>
+<li>Something gentle happens: a star twinkles, the cat wants to play, the rain taps on the window.</li>
+<li>A small adventure, two or three scenes. Keep it calm, not scary.</li>
+<li>Coming home, a hug from Mom or Dad.</li>
+<li>Getting cozy in bed.</li>
+<li>"Good night, Ella. Sweet dreams."</li></ol>
+<h2>Choosing characters</h2>
+<p>Pick the character who looks most like your child, or the one they like best. <b>Mira</b> and <b>Mei</b> have many poses, and <b>Mei's family</b> includes a mom and a dad. Mochi the cat is a good pet for any story. The name in the words is what makes it your child's story; the picture doesn't have to match exactly.</p>
+<h2>Making it calm</h2>
+<ul><li>Choose <b>Light: night (darker)</b> on characters in evening scenes, and backgrounds like the cozy bedroom, the reading nook or the starry lake.</li>
+<li>Use <b>Movement: gentle breathing</b> or <b>steady</b>, not hop.</li>
+<li>Pick the <b>Slow</b> speed for the AI voice, and the <i>Gentle: Soft piano</i> music.</li>
+<li>End on a still scene with very few words, so the video fades out softly.</li></ul>
+<h2>Your own voice</h2>
+<p>A story read by Mom, Dad, Lola or Lolo means more than any narrator. Record each scene with <b>● Record my voice</b>. Grandparents who live far away can record a story on their own phone and send the video, a lovely way to keep bedtime together.</p>
+<h2>Keep it safe</h2>
+<p>Save the video and also tap <b>Save a backup</b>, so you can change the story later, like adding a new pet or a new year at school. See <a href="../share-and-keep/">Sharing your video and keeping your work</a>.</p>
+<p class="tip"><b>Privacy tip:</b> if you share the video outside the family, consider using a first name only.</p>
+<h2>Questions parents ask</h2>
+<h3>How long should a bedtime story be?</h3><p>One to three minutes is plenty. Children often ask to watch it again, which is part of the bedtime routine.</p>
+<h3>Can I make a story about a hard moment, like a new sibling or moving house?</h3><p>Yes. Stories help children understand big changes. Keep the problem gentle, show the child feeling unsure, and end with comfort and love.</p>
+<h3>Is it free?</h3><p>Yes. Telar Stories is free, with no sign-up, and your stories stay on your device.</p>'''),
+ ('story-videos-in-the-classroom', 'Using story videos in the classroom', 'Lesson ideas for teachers: reading, values, languages and student-made stories, with simple routines that work.', '''
+<p class="lead">A short story video can open a lesson, start a discussion, or become a project students make themselves. Here are ways teachers use Telar Stories in class.</p>
+<h2>1. A story to start a lesson</h2>
+<p>Play a one- to two-minute story at the start of a lesson to set the topic. <i>Friends Around the World</i> opens a lesson about cultures and greetings; <i>The Christmas Gift</i> opens a talk about kindness and giving.</p>
+<h2>2. Listening and comprehension</h2>
+<ul><li><b>Before:</b> show the title scene and ask, "What do you think this story is about?"</li>
+<li><b>During:</b> pause after a key scene. "How does Amara feel now? How do you know?"</li>
+<li><b>After:</b> ask students to put three scenes in order, or retell the story in their own words.</li></ul>
+<h2>3. Values and social-emotional learning</h2>
+<p>Make a short story about a classroom situation: sharing toys, including a new classmate, saying sorry, being patient. Children can talk about a character's choices more easily than about their own.</p>
+<h2>4. Language learning</h2>
+<ul><li>Write the same story in two languages, and make one video for each.</li>
+<li>Use the AI voice's <b>Slow</b> speed so learners can follow every word, with the captions on screen.</li>
+<li>Students record their own voice reading a scene, a good speaking practice they can listen back to.</li></ul>
+<h2>5. Students make their own stories</h2>
+<p>Older children can plan and make a story in groups:</p>
+<ol><li><b>Plan:</b> a hero, a problem, and how it's solved, in six to eight scenes on paper.</li>
+<li><b>Write:</b> one to three sentences per scene. Check spelling together.</li>
+<li><b>Build:</b> choose backgrounds and characters, and place them.</li>
+<li><b>Voice:</b> record the narration, taking turns reading.</li>
+<li><b>Share:</b> play every group's video for the class.</li></ol>
+<p>Students don't need accounts. If groups work over several days on a shared computer, use <b>Save a backup</b> at the end of each class and <b>Open a backup</b> to continue.</p>
+<h2>6. A video for parents</h2>
+<p>Make a short story about the week's lesson or a class event, and send it to parents. It's an easy way to show what children learned.</p>
+<h2>Practical tips</h2>
+<ul><li>Download the video before class and play the MP4 file, so it doesn't depend on the school's internet.</li>
+<li>Keep videos short. Two short stories are better than one long one.</li>
+<li>For a whiteboard to go with the lesson, try <a href="https://pizarrapad.telarlabs.net">PizarraPad</a>, our free online board.</li></ul>
+<h2>Questions teachers ask</h2>
+<h3>Do students need accounts or email addresses?</h3><p>No. Telar Stories works in the browser with no sign-up. Work is saved on the device, and backups can be saved as files.</p>
+<h3>Does it work on school Chromebooks and tablets?</h3><p>It works in modern browsers like Chrome, Edge and Safari. The AI voice needs a one-time download of about 90 MB; on slow connections, students can record their own voices instead.</p>
+<h3>Can I use the videos on our school page?</h3><p>Yes, the videos you make are yours to share. Follow your school's rules about students' names and voices.</p>'''),
+ ('christmas-story-video', 'Make a Christmas story video for your family, class or church', 'Ideas and a step-by-step plan for a short narrated Christmas story, from the Nativity to a family greeting.', '''
+<p class="lead">A narrated Christmas story makes a warm greeting for family far away, a children's message for a Christmas service, or a closing activity before the school break.</p>
+<h2>Three kinds of Christmas story</h2>
+<ul><li><b>The Nativity:</b> <i>The First Christmas</i> is ready to play, from the angel's visit to Mary to the shepherds at the stable.</li>
+<li><b>A kindness story:</b> <i>The Christmas Gift</i> tells how Lily gives up a present to cheer up her lonely neighbor, Mr. Ben.</li>
+<li><b>Your own family story:</b> your children, your home, and how your family celebrates.</li></ul>
+<h2>A family Christmas greeting in six scenes</h2>
+<ol><li><b>Title:</b> "Christmas with the Santos Family" over the snowy Christmas village or the living room with fireplace.</li>
+<li>The children waiting for Christmas, counting the days.</li>
+<li>Getting ready: baking, decorating, wrapping gifts. Use Mei's gift pose or Lily's baking poses.</li>
+<li>Remembering the true meaning: a short line about Jesus, or about love and family.</li>
+<li>A message for the people watching: "We miss you, Lola and Lolo!"</li>
+<li>"Merry Christmas and a happy New Year!"</li></ol>
+<h2>Backgrounds for the season</h2>
+<p>Under <b>Story places</b>: the snowy street, the cozy bedroom, the toy shop, the Christmas kitchen, the front door in the snow, the living room with fireplace, and the stable with the star. Under <b>From Telar Clips</b>: the snowy Christmas village and, for New Year, the fireworks over the harbour.</p>
+<h2>Narration and music</h2>
+<ul><li>Let each family member record one scene with <b>● Record my voice</b>. Children love hearing themselves in the video.</li>
+<li>Choose gentle music, like <i>Gentle: Soft piano</i> or <i>Warm and happy: Sunday</i>.</li>
+<li>Keep it under two minutes, so people watch to the end on their phones.</li></ul>
+<h2>Sharing it</h2>
+<p>Send the MP4 in your family group chat, or post it on Facebook. For a church or school program, play the downloaded file on the projector. See <a href="../share-and-keep/">Sharing your video and keeping your work</a>.</p>
+<p class="tip"><b>Tip:</b> Save a backup of your Christmas story. Next year, open it, change the names and the year, add the new baby or the new puppy, and make a fresh greeting in minutes.</p>
+<h2>Ideas for a church Christmas program</h2>
+<ul><li>Play <i>The First Christmas</i> before the children's nativity play, so the audience knows the story.</li>
+<li>Have the Sunday school class record the narration, one child per scene.</li>
+<li>End the program with a short video greeting from the church, with the service times in the last scene.</li></ul>'''),
 ]
 CSS = '''<style>:root{--bg:#16131c;--bg2:#1f1b27;--fg:#f4f1f8;--muted:#a8a1b1;--line:#352f40;--accent:#ff8fa3}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
@@ -109,6 +299,7 @@ h1{font-size:30px;line-height:1.2;margin:8px 0 10px}h2{font-size:21px;margin:28p
 pre{background:#0f0d13;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;overflow-x:auto}
 .cards{display:grid;gap:12px;margin-top:18px}.card{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;color:var(--fg);text-decoration:none}
 .card:hover{border-color:var(--accent)}.card b{font-size:18px}.card span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.table,table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--bg2)}code{background:#0f0d13;padding:1px 6px;border-radius:6px}
 .next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}
 .foot{max-width:760px;margin:0 auto;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}.foot a{color:var(--muted)}</style>'''
 def page(title, desc, body, depth, path=''):
