@@ -284,6 +284,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['mei-surprised','Mei · surprised',330],['mei-gift','Mei · gift',330],
  ['mother-standing','Mei’s mom · stand',480],['mother-hug','Mei’s mom · hug',480],['mother-reading','Mei’s mom · read (sit)',380],['mother-walking','Mei’s mom · walk',470],
  ['father-standing','Mei’s dad · stand',500],['father-walking','Mei’s dad · walk',490],
+ ['father-kneel','Mei’s dad · kneel, arms open',380],['father-pointing','Mei’s dad · point up',500],
  ['#','The First Christmas'],
  ['mary-surprised','Mary · surprised',400],['mary-sweeping','Mary · sweep',400],['mary-praying','Mary · pray',330],['mary-kneeling','Mary · kneel',330],
  ['mary-tired','Mary · rest',310],['mary-baby','Mary · baby Jesus',330],['mary-donkey','Mary · on donkey',380,1],
@@ -312,7 +313,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261123c';
+const AV='v=20261123d';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
