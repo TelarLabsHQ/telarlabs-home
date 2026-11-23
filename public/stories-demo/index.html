@@ -117,7 +117,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
         <span class="sb-l" style="margin:0">💾 Keep your story safe</span>
         <button class="btn sm" id="bkSave">Save a backup</button>
         <button class="btn sm" id="bkOpen">Open a backup</button>
-        <input type="file" id="bkFile" accept=".telarstory,application/octet-stream" hidden>
+        <input type="file" id="bkFile" hidden>
       </div>
       <p class="sb-note" id="bkInfo">Your story is saved in this browser only. Save a backup file to keep it, or to continue on another phone or computer.</p>
       <div class="sb-confirm" id="bkConfirm" hidden><span>Replace your current story with the backup <b id="bkName"></b>?</span><button class="btn primary sm" id="bkYes">Open it</button><button class="btn sm" id="bkNo">Cancel</button></div>
@@ -593,7 +593,7 @@ $('bkFile').onchange=async e=>{const f=e.target.files[0]; if(!f)return;
   const hl=new DataView(buf,m.length,4).getUint32(0,true), head=JSON.parse(new TextDecoder().decode(u8.subarray(m.length+4,m.length+4+hl)));
   if(head.app!=='telar-stories'||!Array.isArray(head.scenes)||!head.scenes.length)throw new Error('not a backup');
   bkPending={head,buf,off:m.length+4+hl}; $('bkName').textContent='“'+(head.title||'My Story')+'”'; $('bkConfirm').hidden=false;
- }catch(err){bkPending=null;bkMsg('That file isn’t a Telar Stories backup. Choose a file that ends in <b>.telarstory</b>.');}};
+ }catch(err){bkPending=null;bkMsg(`That file isn’t a Telar Stories backup. Choose the file that ends in <b>.telarstory</b>.<br><span style="font-size:.85em;opacity:.75">You chose: ${esc(f.name)} (${f.size>=1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB'}${f.type?', '+esc(f.type):''})</span>`);}};
 $('bkNo').onclick=()=>{$('bkConfirm').hidden=true;bkPending=null;};
 $('bkYes').onclick=async()=>{$('bkConfirm').hidden=true; const P=bkPending; bkPending=null; if(!P)return;
  try{if(playing)playing.stop(); const {head,buf}=P; let off=P.off;
