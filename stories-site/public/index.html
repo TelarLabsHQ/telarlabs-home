@@ -94,6 +94,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 [hidden]{display:none!important}
 .sb-backup{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .sb-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.sb-print{font-size:14px;color:var(--accent);margin-left:6px;white-space:nowrap}
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
 </style>
@@ -110,9 +111,9 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 
 <div class="wrap">
   <main>
-    <div class="intro"><b>📖 A picture book that talks.</b> Telar Stories is made for teachers, parents and churches with no video-editing skills. Pick a story, change the words if you like, and get a narrated video with pictures, gentle movements and captions. No timelines, no complicated effects, no big animations, just a simple story told well. <a href="guides/" style="color:#ffb3c1;font-weight:700;white-space:nowrap">Read the short guides →</a></div>
+    <div class="intro"><b>📖 A picture book that talks.</b> Telar Stories is made for teachers, parents and churches with no video-editing skills. Pick a story, change the words if you like, and get a narrated video with pictures, gentle movements and captions. No timelines, no complicated effects, no big animations, just a simple story told well. <a href="guides/" style="color:#ffb3c1;font-weight:700;white-space:nowrap">Read the short guides →</a> &nbsp;·&nbsp; <a href="stories/" style="color:#ffb3c1;font-weight:700;white-space:nowrap">🖨 Free printables →</a></div>
     <div class="storybar" id="storyBar">
-      <span class="sb-l">📚 Ready-made stories</span>
+      <span class="sb-l">📚 Ready-made stories</span> <a class="sb-print" href="stories/">🖨 Free printables for each story →</a>
       <div class="sb-chips"><button data-s="mira">Mira and the Rainy Day</button><button data-s="xmas">The First Christmas</button><button data-s="sheep">The Lost Sheep</button><button data-s="gift">The Christmas Gift</button><button data-s="noah">Noah's Ark</button><button data-s="friends">Friends Around the World</button><button data-s="blank">＋ Blank story</button></div>
       <div class="sb-confirm" id="sbConfirm" hidden><span>Replace your current story with <b id="sbName"></b>?</span><button class="btn primary sm" id="sbYes">Load it</button><button class="btn sm" id="sbNo">Cancel</button></div>
       <div class="sb-backup">
