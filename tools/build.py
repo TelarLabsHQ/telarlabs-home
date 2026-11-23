@@ -255,7 +255,7 @@ def extras(GUIDES=()):
     urls = ['/', '/guides/', '/about/', '/contact/', '/privacy/', '/terms/'] + [f'/guides/{g["slug"]}/' for g in GUIDES]
     open(os.path.join(PUB, 'sitemap.xml'), 'w').write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + ''.join(f'<url><loc>{URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
-    open(os.path.join(PUB, 'robots.txt'), 'w').write(f'User-agent: *\nAllow: /\nSitemap: {URL}/sitemap.xml\n')
+    open(os.path.join(PUB, 'robots.txt'), 'w').write(f'User-agent: *\nDisallow: /cdn-cgi/\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nSitemap: {URL}/sitemap.xml\n')
     if CFG.get('adsense_client'):
         pub = CFG['adsense_client'].replace('ca-', '')
         open(os.path.join(PUB, 'ads.txt'), 'w').write(f'google.com, {pub}, DIRECT, f08c47fec0942fa0\n')
