@@ -567,33 +567,35 @@ $('sbNo').onclick=()=>{$('sbConfirm').hidden=true;pickId=null;markPick(null);};
 $('sbYes').onclick=async()=>{$('sbConfirm').hidden=true;if(!pickId)return;const id=pickId;pickId=null;markPick(null);try{localStorage.setItem('ts-story',id)}catch(e){}markStory();await loadStory(id);};
 markStory();
 
-// ---------- backup file (.telarstory): the story, its settings and its voices in one file
-// Layout: "TELARSTORY1\n", 4-byte header length, JSON header, then each voice as 16-bit audio.
+// ---------- backup file (…-telar-story-backup.json): the story, its settings and its voices in one file
+// Voices are 16-bit audio in base64. Older binary backups ("TELARSTORY1") still open.
 const BK_MAGIC='TELARSTORY1\n';
 function bkMsg(h){$('bkInfo').innerHTML=h;}
+function b64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s);}
+function unb64(t){const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u;}
 $('bkSave').onclick=()=>{try{
  snap(); const voices=[], parts=[];
  S.forEach(sc=>{if(!sc.abuf)return; const d=sc.abuf.getChannelData(0), pcm=new Int16Array(d.length);
   for(let i=0;i<d.length;i++){const v=Math.max(-1,Math.min(1,d[i]));pcm[i]=v<0?v*32768:v*32767;}
   voices.push({sid:sc.sid,sr:sc.abuf.sampleRate,n:pcm.length,ai:!!sc.ai,aiKey:sc.aiKey||null}); parts.push(pcm);});
- const head=new TextEncoder().encode(JSON.stringify({app:'telar-stories',v:1,saved:new Date().toISOString(),
+ voices.forEach((v,i)=>v.pcm=b64(new Uint8Array(parts[i].buffer)));
+ const blob=new Blob([JSON.stringify({app:'telar-stories',v:2,saved:new Date().toISOString(),
   title:(S.find(x=>x.title)||{}).title||'My Story', scenes:S.map(strip_), voices,
-  settings:{music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}}));
- const len=new Uint8Array(4); new DataView(len.buffer).setUint32(0,head.length,true);
- const blob=new Blob([BK_MAGIC,len,head,...parts],{type:'application/octet-stream'});
- const name=videoName('telarstory'), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  settings:{music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}})],{type:'application/json'});
+ const name=videoName('json').replace(/\.json$/,'-telar-story-backup.json'), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
  bkMsg(`<span class="pill ok">Saved</span> <b>${esc(name)}</b> (${(blob.size/1048576).toFixed(1)} MB) is in your Downloads. Keep it somewhere safe, like Google Drive or email it to yourself. Open it later with <b>Open a backup</b>.`+(voices.length<S.length?' Scenes without a voice are saved without one.':'')+($('music').value==='custom'?' Your own music file isn’t included; choose it again after opening.':''));
 }catch(e){bkMsg('The backup could not be saved. Try again, or free some space on your device.');}};
 let bkPending=null;
 $('bkOpen').onclick=()=>{if(playing||aiBusy){bkMsg('Wait until the story or voice finishes, then open the backup.');return;}$('bkFile').value='';$('bkFile').click();};
 $('bkFile').onchange=async e=>{const f=e.target.files[0]; if(!f)return;
- try{const buf=await f.arrayBuffer(), u8=new Uint8Array(buf), m=new TextEncoder().encode(BK_MAGIC);
-  if(u8.length<m.length+4||!m.every((b,i)=>u8[i]===b))throw new Error('not a backup');
-  const hl=new DataView(buf,m.length,4).getUint32(0,true), head=JSON.parse(new TextDecoder().decode(u8.subarray(m.length+4,m.length+4+hl)));
+ try{const buf=await f.arrayBuffer(), u8=new Uint8Array(buf), m=new TextEncoder().encode(BK_MAGIC); let head, off=0;
+  if(u8[0]===0x7b){head=JSON.parse(new TextDecoder().decode(u8));}            // { ... }  JSON backup
+  else{ if(u8.length<m.length+4||!m.every((b,i)=>u8[i]===b))throw new Error('not a backup');
+   const hl=new DataView(buf,m.length,4).getUint32(0,true); head=JSON.parse(new TextDecoder().decode(u8.subarray(m.length+4,m.length+4+hl))); off=m.length+4+hl;}
   if(head.app!=='telar-stories'||!Array.isArray(head.scenes)||!head.scenes.length)throw new Error('not a backup');
-  bkPending={head,buf,off:m.length+4+hl}; $('bkName').textContent='“'+(head.title||'My Story')+'”'; $('bkConfirm').hidden=false;
- }catch(err){bkPending=null;bkMsg(`That file isn’t a Telar Stories backup. Choose the file that ends in <b>.telarstory</b>.<br><span style="font-size:.85em;opacity:.75">You chose: ${esc(f.name)} (${f.size>=1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB'}${f.type?', '+esc(f.type):''})</span>`);}};
+  bkPending={head,buf,off}; $('bkName').textContent='“'+(head.title||'My Story')+'”'; $('bkConfirm').hidden=false;
+ }catch(err){bkPending=null;bkMsg(`That file isn’t a Telar Stories backup. Choose the file that ends in <b>telar-story-backup.json</b>.<br><span style="font-size:.85em;opacity:.75">You chose: ${esc(f.name)} (${f.size>=1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB'}${f.type?', '+esc(f.type):''})</span>`);}};
 $('bkNo').onclick=()=>{$('bkConfirm').hidden=true;bkPending=null;};
 $('bkYes').onclick=async()=>{$('bkConfirm').hidden=true; const P=bkPending; bkPending=null; if(!P)return;
  try{if(playing)playing.stop(); const {head,buf}=P; let off=P.off;
@@ -601,7 +603,7 @@ $('bkYes').onclick=async()=>{$('bkConfirm').hidden=true; const P=bkPending; bkPe
   const mx=Math.max(0,...L.map(x=>+x.sid||0)); uid=Math.max(uid,mx+1);
   aiMsg('Opening your backup…'); prune(L); await needStory(L);
   const bySid={}; L.forEach(x=>bySid[x.sid]=x);
-  for(const v of head.voices||[]){const bytes=v.n*2; const pcm=new Int16Array(buf.slice(off,off+bytes)); off+=bytes;
+  for(const v of head.voices||[]){let pcm; if(v.pcm){const u=unb64(v.pcm); pcm=new Int16Array(u.buffer,0,u.length>>1);} else {const bytes=v.n*2; pcm=new Int16Array(buf.slice(off,off+bytes)); off+=bytes;}
    const sc=bySid[v.sid]; if(!sc)continue; const f32=new Float32Array(pcm.length); for(let i=0;i<pcm.length;i++)f32[i]=pcm[i]/32768;
    const b=ac().createBuffer(1,f32.length,v.sr); b.copyToChannel(f32,0); sc.abuf=b; sc.ai=v.ai; sc.aiKey=v.aiKey;}
   await vTx('readwrite',st=>st.clear()).catch(()=>{});
