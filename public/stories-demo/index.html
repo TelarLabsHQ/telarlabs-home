@@ -117,7 +117,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
         <span class="sb-l" style="margin:0">💾 Keep your story safe</span>
         <button class="btn sm" id="bkSave">Save a backup</button>
         <button class="btn sm" id="bkOpen">Open a backup</button>
-        <input type="file" id="bkFile" hidden>
+        <input type="file" id="bkFile" accept="application/json,.json,.telarstory" hidden>
       </div>
       <p class="sb-note" id="bkInfo">Your story is saved in this browser only. Save a backup file to keep it, or to continue on another phone or computer.</p>
       <div class="sb-confirm" id="bkConfirm" hidden><span>Replace your current story with the backup <b id="bkName"></b>?</span><button class="btn primary sm" id="bkYes">Open it</button><button class="btn sm" id="bkNo">Cancel</button></div>
