@@ -242,7 +242,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
   <div class="dlg wide">
     <h2>Make a story video in 4 steps</h2>
     <p style="margin:0 0 6px">📖 <b>Like a picture book that talks.</b> No editing skills needed: pictures, gentle movements, captions and a friendly narrator. No complicated effects or big animations.</p>
-    <p class="muted">A sample story is already loaded. Use it as it is, or change anything you like. Need more help? <a href="guides/" style="color:#ff8fa3">Read the guides</a>.</p>
+    <p class="muted">A sample story is already loaded. Use it as it is, or change anything you like. Need more help? <a href="guides/" style="color:#ff8fa3">Read the guides</a>, or get <a href="stories/" style="color:#ff8fa3">free printables</a> for each story.</p>
     <p class="muted">📶 <b>Tip:</b> use a strong Wi-Fi or mobile data connection. The pictures, music and AI voice load faster, and the first visit downloads the most. After that, many things load from your device.</p>
     <ol class="steps">
       <li><b>Pick a scene</b> in the strip under the picture. Add more with <b>+ Scene</b>.</li>
@@ -1015,6 +1015,9 @@ $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text
  // other pictures load only when picked (preloading all of them used too much memory on phones)
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
  if(!seen)$('help').classList.add('on');
+ // ?story=mira (links from story pages): offer that story, with the usual confirm
+ try{const q=new URLSearchParams(location.search).get('story'); const b=q&&document.querySelector(`.sb-chips button[data-s="${CSS.escape(q)}"]`);
+  if(b){$('help').classList.remove('on'); history.replaceState(null,'',location.pathname); b.click(); b.scrollIntoView({block:'center'});}}catch(e){}
 })();
 })();
 </script>

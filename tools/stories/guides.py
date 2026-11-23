@@ -301,6 +301,7 @@ pre{background:#0f0d13;border:1px solid var(--line);border-radius:10px;padding:1
 .card:hover{border-color:var(--accent)}.card b{font-size:18px}.card span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
 .table,table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--bg2)}code{background:#0f0d13;padding:1px 6px;border-radius:6px}
 .next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}
+.top b,.top .btn{white-space:nowrap}@media(max-width:480px){.top{gap:6px;padding:10px 12px}.top .btn{padding:7px 10px;font-size:13px}.top b{font-size:15px}}
 .foot{max-width:760px;margin:0 auto;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}.foot a{color:var(--muted)}</style>'''
 def page(title, desc, body, depth, path=''):
     up = '../' * depth
@@ -308,9 +309,9 @@ def page(title, desc, body, depth, path=''):
 <title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script>{CSS}</head><body>
-<header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
+<header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
-<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
+<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
 os.makedirs(OUT, exist_ok=True)
 cards = ''.join(f'<a class="card" href="{s}/"><b>{E(t)}</b><span>{E(d)}</span></a>' for s, t, d, _ in G)
 open(os.path.join(OUT, 'index.html'), 'w').write(page('Guides', 'How to make story videos with Telar Stories.',
@@ -321,8 +322,46 @@ for i, (s, t, d, body) in enumerate(G):
     os.makedirs(os.path.join(OUT, s), exist_ok=True)
     open(os.path.join(OUT, s, 'index.html'), 'w').write(page(t, d, f'<p class="crumb"><a href="../">Guides</a></p><h1>{E(t)}</h1>{body}{foot}', 2, f'guides/{s}/'))
 SITE = os.path.join(OUT, '..')
+# ---------------------------------------------------------------- story pages with printables (content pages, with ads)
+STORIES = [
+ dict(slug='mira-and-the-rainy-day', id='mira', title='Mira and the Rainy Day',
+  desc='A free narrated picture-book story about a rainy afternoon, a curious cat and an old red book, with a printable coloring page, sequencing sheet and discussion questions.',
+  age='Ages 3 to 7', mins='About 1½ minutes', theme='Imagination, reading, finding joy on a boring day',
+  summary='<p>It’s a rainy afternoon, and Mira wants to play outside. “There is nothing to do,” she sighs, while her little cat, Mochi, sleeps nearby. Then Mochi wakes up, wanders to the bookshelf and – bump! – knocks an old red book onto the floor. Inside, Mira finds stories about faraway places, brave animals and wonderful friends. By the time she looks up, the rain has stopped and a rainbow fills the sky.</p>',
+  lesson='<p>Boredom is often the start of something good. The story gently shows children that books and imagination can turn an ordinary day into an adventure, and that small surprises, like a cat knocking over a book, can lead somewhere wonderful.</p>',
+  before=['Look out the window together. What is the weather like today?', 'What do you do when you can’t play outside?', 'Show the title scene and ask: what do you think this story is about?'],
+  after=['How did Mira feel at the start of the story? How do you know?', 'What did Mochi do that changed Mira’s day?', 'What was inside the old red book?', 'How did Mira feel at the end? Why?', 'What do YOU like to do on a rainy day?', 'If you found a magic book, what kind of stories would be inside?'],
+  activities=['<b>Rainy-day book nook:</b> make a cozy reading corner with pillows and a blanket, and read a favorite book together, the way Mira did.',
+   '<b>Rain sounds:</b> tap fingers on a table to make soft rain, then louder rain, then let it stop and draw a rainbow in the air.',
+   '<b>Book hunt:</b> let your child pick an “old” book from the shelf, like Mochi did, and read it together.',
+   '<b>Make it yours:</b> in Telar Stories, change Mira’s name to your child’s name and record the last line together, then save the video.'],
+  pages=[('Color Mira and Mochi', 'A coloring page with Mira, Mochi and a box to draw a raindrop or rainbow.'),
+         ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'),
+         ('Think, talk and draw', 'Four questions to talk about and a big box to draw a rainy-day adventure.')]),
+]
+SP = os.path.join(SITE, 'stories'); os.makedirs(SP, exist_ok=True)
+STYLE2 = '<style>.meta{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 16px}.meta span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}.pv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.pv figure{margin:0}.pv img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}.pv figcaption{font-size:13px;color:var(--muted);margin-top:4px}.dl{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:18px 0}.dl .btn{display:inline-block;margin-top:8px}@media(max-width:560px){.pv{grid-template-columns:1fr 1fr}}</style>'
+for st in STORIES:
+    sl = st['slug']; li = lambda xs: '<ul>' + ''.join(f'<li>{x}</li>' for x in xs) + '</ul>'
+    pv = ''.join(f'<figure><img src="../../printables/{sl}-p{i}.webp" width="579" height="819" alt="{E(t)} – printable page {i}" loading="lazy"><figcaption><b>{E(t)}</b><br>{E(d)}</figcaption></figure>' for i, (t, d) in enumerate(st['pages'], 1))
+    body = (f'{STYLE2}<p class="crumb"><a href="../">Stories</a></p><h1>{E(st["title"])}</h1>'
+      f'<div class="meta"><span>{E(st["age"])}</span><span>{E(st["mins"])}</span><span>{E(st["theme"])}</span></div>'
+      f'<p class="lead">{E(st["desc"])}</p>'
+      f'<p><a class="btn primary" href="../../?story={st["id"]}">▶ Open this story in Telar Stories</a></p>'
+      f'<h2>The story</h2>{st["summary"]}<h2>What it teaches</h2>{st["lesson"]}'
+      f'<h2>Before the story</h2>{li(st["before"])}<h2>After the story: questions to talk about</h2>{li(st["after"])}'
+      f'<h2>Free printable activity pack</h2><p>Three pages to print at home, in class or at church. Black-and-white friendly, A4 and US Letter.</p><div class="pv">{pv}</div>'
+      f'<div class="dl"><b>Mira and the Rainy Day – activity pack</b> (PDF, 3 pages)<br><a class="btn primary" href="../../printables/{sl}-activities.pdf" download>⬇ Download the printables</a></div>'
+      f'<h2>Activities to try</h2>{li(st["activities"])}'
+      f'<h2>Make it your own</h2><p>Open the story in Telar Stories and change anything: your child’s name, the words, the music or the voice. You can record your own voice for each scene and save the finished story as an MP4 video to share with family. See <a href="../../guides/first-story-video/">Make your first story video</a>.</p>'
+      f'<p class="tip"><b>Free to use:</b> print as many copies as you need for your family, class or church. Please don’t sell them.</p>')
+    os.makedirs(os.path.join(SP, sl), exist_ok=True)
+    open(os.path.join(SP, sl, 'index.html'), 'w').write(page(st['title'] + ': free story and printables', st['desc'], body, 2, f'stories/{sl}/'))
+cards2 = ''.join(f'<a class="card" href="{x["slug"]}/"><b>{E(x["title"])}</b><span>{E(x["desc"])}</span></a>' for x in STORIES)
+open(os.path.join(SP, 'index.html'), 'w').write(page('Stories and free printables', 'Free narrated picture-book stories with printable coloring pages and activities for home, class and church.',
+    '<h1>Stories and free printables</h1><p class="lead">Each story comes with questions to talk about and a free printable activity pack. Open any story in Telar Stories to play it, change it or save it as a video.</p>' + f'<div class="cards">{cards2}</div>', 1, 'stories/'))
 open(os.path.join(SITE, 'sitemap.xml'), 'w').write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + ''.join(f'<url><loc>https://stories.telarlabs.net/{u}</loc></url>\n' for u in ['', 'guides/'] + [f'guides/{x[0]}/' for x in G]) + '</urlset>\n')
+    + ''.join(f'<url><loc>https://stories.telarlabs.net/{u}</loc></url>\n' for u in ['', 'guides/'] + [f'guides/{x[0]}/' for x in G] + ['stories/'] + [f'stories/{x["slug"]}/' for x in STORIES]) + '</urlset>\n')
 open(os.path.join(SITE, 'robots.txt'), 'w').write('User-agent: *\nDisallow: /cdn-cgi/\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nSitemap: https://stories.telarlabs.net/sitemap.xml\n')
 open(os.path.join(SITE, 'ads.txt'), 'w').write('google.com, pub-4326677240395780, DIRECT, f08c47fec0942fa0\n')
 # The app needs cross-origin isolation for the AI voice; the guides must not have it, or ads can't load.
