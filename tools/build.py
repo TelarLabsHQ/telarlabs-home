@@ -259,9 +259,8 @@ def extras(GUIDES=()):
     if CFG.get('adsense_client'):
         pub = CFG['adsense_client'].replace('ca-', '')
         open(os.path.join(PUB, 'ads.txt'), 'w').write(f'google.com, {pub}, DIRECT, f08c47fec0942fa0\n')
-    open(os.path.join(PUB, '_headers'), 'w').write('/assets/*\n  Cache-Control: public, max-age=86400\n'
-        '/stories-move.html\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-site\n')
-    # Telar Stories moved to its own subdomain; stories-move.html hands saved stories over to it
+    open(os.path.join(PUB, '_headers'), 'w').write('/assets/*\n  Cache-Control: public, max-age=86400\n')
+    # Telar Stories moved to its own subdomain
     open(os.path.join(PUB, '_redirects'), 'w').write('/stories-demo https://stories.telarlabs.net/ 301\n/stories-demo/* https://stories.telarlabs.net/:splat 301\n')
 
 if __name__ == '__main__':

@@ -996,30 +996,10 @@ $('helpBtn').onclick=()=>$('help').classList.add('on');
 $('helpGo').onclick=closeHelp;
 $('helpBlank').onclick=()=>{S=[{bg:'reading-nook',cam:'in',title:'My Story',text:'',dur:5,chars:[]}];cur=0;sel=null;refresh();save();closeHelp();};
 
-// ---------- moving from telarlabs.net/stories-demo: bring the saved story across once (same site, so allowed)
-async function migrateOnce(){
- try{ if(localStorage.getItem('ts-proto')||localStorage.getItem('ts-migrated'))return false; localStorage.setItem('ts-migrated','1'); }catch(e){return false;}
- const OLD='https://telarlabs.net';
- const data=await new Promise(ok=>{const f=document.createElement('iframe'); f.style.display='none'; f.title='';
-  const done=v=>{removeEventListener('message',on); clearTimeout(t); f.remove(); ok(v);};
-  const on=e=>{if(e.origin===OLD&&e.data&&e.data.type==='ts-migrate')done(e.data);};
-  const t=setTimeout(()=>done(null),8000); addEventListener('message',on);
-  f.src=OLD+'/stories-move.html'; document.body.appendChild(f);});
- if(!data||!data.ls||!data.ls['ts-proto'])return false;
- try{ for(const k in data.ls) if(k!=='ts-migrated') localStorage.setItem(k,data.ls[k]);
-  for(const v of data.voices||[]) await vTx('readwrite',st=>st.put(v.val,v.key));
-  const pv=data.ls['ts-pron']; if(typeof pv==='string')$('pron').value=pv;
-  if(data.ls['ts-voice'])$('aiVoice').value=data.ls['ts-voice'];
-  if(data.ls['ts-music']&&(MUSIC_FILES[data.ls['ts-music']]||data.ls['ts-music']==='none'))$('music').value=data.ls['ts-music'];
-  markStory(); return true; }catch(e){console.warn('move',e);return false;}
-}
-
 // ---------- start
 (async()=>{
- const moved=await migrateOnce();
  restore(); lastSnap=snap(); persist(lastSnap);
- if(moved)bkMsg(`<span class="pill ok">Welcome</span> Telar Stories has a new home. We brought over your story from the previous version.`);
- vLoadAll().then(n=>{if(moved){refresh();aiMsg(`<span class="pill ok">Welcome</span> Your story and its voices were brought over from the previous version.`);} else if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
+ vLoadAll().then(n=>{if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
  await needStory(S); refresh(); requestAnimationFrame(loop);
  // other pictures load only when picked (preloading all of them used too much memory on phones)
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}

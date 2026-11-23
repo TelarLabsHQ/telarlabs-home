@@ -1,5 +1,2 @@
 /assets/*
   Cache-Control: public, max-age=86400
-/stories-move.html
-  Cross-Origin-Embedder-Policy: require-corp
-  Cross-Origin-Resource-Policy: same-site
