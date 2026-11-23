@@ -338,6 +338,66 @@ STORIES = [
   pages=[('Color Mira and Mochi', 'A coloring page with Mira, Mochi and a box to draw a raindrop or rainbow.'),
          ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'),
          ('Think, talk and draw', 'Four questions to talk about and a big box to draw a rainy-day adventure.')]),
+ dict(slug='the-first-christmas', id='xmas', title='The First Christmas',
+  desc='A free narrated picture-book telling of the Nativity for young children, from the angel’s visit to Mary to the shepherds at the stable, with a printable coloring page, sequencing sheet and discussion questions.',
+  age='Ages 3 to 8', mins='About 2 minutes', theme='Christmas, the Nativity, God’s gift of Jesus',
+  summary='<p>In the little town of Nazareth, the angel Gabriel visits a young woman named Mary. “Do not be afraid,” he says. “You will have a baby, and you will name him Jesus.” Mary and Joseph travel to Bethlehem, but the town is so crowded that the only place to stay is a stable. That night, baby Jesus is born and laid in a manger. Out in the fields, angels appear to shepherds with the good news, and the shepherds hurry to find the baby, just as the angel said.</p>',
+  lesson='<p>Christmas is about a gift: God sending Jesus to the world. The story also shows trust (Mary saying yes to God), kindness (the innkeeper making room) and joy that is meant to be shared (the shepherds telling everyone).</p>',
+  before=['What do you know about Christmas? Why do we celebrate it?', 'Have you ever had to wait for something special?', 'Look at the title scene. Who do you think the people are?'],
+  after=['Who visited Mary, and what did he tell her?', 'Why did Mary and Joseph go to Bethlehem?', 'Where was baby Jesus born? Why there?', 'Who heard the news first, and how did they hear it?', 'Why do we call Jesus God’s greatest gift?', 'How can you share the joy of Christmas with someone this year?'],
+  activities=['<b>Nativity play:</b> act out the story with family or classmates, using a doll for baby Jesus and towels for costumes.',
+   '<b>Star of joy:</b> cut out a paper star and write on it one way to be kind this Christmas.',
+   '<b>Count the characters:</b> list everyone in the story (Mary, Joseph, the angel, the innkeeper, the shepherds) and talk about what each one did.',
+   '<b>Record it together:</b> in Telar Stories, let children take turns recording the narration, one scene each, and save the video for the Christmas program.'],
+  pages=[('Color Mary and baby Jesus', 'A coloring page with Mary holding baby Jesus, the donkey, and a box to draw the star.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw the night Jesus was born.')]),
+ dict(slug='the-lost-sheep', id='sheep', title='The Lost Sheep',
+  desc='A free narrated picture-book telling of the parable of the lost sheep from Luke 15, with a printable coloring page, sequencing sheet and discussion questions for Sunday school and home.',
+  age='Ages 3 to 8', mins='About 2 minutes', theme='God’s love for each one of us, never giving up',
+  summary='<p>A shepherd boy loves his sheep and counts them every evening. One night he counts ninety-seven, ninety-eight, ninety-nine… one is missing! He makes sure the others are safe, then searches the rocky hills and thorny bushes as the sun goes down. In the dark and cold he hears a tiny “baa”, and finds the little lamb, alone and afraid. He carries it home on his shoulders and calls his friends: “Be glad with me! I found my lost sheep!”</p>',
+  lesson='<p>Jesus told this story to show how much God loves every single person. No one is too small to matter, and God keeps looking for us and is full of joy when we come home. Children can also learn to notice when someone is left out and go looking for them.</p>',
+  before=['Have you ever lost something special? How did you feel?', 'What does a shepherd do?', 'Have you ever felt lost or left out?'],
+  after=['How many sheep did the shepherd have?', 'How did the shepherd know one was missing?', 'Where did he look for the lamb?', 'How did the lamb feel when it was lost? And when it was found?', 'Why did the shepherd have a party?', 'What does this story tell us about how God loves us?'],
+  activities=['<b>Hide the lamb:</b> hide a toy sheep in the room and let children search for it, then celebrate when it’s found.',
+   '<b>Counting game:</b> line up 10 cotton balls, take one away, and let children find which one is missing.',
+   '<b>Memory verse:</b> learn Luke 15:6, “Rejoice with me; I have found my lost sheep.”',
+   '<b>Be a shepherd:</b> talk about someone who might feel left out at school or church, and one way to include them this week.'],
+  pages=[('Color the shepherd and the lamb', 'A coloring page with the shepherd carrying the lamb, the little lamb, and a box to draw the ninety-nine sheep.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw the shepherd finding the lamb.')]),
+ dict(slug='the-christmas-gift', id='gift', title='The Christmas Gift',
+  desc='A free narrated picture-book story about Lily, who gives up the gift she wanted to cheer up her lonely neighbor, with a printable coloring page, sequencing sheet and discussion questions.',
+  age='Ages 4 to 9', mins='About 2 minutes', theme='Kindness, giving, thinking of others',
+  summary='<p>All year, Lily has saved her coins to buy a snow globe with a tiny dancing bear. On the way home from the toy shop, she sees her old neighbor, Mr. Ben, sitting alone by his window. Mom explains that his family lives far away. Lily thinks about the snow globe, then about Mr. Ben, and has an idea. She spends her coins on flour and sprinkles, bakes cookies with Mom, and on Christmas Eve brings them to Mr. Ben with a card. He smiles the biggest smile, and they sing Christmas songs together.</p>',
+  lesson='<p>The best gifts are the ones we give. Lily chooses kindness over something she wanted for herself, and discovers it makes her happier. It’s a gentle way to talk with children about noticing lonely people, and about giving time and care, not only things.</p>',
+  before=['What would you like for Christmas?', 'Do you know someone who might feel lonely at Christmas?', 'What makes a gift special?'],
+  after=['What was Lily saving her coins for?', 'Why was Mr. Ben alone?', 'What did Lily decide to do with her coins? Why?', 'How did Mr. Ben feel when he got the cookies?', 'How did Lily feel at the end?', 'Who could you make happy with a small gift or a visit?'],
+  activities=['<b>Kindness cookies:</b> bake or decorate cookies together and give them to a neighbor, a grandparent or a school guard.',
+   '<b>Card for someone lonely:</b> make a Christmas card for someone who lives alone or far from family.',
+   '<b>Coin jar:</b> start a family jar for helping others, and decide together how to use it.',
+   '<b>Make it yours:</b> in Telar Stories, change Lily’s name and Mr. Ben’s name to people your child knows, and record a message at the end.'],
+  pages=[('Color Lily and Mr. Ben', 'A coloring page with Lily and her cookies, Mr. Ben with his card, and a box to draw a Christmas cookie.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw a gift you could make for someone.')]),
+ dict(slug='noahs-ark', id='noah', title='Noah’s Ark',
+  desc='A free narrated picture-book telling of Noah’s Ark for young children, with the animals coming two by two, the great rain and the dove with the olive leaf, plus a printable coloring page, sequencing sheet and discussion questions.',
+  age='Ages 3 to 8', mins='About 2 minutes', theme='Trusting and obeying God, God’s promise',
+  summary='<p>Long ago, many people forgot to be kind and forgot about God, but Noah loved God and always tried to do what was right. God told Noah to build a very big boat called an ark. Noah and his family worked hard, day after day, and then the animals came, two by two: lions and elephants, giraffes and zebras, sheep and rabbits. The rain fell for forty days and forty nights, but inside the ark everyone was safe. At last the rain stopped, and a dove came back with an olive leaf. The land was drying!</p>',
+  lesson='<p>Noah trusted God even when building a huge boat on dry land seemed strange. The story shows that God takes care of those who trust Him, and the rainbow is a sign of God’s promise.</p>',
+  before=['What is your favorite animal?', 'Have you ever been caught in a big rainstorm? How did it feel?', 'What do you think an ark is?'],
+  after=['Why did God choose Noah?', 'What did God ask Noah to build?', 'How did the animals come into the ark?', 'How long did it rain?', 'What did the dove bring back?', 'What does a rainbow remind us of?'],
+  activities=['<b>Two by two:</b> make pairs of animal cards and play a matching game.',
+   '<b>Animal parade:</b> children act like their favorite animal and march “into the ark” in pairs.',
+   '<b>Rainbow promise:</b> make a paper rainbow and write a promise on each color.',
+   '<b>Count the animals:</b> pause the story at the animals scene and count every pair together.'],
+  pages=[('Color Noah and the animals', 'A coloring page with Noah, two sheep, and a box to draw a rainbow.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw animals going into the ark.')]),
+ dict(slug='friends-around-the-world', id='friends', title='Friends Around the World',
+  desc='A free narrated picture-book story about Amara’s first day at a new school and a class that shares hello and food from around the world, with a printable coloring page, sequencing sheet and discussion questions.',
+  age='Ages 4 to 9', mins='About 2½ minutes', theme='Welcoming others, cultures, friendship',
+  summary='<p>It’s Amara’s first day at a new school. Her family has just moved from Nigeria, and she doesn’t know anyone. Her teacher, Ms. Rose, announces Share Your Home Day. The next day, Paolo says “Kumusta!” and shares pancit, Zofia says “Cześć!” and shares pierogi, Ayaan says “Assalam-o-alaikum!” and shares samosas, and Lena says “Hallo!” with a soft pretzel. Then it’s Amara’s turn: “Bawo ni!” She shares jollof rice, everyone loves it, and at lunch they share all their food. Amara laughs for the first time all week.</p>',
+  lesson='<p>We come from different places, but a smile means hello everywhere. The story helps children welcome new classmates, be curious about other cultures, and see that sharing something from home can turn strangers into friends.</p>',
+  before=['How do you feel on the first day at a new place?', 'How do you say “hello” in another language?', 'What food does your family make for special days?'],
+  after=['Why was Amara shy at the start?', 'What is Share Your Home Day?', 'Which greetings did the children say? Can you say them?', 'What foods did they share?', 'How did Amara feel at the end? Why?', 'How can you help a new classmate feel welcome?'],
+  activities=['<b>Hello wall:</b> make a poster of “hello” in all the languages your class or family knows.',
+   '<b>Share Your Home Day:</b> hold your own day where each child brings a photo, a food or a song from their family.',
+   '<b>Map it:</b> find Nigeria, the Philippines, Poland, Pakistan and Germany on a map or globe.',
+   '<b>Welcome buddy:</b> talk about what a good welcome buddy does for a new classmate.'],
+  pages=[('Color the friends', 'A coloring page with the five friends waving hello.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw something special from your family.')]),
 ]
 SP = os.path.join(SITE, 'stories'); os.makedirs(SP, exist_ok=True)
 STYLE2 = '<style>.meta{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 16px}.meta span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}.pv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.pv figure{margin:0}.pv img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}.pv figcaption{font-size:13px;color:var(--muted);margin-top:4px}.dl{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:18px 0}.dl .btn{display:inline-block;margin-top:8px}@media(max-width:560px){.pv{grid-template-columns:1fr 1fr}}</style>'
@@ -351,10 +411,10 @@ for st in STORIES:
       f'<h2>The story</h2>{st["summary"]}<h2>What it teaches</h2>{st["lesson"]}'
       f'<h2>Before the story</h2>{li(st["before"])}<h2>After the story: questions to talk about</h2>{li(st["after"])}'
       f'<h2>Free printable activity pack</h2><p>Three pages to print at home, in class or at church. Black-and-white friendly, A4 and US Letter.</p><div class="pv">{pv}</div>'
-      f'<div class="dl"><b>Mira and the Rainy Day – activity pack</b> (PDF, 3 pages)<br><a class="btn primary" href="../../printables/{sl}-activities.pdf" download>⬇ Download the printables</a></div>'
+      f'<div class="dl"><b>{E(st["title"])} – activity pack</b> (PDF, 3 pages)<br><a class="btn primary" href="../../printables/{sl}-activities.pdf" download>⬇ Download the printables</a></div>'
       f'<h2>Activities to try</h2>{li(st["activities"])}'
       f'<h2>Make it your own</h2><p>Open the story in Telar Stories and change anything: your child’s name, the words, the music or the voice. You can record your own voice for each scene and save the finished story as an MP4 video to share with family. See <a href="../../guides/first-story-video/">Make your first story video</a>.</p>'
-      f'<p class="tip"><b>Free to use:</b> print as many copies as you need for your family, class or church. Please don’t sell them.</p>')
+      f'<p class="tip"><b>Free to use:</b> print as many copies as you need for your family, class or church. Please don’t sell them.</p>' + (f'<h2>More stories</h2><ul>' + ''.join(f'<li><a href="../{o["slug"]}/">{E(o["title"])}</a></li>' for o in STORIES if o is not st) + '</ul>'))
     os.makedirs(os.path.join(SP, sl), exist_ok=True)
     open(os.path.join(SP, sl, 'index.html'), 'w').write(page(st['title'] + ': free story and printables', st['desc'], body, 2, f'stories/{sl}/'))
 cards2 = ''.join(f'<a class="card" href="{x["slug"]}/"><b>{E(x["title"])}</b><span>{E(x["desc"])}</span></a>' for x in STORIES)
