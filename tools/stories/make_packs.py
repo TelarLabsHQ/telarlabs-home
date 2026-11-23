@@ -64,7 +64,7 @@ PACKS = {
        'What did the dove bring back to Noah?', 'What does the rainbow remind us of?'],
    draw='Draw your favorite animals going into the ark', drawsub='Remember: two by two!', name='My animals are'),
  'friends-around-the-world': dict(title='Friends Around the World', color='Color the friends!',
-   chars=[('kids-wave', 1.0)], box=None,
+   chars=[('kids-wave', 1.0)], box='Draw yourself as\na new friend here!',
    scenes=[('school-gate', [('amara-shy', 640, 715, 340)], 'Amara\'s first day at a new school.'),
            ('classroom-map', [('paolo-pancit', 640, 715, 350)], 'Paolo shares pancit from the Philippines.'),
            ('classroom-map', [('rose-hands', 330, 715, 440), ('amara-jollof', 720, 715, 340)], 'Amara shares jollof rice.'),
