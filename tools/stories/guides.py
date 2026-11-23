@@ -1,4 +1,4 @@
-"""Short how-to guides inside the Telar Stories prototype (stories.telarlabs.net/guides/). Hidden from search until launch."""
+"""How-to guides for Telar Stories (stories.telarlabs.net/guides/). Public content pages with ads; the app itself has none."""
 import os, html
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'stories-site', 'public', 'guides')
 E = html.escape
@@ -10,9 +10,10 @@ G = [
 <h2>2. Watch it</h2>
 <p>Press <b>▶ Play</b> at the top. The story plays scene by scene, with the narrator reading the words. The strip of small pictures under the main picture shows every scene. Tap one to jump to it.</p>
 <h2>3. Save the video</h2>
-<p>Press <b>⬇ Make video</b>. Keep the page open while the video is made; it can take up to as long as the story itself. When it's ready, tap <b>Download video</b>.</p>
-<ul><li>On most phones and computers the video is saved as <b>MP4</b>, which plays almost everywhere, including CapCut, Messenger and TVs.</li>
-<li>Some browsers save <b>WebM</b> instead. It plays in Chrome and on YouTube; for CapCut on some phones, convert it to MP4 first.</li></ul>
+<p>Press <b>⬇ Make video</b>. A progress bar and a percentage show how far along it is. Keep the screen open while the video is made: if you switch apps or lock your phone, it pauses and continues when you come back.</p>
+<p>When it reaches 100%, the video is <b>saved automatically</b> to your Downloads, with the story's name and the date in the file name. On phones, <b>Share or save to phone</b> sends it straight to your gallery, Messenger or another app, and <b>Save again</b> downloads another copy.</p>
+<ul><li>Videos are saved as <b>MP4</b>, which plays almost everywhere, including CapCut, Messenger and TVs.</li>
+<li>On a few phones the app uses a slower, steadier way to make the video. It tells you when it does; just keep the screen open a little longer.</li></ul>
 <h2>4. Share it</h2>
 <p>Send the video in your class or family group chat, show it on the classroom TV, or upload it to YouTube or Facebook. See <a href="../share-and-keep/">Sharing your video and keeping your work</a>.</p>
 <p class="tip"><b>Tip:</b> Using a sample exactly as it is is perfectly fine. Change only what you want, like a child's name, and leave the rest.</p>'''),
@@ -78,8 +79,13 @@ Lucia = loo-see-ah</pre>
 <p class="lead">Telar Stories works entirely in your browser. That keeps your stories private, but it also means a few things are worth knowing.</p>
 <h2>Where your work is saved</h2>
 <ul><li>Your story, pictures and voices are saved <b>in this browser on this device</b>. Close the page and come back later, and it's still there.</li>
-<li>It isn't saved online, so it won't appear on your other devices.</li>
+<li>It isn't saved online, so it won't appear on your other devices by itself.</li>
 <li>Clearing your browser's data, using a private window, or a phone freeing up space can remove it.</li></ul>
+<h2>Save a backup</h2>
+<p>Under <b>Keep your story safe</b>, tap <b>Save a backup</b>. You get one file ending in <b>telar-story-backup.json</b> with the whole story: every scene, its picture and characters, the voices, the music choice and your pronunciation list. Keep it in Google Drive, email it to yourself, or copy it to a USB stick.</p>
+<p>To continue on another phone or computer, open Telar Stories there, tap <b>Open a backup</b> and choose the file. The app asks before replacing the story on screen.</p>
+<ul><li>Don't open the backup file by itself; it only shows computer code. Always open it from Telar Stories.</li>
+<li>If you used your own music file, choose it again after opening the backup.</li></ul>
 <p class="tip"><b>Keep your finished video.</b> Once you're happy with a story, press <b>Make video</b> and download it. The video file is yours to keep, even if the browser's data is cleared.</p>
 <h2>Sharing</h2>
 <ul><li><b>Group chats:</b> send the downloaded video in Messenger, WhatsApp, Viber or Telegram.</li>
@@ -87,7 +93,7 @@ Lucia = loo-see-ah</pre>
 <li><b>YouTube and Facebook:</b> upload it like any other video. Stories are 16:9, so they fit YouTube and TVs.</li>
 <li><b>Editing apps:</b> open the MP4 in CapCut or a similar app to add your own music or intro.</li></ul>
 <h2>Music</h2>
-<p>Under <b>Whole story</b>, choose background music: Gentle, Happy, Adventure, Dreamy, your own music file, or none. If you use your own music, make sure you're allowed to use it, especially on YouTube and Facebook.</p>
+<p>Under <b>Whole story</b>, choose background music: <i>Gentle: Soft piano</i>, <i>Warm and happy: Picnic</i> or <i>Sunday</i>, <i>Easy and happy: Playful</i> or <i>Garden</i>, your own music file, or no music. Our music is made for Telar Stories and free to use in your videos. If you use your own music, make sure you're allowed to use it, especially on YouTube and Facebook.</p>
 <h2>Respect and privacy</h2>
 <ul><li>Use children's real names only when the family is happy for the video to be shared.</li>
 <li>For public posts, consider using a first name only, or a made-up name.</li></ul>'''),
@@ -103,20 +109,34 @@ h1{font-size:30px;line-height:1.2;margin:8px 0 10px}h2{font-size:21px;margin:28p
 pre{background:#0f0d13;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;overflow-x:auto}
 .cards{display:grid;gap:12px;margin-top:18px}.card{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;color:var(--fg);text-decoration:none}
 .card:hover{border-color:var(--accent)}.card b{font-size:18px}.card span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
-.next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}</style>'''
-def page(title, desc, body, depth):
+.next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}
+.foot{max-width:760px;margin:0 auto;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}.foot a{color:var(--muted)}</style>'''
+def page(title, desc, body, depth, path=''):
     up = '../' * depth
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>{E(title)} – Telar Stories</title><meta name="description" content="{E(desc)}">{CSS}</head><body>
+<title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script>{CSS}</head><body>
 <header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
-<main>{body}</main></body></html>'''
+<main>{body}</main>
+<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
 os.makedirs(OUT, exist_ok=True)
 cards = ''.join(f'<a class="card" href="{s}/"><b>{E(t)}</b><span>{E(d)}</span></a>' for s, t, d, _ in G)
 open(os.path.join(OUT, 'index.html'), 'w').write(page('Guides', 'How to make story videos with Telar Stories.',
-    '<h1>Telar Stories guides</h1><p class="lead">Short, friendly guides for making story videos. No editing skills needed.</p>' + f'<div class="cards">{cards}</div>', 1))
+    '<h1>Telar Stories guides</h1><p class="lead">Short, friendly guides for making story videos. No editing skills needed.</p>' + f'<div class="cards">{cards}</div>', 1, 'guides/'))
 for i, (s, t, d, body) in enumerate(G):
     nxt = G[i + 1] if i + 1 < len(G) else None
     foot = '<div class="next">' + (f'<a class="btn" href="../{nxt[0]}/">Next: {E(nxt[1])} →</a>' if nxt else '') + '<a class="btn primary" href="../../">Open the app</a></div>'
     os.makedirs(os.path.join(OUT, s), exist_ok=True)
-    open(os.path.join(OUT, s, 'index.html'), 'w').write(page(t, d, f'<p class="crumb"><a href="../">Guides</a></p><h1>{E(t)}</h1>{body}{foot}', 2))
+    open(os.path.join(OUT, s, 'index.html'), 'w').write(page(t, d, f'<p class="crumb"><a href="../">Guides</a></p><h1>{E(t)}</h1>{body}{foot}', 2, f'guides/{s}/'))
+SITE = os.path.join(OUT, '..')
+open(os.path.join(SITE, 'sitemap.xml'), 'w').write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + ''.join(f'<url><loc>https://stories.telarlabs.net/{u}</loc></url>\n' for u in ['', 'guides/'] + [f'guides/{x[0]}/' for x in G]) + '</urlset>\n')
+open(os.path.join(SITE, 'robots.txt'), 'w').write('User-agent: *\nDisallow: /cdn-cgi/\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nSitemap: https://stories.telarlabs.net/sitemap.xml\n')
+open(os.path.join(SITE, 'ads.txt'), 'w').write('google.com, pub-4326677240395780, DIRECT, f08c47fec0942fa0\n')
+# The app needs cross-origin isolation for the AI voice; the guides must not have it, or ads can't load.
+open(os.path.join(SITE, '_headers'), 'w').write('/\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n'
+    '/index.html\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n'
+    '/assets/*\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n'
+    '/assets/ort-v2/*\n  Cache-Control: public, max-age=604800\n/assets/bg/*\n  Cache-Control: public, max-age=86400\n/assets/ch/*\n  Cache-Control: public, max-age=86400\n')
 print('built', len(G), 'guides')

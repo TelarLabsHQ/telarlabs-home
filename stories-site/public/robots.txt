@@ -3,3 +3,5 @@ Disallow: /cdn-cgi/
 
 User-agent: Mediapartners-Google
 Allow: /
+
+Sitemap: https://stories.telarlabs.net/sitemap.xml
