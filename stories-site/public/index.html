@@ -1018,7 +1018,8 @@ async function migrateOnce(){
 (async()=>{
  const moved=await migrateOnce();
  restore(); lastSnap=snap(); persist(lastSnap);
- vLoadAll().then(n=>{if(moved){refresh();aiMsg(`<span class="pill ok">Welcome</span> Telar Stories has a new home. We brought over your story from the previous version.`);} else if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
+ if(moved)bkMsg(`<span class="pill ok">Welcome</span> Telar Stories has a new home. We brought over your story from the previous version.`);
+ vLoadAll().then(n=>{if(moved){refresh();aiMsg(`<span class="pill ok">Welcome</span> Your story and its voices were brought over from the previous version.`);} else if(n){refresh();aiMsg(`<span class="pill ok">Welcome back</span> ${n} saved voice${n>1?'s were':' was'} restored.`);} return attachVo();});
  await needStory(S); refresh(); requestAnimationFrame(loop);
  // other pictures load only when picked (preloading all of them used too much memory on phones)
  let seen=false;try{seen=!!localStorage.getItem('ts-help')}catch(e){}
