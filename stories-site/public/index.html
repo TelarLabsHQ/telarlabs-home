@@ -1004,7 +1004,7 @@ async function migrateOnce(){
   const done=v=>{removeEventListener('message',on); clearTimeout(t); f.remove(); ok(v);};
   const on=e=>{if(e.origin===OLD&&e.data&&e.data.type==='ts-migrate')done(e.data);};
   const t=setTimeout(()=>done(null),8000); addEventListener('message',on);
-  f.src=OLD+'/stories-demo/migrate.html'; document.body.appendChild(f);});
+  f.src=OLD+'/stories-move.html'; document.body.appendChild(f);});
  if(!data||!data.ls||!data.ls['ts-proto'])return false;
  try{ for(const k in data.ls) if(k!=='ts-migrated') localStorage.setItem(k,data.ls[k]);
   for(const v of data.voices||[]) await vTx('readwrite',st=>st.put(v.val,v.key));

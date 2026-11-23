@@ -1,0 +1,2 @@
+/stories-demo https://stories.telarlabs.net/ 301
+/stories-demo/* https://stories.telarlabs.net/:splat 301
