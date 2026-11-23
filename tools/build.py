@@ -46,7 +46,7 @@ def page(path, title, desc, body, ads_on=True, head_extra='', og_type='website')
   <div><a class="logo" href="/">{LOGO}<span>{E(ST)}</span></a>
   <p class="muted">Small, free tools for teachers and creators.</p></div>
   <div class="foot-cols">
-    <div><h4>Apps</h4>{''.join(f'<a href="{E(a["url"])}">{E(a["name"])}</a>' for a in CFG["apps"] if a.get("url"))}</div>
+    <div><h4>Apps</h4>{''.join(f'<a href="{E(a["url"])}">{E(a["name"])}</a>' for a in CFG["apps"] if a.get("url") and (not a.get("soon") or CFG.get("stories_live")))}</div>
     <div><h4>{E(ST)}</h4><a href="/guides/">Guides</a><a href="/about/">About</a><a href="/privacy/">Privacy policy</a><a href="/terms/">Terms of use</a><a href="/contact/">Contact</a></div>
   </div>
 </div><div class="wrap fine">&copy; {date.today().year} {E(ST)}.</div></footer>
@@ -57,10 +57,11 @@ def page(path, title, desc, body, ads_on=True, head_extra='', og_type='website')
     open(out, 'w').write(doc)
 
 def app_card(a):
-    soon = a.get('soon')
+    soon = a.get('soon') and not (a['name'] == 'Telar Stories' and CFG.get('stories_live'))   # switched on at launch
+    if not soon and a.get('blurb_live'): a = {**a, 'blurb': a['blurb_live']}
     tag = 'div' if soon else 'a'
     href = '' if soon else f' href="{E(a["url"])}"'
-    badge = '<span class="badge soon">Coming soon</span>' if soon else f'<span class="badge">{E(a["for"])}</span>'
+    badge = '<span class="badge soon">Coming soon</span>' if soon else f'<span class="badge">{"New · " if a.get("soon") else ""}{E(a["for"])}</span>'
     cta = '' if soon else f'<span class="go">Open {E(a["name"])} →</span>'
     return (f'<{tag} class="app" style="--c:{a["color"]}"{href}>'
             f'<div class="shot"><img src="/assets/img/{a["img"]}" alt="{E(a["name"])} screenshot" loading="lazy" width="800" height="450"></div>'

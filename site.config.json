@@ -50,7 +50,10 @@
       "img": "stories.webp",
       "color": "#ff8fa3",
       "soon": true,
-      "blurb": "Turn illustrated scenes and characters into 2 to 3 minute narrated story videos for classrooms, Sunday school, organization promos, and parents making simple custom stories for their children."
+      "blurb": "Turn illustrated scenes and characters into 2 to 3 minute narrated story videos for classrooms, Sunday school, organization promos, and parents making simple custom stories for their children.",
+      "url": "https://stories.telarlabs.net",
+      "for": "For teachers & parents",
+      "blurb_live": "Make narrated picture-book story videos: pick a ready-made story or write your own, add characters, a free AI storyteller voice or your own, and download an MP4 for class, church or family."
     }
   ],
   "guides_published": "2026-11-20",
@@ -70,5 +73,6 @@
     "fitness-classes-limited-slots",
     "school-fundraiser-event-planning",
     "school-event-recap-video"
-  ]
+  ],
+  "stories_live": false
 }
