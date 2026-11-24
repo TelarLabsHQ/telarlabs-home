@@ -222,6 +222,12 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
         <button class="btn sm" id="musicPrev">▶ Preview</button>
       </div>
       <input type="file" id="musicFile" accept="audio/*" hidden>
+      <div class="row" style="margin-top:8px">
+        <span class="muted">Between scenes</span>
+        <select id="trans" style="flex:1;background:var(--bg3);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit">
+          <option value="slide">Slide, like turning a page (sharpest words)</option><option value="fade">Fade to black (softer; words may blur a little on some phones)</option>
+        </select>
+      </div>
       <p class="muted" id="musicInfo">The built-in tracks are original and free to use. You can also choose <b>My own music file</b> to use any song you have the right to use (MP3 or M4A).</p>
       <div class="row" style="margin-top:8px">
         <button class="btn sm" id="newStory">Start a blank story</button>
@@ -331,7 +337,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124k';
+const AV='v=20261124l';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -518,9 +524,12 @@ function drawScene(s,t,{caption=true,fade=false,fadeIn=fade,fadeOut=fade,editing
 // One frame of the whole story at time t. Between scenes the next scene slides in and pushes the old one out
 // (like turning a page). Video compressors handle sideways motion far better than fades, so words stay sharp.
 const SLIDE=0.5;
+let TRANS='slide'; try{const v=localStorage.getItem('ts-trans');if(v==='fade'||v==='slide')TRANS=v;}catch(e){}
+function setTrans(v){TRANS=v==='fade'?'fade':'slide';const el=document.getElementById('trans');if(el)el.value=TRANS;try{localStorage.setItem('ts-trans',TRANS)}catch(e){}}
 function drawStoryFrame(L,durs,t){
  let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
  const lt=Math.max(0,t-a), last=i===L.length-1, left=durs[i]-lt;
+ if(TRANS==='fade'){drawScene(L[i],lt,{fade:true}); drawBadge(); return {i,a,lt};}
  if(!last&&left<SLIDE){
   const p=1-left/SLIDE, e=0.5-0.5*Math.cos(Math.PI*p), dx=Math.round(e*W);
   for(const [sc,st,off] of [[L[i],lt,-dx],[L[i+1],0,W-dx]]){
@@ -639,7 +648,7 @@ $('bkSave').onclick=()=>{try{
  voices.forEach((v,i)=>v.pcm=b64(new Uint8Array(parts[i].buffer)));
  const blob=new Blob([JSON.stringify({app:'telar-stories',v:2,saved:new Date().toISOString(),
   title:(S.find(x=>x.title)||{}).title||'My Story', scenes:S.map(strip_), voices,
-  settings:{music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}})],{type:'application/json'});
+  settings:{trans:TRANS, music:$('music').value==='custom'?'gentle':$('music').value, voice:$('aiVoice').value, speed:$('aiSpeed').value, pron:$('pron').value}})],{type:'application/json'});
  const name=videoName('json').replace(/\.json$/,'-telar-story-backup.json'), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
  bkMsg(`<span class="pill ok">Saved</span> <b>${esc(name)}</b> (${(blob.size/1048576).toFixed(1)} MB) is in your Downloads. Keep it somewhere safe, like Google Drive or email it to yourself. To bring the story back, use <b>Open a backup</b> here. (Opening the file by itself only shows computer code.)`+(voices.length<S.length?' Scenes without a voice are saved without one.':'')+($('music').value==='custom'?' Your own music file isn’t included; choose it again after opening.':''));
@@ -667,6 +676,7 @@ $('bkYes').onclick=async()=>{$('bkConfirm').hidden=true; const P=bkPending; bkPe
   await vTx('readwrite',st=>st.clear()).catch(()=>{});
   S=L; cur=0; sel=null; hist=[]; lastSnap=null; save(); S.forEach(vPut);
   const st=head.settings||{};
+  if(st.trans)setTrans(st.trans);
   if(st.music&&(MUSIC_FILES[st.music]||st.music==='none')){$('music').value=st.music;try{localStorage.setItem('ts-music',st.music)}catch(_){}}
   if(st.voice){$('aiVoice').value=st.voice;try{localStorage.setItem('ts-voice',st.voice)}catch(_){}}
   if(st.speed)$('aiSpeed').value=st.speed;
@@ -865,6 +875,7 @@ let musicStop=null;
 $('musicPrev').onclick=async()=>{if(musicStop){musicStop();musicStop=null;$('musicPrev').textContent='▶ Preview';return;}
  await loadMusic($('music').value); const ctx=ac();if(ctx.state==='suspended')ctx.resume();musicStop=startMusic(ctx,ctx.destination,8,$('music').value);$('musicPrev').textContent='■ Stop';
  setTimeout(()=>{if(musicStop){musicStop=null;$('musicPrev').textContent='▶ Preview';}},8000);};
+$('trans').value=TRANS; $('trans').onchange=e=>setTrans(e.target.value);
 $('music').onchange=e=>{const v=e.target.value; loadMusic(v); if(v==='custom'&&!customBuf){$('musicFile').click();}
  if(v!=='custom'){try{localStorage.setItem('ts-music',v)}catch(_){}}};
 $('musicFile').onchange=async e=>{const f=e.target.files[0]; if(!f){if(!customBuf)$('music').value='gentle';return;}
@@ -998,7 +1009,8 @@ async function exportFast(way=VWAYS[0],note=''){
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
   // full pictures during the opening and closing fades (phone video chips starve fading frames, which shows as a mosaic)
   // and at the first frame after each slide, so every scene starts crisp
-  const inFade=(i===0&&lt<0.4+1/FPS)||(i===S.length-1&&durs[i]-lt<0.4+1/FPS), sceneStart=i!==lastScene; lastScene=i;
+  const fin=lt<0.4+1/FPS, fout=durs[i]-lt<0.4+1/FPS;
+  const inFade=TRANS==='fade'?(fin||fout):((i===0&&fin)||(i===S.length-1&&fout)), sceneStart=i!==lastScene; lastScene=i;
   ve.encode(vf,{keyFrame:f%(FPS*2)===0||sceneStart||inFade}); vf.close();
   // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
   // let the queue grow until the page runs out of memory
