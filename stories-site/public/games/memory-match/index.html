@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory Match: a free memory game for kids | Telar Stories</title><meta name="description" content="A free memory card game for children ages 3 to 8 with the Telar Stories characters. Easy, medium and hard levels, no sign-up."><link rel="canonical" href="https://stories.telarlabs.net/games/memory-match/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script><style>:root{--bg:#16131c;--bg2:#1f1b27;--fg:#f4f1f8;--muted:#a8a1b1;--line:#352f40;--accent:#ff8fa3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+a{color:var(--accent)}.top{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:#121017;position:sticky;top:0}
+.top b{font-size:17px}.top b span{color:var(--accent)}.top .sp{flex:1}.btn{border:1px solid var(--line);background:#2a2533;color:var(--fg);padding:8px 14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px}
+.btn.primary{background:var(--accent);color:#2a0d14;border-color:var(--accent)}main{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:30px;line-height:1.2;margin:8px 0 10px}h2{font-size:21px;margin:28px 0 8px}.lead{font-size:18px;color:#e9e2f0}
+.crumb{font-size:14px;color:var(--muted)}.crumb a{color:var(--muted)}li{margin:4px 0}
+.tip{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px}
+pre{background:#0f0d13;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:15px;overflow-x:auto}
+.cards{display:grid;gap:12px;margin-top:18px}.card{display:block;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;color:var(--fg);text-decoration:none}
+.card:hover{border-color:var(--accent)}.card b{font-size:18px}.card span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.table,table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--bg2)}code{background:#0f0d13;padding:1px 6px;border-radius:6px}
+.next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}
+.top b,.top .btn{white-space:nowrap}@media(max-width:480px){.top{gap:6px;padding:10px 12px}.top .btn{padding:7px 10px;font-size:13px}.top b{font-size:15px}}
+.foot{max-width:760px;margin:0 auto;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}.foot a{color:var(--muted)}</style></head><body>
+<header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="../../stories/">Printables</a><a class="btn" href="../../guides/">Guides</a><a class="btn primary" href="../../">Open the app</a></header>
+<main><p class="crumb"><a href="../">Games</a></p><h1>Memory Match</h1><p class="lead">Turn over two cards at a time and find the matching characters.</p><style>
+.gbox [hidden]{display:none!important}
+.gbox{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:16px;margin:16px 0 48px}
+.gbox h2{margin:0 0 4px}.gsub{color:var(--muted);margin:0 0 12px}
+.gbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.gbar button,.gbtn{font:inherit;font-weight:800;border-radius:999px;border:2px solid var(--line);background:#2a2533;color:var(--fg);padding:9px 16px;cursor:pointer;touch-action:manipulation}
+.gbar button.on,.gbtn.pri{background:var(--accent);border-color:var(--accent);color:#2a0d14}
+.gbar .sp{flex:1}.gstat{font-weight:700;color:var(--muted)}
+.mm{display:grid;gap:8px;perspective:900px}
+.mc{position:relative;aspect-ratio:3/4;border:0;padding:0;background:none;cursor:pointer;touch-action:manipulation}
+.mc .in{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
+.mc.up .in,.mc.got .in{transform:rotateY(180deg)}
+.mc .f,.mc .b{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mc .b{background:radial-gradient(circle at 30% 25%,#ffb3c1,#ff8fa3 45%,#d9667c);border:3px solid #ffe1e7;color:#fff;font-size:30px}
+.mc .f{transform:rotateY(180deg);background:#fff7ec;border:3px solid #ffd7a8}
+.mc .f img{width:88%;height:auto;flex:1;object-fit:contain;min-height:0}.mc .f span{font-weight:800;color:#5a3b2a;font-size:13px;padding-bottom:4px}
+.mc.got .f{border-color:#7ed39b;background:#effbf2}
+.mwin,.owin{text-align:center;padding:10px 0}.mwin b,.owin b{display:block;font-size:30px;color:var(--accent)}
+.oprompt{font-size:22px;font-weight:800;text-align:center;margin:4px 0 10px;min-height:34px}
+.oslots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.oslot{aspect-ratio:16/9;border:2px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted);font-size:20px;overflow:hidden;position:relative}
+.oslot img{width:100%;height:100%;object-fit:cover}.oslot i{position:absolute;top:3px;left:3px;background:var(--accent);color:#2a0d14;border-radius:999px;width:24px;height:24px;font-style:normal;font-size:14px;display:flex;align-items:center;justify-content:center}
+.ocards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ocards button{border:3px solid transparent;border-radius:12px;padding:0;background:none;cursor:pointer;overflow:hidden;line-height:0;touch-action:manipulation}
+.ocards button img{width:100%;height:auto}.ocards button.gone{visibility:hidden}
+.ocards button.no{animation:wig .4s;border-color:#ff6b6b}@keyframes wig{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.ocaps{list-style:none;padding:0;margin:10px 0;text-align:left}.ocaps li{padding:6px 0;border-bottom:1px solid var(--line)}
+.snd{font-size:20px;padding:6px 10px!important}
+</style><div class="gbox" id="mg">
+<div class="gbar" id="mgLv"><button data-n="6" class="on">Easy</button><button data-n="8">Medium</button><button data-n="12">Hard</button><span class="sp"></span><span class="gstat">Moves: <b id="mgMoves">0</b></span><button class="snd" id="mgSnd" aria-label="Sound on or off"></button></div>
+<div class="mm" id="mgGrid"></div>
+<div class="mwin" id="mgWin" hidden><b>🎉 You found them all!</b><p id="mgMsg"></p><button class="gbtn pri" id="mgAgain">Play again</button></div>
+</div>
+<script>(()=>{const C=[["../../games/img/card-mira-wave-happy.webp", "Mira"], ["../../games/img/card-mochi-sitting.webp", "Mochi"], ["../../games/img/card-mei-wave.webp", "Mei"], ["../../games/img/card-leo-wave.webp", "Leo"], ["../../games/img/card-grandma-wave.webp", "Grandma"], ["../../games/img/card-biscuit-sitting.webp", "Biscuit"], ["../../games/img/card-pip-singing.webp", "Pip"], ["../../games/img/card-teacher-clapping.webp", "Mr. Tan"], ["../../games/img/card-lily-gift.webp", "Lily"], ["../../games/img/card-noah-welcome.webp", "Noah"], ["../../games/img/card-shepherd-boy-lamb.webp", "Shepherd boy"], ["../../games/img/card-donkey-standing.webp", "Donkey"]];const S={on:true};try{S.on=localStorage.getItem('ts-snd')!=='0'}catch(e){}
+let AC=null;function tone(f,d,t){if(!S.on)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,AC.currentTime);g.gain.exponentialRampToValueAtTime(.18,AC.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d+.05)}catch(e){}}
+const yay=()=>{tone(523,.15);setTimeout(()=>tone(659,.15),110);setTimeout(()=>tone(784,.25),220)},ding=()=>tone(880,.18),boop=()=>tone(220,.2,'triangle');
+function sndBtn(b){const f=()=>b.textContent=S.on?'🔊':'🔇';f();b.onclick=()=>{S.on=!S.on;try{localStorage.setItem('ts-snd',S.on?'1':'0')}catch(e){}f()}}
+const $=i=>document.getElementById(i),sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let n=6,open=[],moves=0,got=0,lock=false;sndBtn($('mgSnd'));
+document.querySelectorAll('#mgLv button[data-n]').forEach(b=>b.onclick=()=>{n=+b.dataset.n;document.querySelectorAll('#mgLv button[data-n]').forEach(x=>x.classList.toggle('on',x===b));deal()});
+function deal(){open=[];moves=0;got=0;lock=false;$('mgMoves').textContent=0;$('mgWin').hidden=true;const g=$('mgGrid');g.innerHTML='';
+ const cols=n===12&&innerWidth>620?6:4;g.style.gridTemplateColumns='repeat('+cols+',1fr)';g.style.maxWidth=(cols*110)+'px';g.style.margin='0 auto';
+ sh(sh(C).slice(0,n).flatMap(c=>[c,c])).forEach(c=>{const b=document.createElement('button');b.className='mc';b.dataset.k=c[1];b.setAttribute('aria-label','Card');
+  b.innerHTML='<div class="in"><div class="b">★</div><div class="f"><img src="'+c[0]+'" alt=""><span>'+c[1]+'</span></div></div>';b.onclick=()=>flip(b);g.appendChild(b)})}
+function flip(b){if(lock||b.classList.contains('up')||b.classList.contains('got'))return;b.classList.add('up');b.setAttribute('aria-label',b.dataset.k);open.push(b);tone(660,.08);
+ if(open.length<2)return;moves++;$('mgMoves').textContent=moves;const[a,c]=open;open=[];
+ if(a.dataset.k===c.dataset.k){setTimeout(()=>{a.classList.add('got');c.classList.add('got');ding()},250);got++;if(got===n)setTimeout(win,700)}
+ else{lock=true;setTimeout(()=>{a.classList.remove('up');c.classList.remove('up');a.setAttribute('aria-label','Card');c.setAttribute('aria-label','Card');lock=false},950)}}
+function win(){yay();const k='ts-mm-'+n;let best=0;try{best=+localStorage.getItem(k)||0}catch(e){}
+ const stars=moves<=n*1.5?'⭐⭐⭐':moves<=n*2.2?'⭐⭐':'⭐';
+ $('mgMsg').textContent=stars+' '+moves+' moves'+(!best||moves<best?' · New best!':' · Best: '+best+' moves');if(!best||moves<best)try{localStorage.setItem(k,moves)}catch(e){}
+ $('mgWin').hidden=false;$('mgWin').scrollIntoView({block:'nearest',behavior:'smooth'})}
+$('mgAgain').onclick=deal;deal()})();</script><h2>How to play</h2>
+<ol><li>Choose <b>Easy</b> (6 pairs), <b>Medium</b> (8 pairs) or <b>Hard</b> (12 pairs).</li>
+<li>Tap a card to turn it over, then tap another one.</li>
+<li>If the two cards show the same character, they stay open. If not, they turn back over. Try to remember where each one was!</li>
+<li>Find all the pairs in as few moves as you can.</li></ol>
+<p>The 🔊 button turns the sounds on or off.</p>
+
+<h2>Meet the characters</h2>
+<p>Every card is a character from Telar Stories: Mira and her cat Mochi, Mei, Leo and Grandma, Biscuit the dog and Pip the bird, Mr. Tan the teacher, Lily from <a href="../../stories/the-christmas-gift/">The Christmas Gift</a>, Noah from <a href="../../stories/noahs-ark/">Noah’s Ark</a>, the shepherd boy from <a href="../../stories/the-first-christmas/">The First Christmas</a> and Mary’s donkey. Children who know the stories love finding their favorites.</p>
+
+<h2>What memory games help with</h2>
+<ul><li><b>Working memory:</b> holding where each card was while looking for its pair.</li>
+<li><b>Focus and patience:</b> slowing down and remembering instead of tapping at random.</li>
+<li><b>Language:</b> say each character’s name out loud when the card turns over. Younger children can practice naming, older ones can read the name under the picture.</li>
+<li><b>Taking turns:</b> play together, one card pair each, and count who finds more.</li></ul>
+
+<h2>Tips for parents and teachers</h2>
+<ul><li>Start with <b>Easy</b> for ages 3 to 5, and move up when your child finishes with three stars.</li>
+<li>Talk about the characters: “Where did we see Mochi? What did Lily give Mr. Ben?”</li>
+<li>After a round, open a story with the same characters in Telar Stories and make a short video together.</li>
+<li>On a classroom screen, let children come up one at a time to choose two cards.</li></ul>
+<p>The game is free, needs no sign-up and works on phones, tablets and computers. Nothing is saved except the best score on this device.</p><h2>More games</h2><ul><li><a href="../../stories/mira-and-the-rainy-day/#play">Story Order: Mira and the Rainy Day</a></li><li><a href="../../stories/the-first-christmas/#play">Story Order: The First Christmas</a></li><li><a href="../../stories/the-lost-sheep/#play">Story Order: The Lost Sheep</a></li><li><a href="../../stories/the-christmas-gift/#play">Story Order: The Christmas Gift</a></li><li><a href="../../stories/noahs-ark/#play">Story Order: Noah’s Ark</a></li><li><a href="../../stories/friends-around-the-world/#play">Story Order: Friends Around the World</a></li></ul></main>
+<footer class="foot"><a href="../../">Telar Stories</a><a href="../../guides/">Guides</a><a href="../../stories/">Stories &amp; printables</a><a href="../../games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>

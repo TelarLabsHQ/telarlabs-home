@@ -311,7 +311,7 @@ def page(title, desc, body, depth, path=''):
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script>{CSS}</head><body>
 <header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
-<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
+<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
 os.makedirs(OUT, exist_ok=True)
 cards = ''.join(f'<a class="card" href="{s}/"><b>{E(t)}</b><span>{E(d)}</span></a>' for s, t, d, _ in G)
 open(os.path.join(OUT, 'index.html'), 'w').write(page('Guides', 'How to make story videos with Telar Stories.',
@@ -400,6 +400,9 @@ STORIES = [
   pages=[('Color the friends', 'A coloring page with the five friends waving hello.'), ('Put the story in order', 'Four pictures from the story to number 1 to 4, then retell. Answers at the bottom.'), ('Think, talk and draw', 'Four questions and a big box to draw something special from your family.')]),
 ]
 SP = os.path.join(SITE, 'stories'); os.makedirs(SP, exist_ok=True)
+import sys as _s; _s.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from games import make_images, memory_game, order_game, games_hub, GCSS, MEMORY_TEXT
+make_images()
 STYLE2 = '<style>.meta{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 16px}.meta span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}.pv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.pv figure{margin:0}.pv img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}.pv figcaption{font-size:13px;color:var(--muted);margin-top:4px}.dl{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:18px 0}.dl .btn{display:inline-block;margin-top:8px}@media(max-width:560px){.pv{grid-template-columns:1fr 1fr}}</style>'
 for st in STORIES:
     sl = st['slug']; li = lambda xs: '<ul>' + ''.join(f'<li>{x}</li>' for x in xs) + '</ul>'
@@ -409,6 +412,7 @@ for st in STORIES:
       f'<p class="lead">{E(st["desc"])}</p>'
       f'<p><a class="btn primary" href="../../?story={st["id"]}">▶ Open this story in Telar Stories</a></p>'
       f'<h2>The story</h2>{st["summary"]}<h2>What it teaches</h2>{st["lesson"]}'
+      f'<h2 id="play">Play: put the story in order</h2>{GCSS}{order_game(sl)}'
       f'<h2>Before the story</h2>{li(st["before"])}<h2>After the story: questions to talk about</h2>{li(st["after"])}'
       f'<h2>Free printable activity pack</h2><p>Three pages to print at home, in class or at church. Black-and-white friendly, A4 and US Letter.</p><div class="pv">{pv}</div>'
       f'<div class="dl"><b>{E(st["title"])} – activity pack</b> (PDF, 3 pages)<br><a class="btn primary" href="../../printables/{sl}-activities.pdf" download>⬇ Download the printables</a></div>'
@@ -419,9 +423,14 @@ for st in STORIES:
     open(os.path.join(SP, sl, 'index.html'), 'w').write(page(st['title'] + ': free story and printables', st['desc'], body, 2, f'stories/{sl}/'))
 cards2 = ''.join(f'<a class="card" href="{x["slug"]}/"><b>{E(x["title"])}</b><span>{E(x["desc"])}</span></a>' for x in STORIES)
 open(os.path.join(SP, 'index.html'), 'w').write(page('Stories and free printables', 'Free narrated picture-book stories with printable coloring pages and activities for home, class and church.',
-    '<h1>Stories and free printables</h1><p class="lead">Each story comes with questions to talk about and a free printable activity pack. Open any story in Telar Stories to play it, change it or save it as a video.</p>' + f'<div class="cards">{cards2}</div>', 1, 'stories/'))
+    '<h1>Stories and free printables</h1><p class="lead">Each story comes with questions to talk about, a free printable activity pack and a Story Order game. Open any story in Telar Stories to play it, change it or save it as a video.</p><p class="tip">🎮 Looking for games? Try <a href="../games/memory-match/">Memory Match</a> or see all <a href="../games/">games for kids</a>.</p>' + f'<div class="cards">{cards2}</div>', 1, 'stories/'))
+GP = os.path.join(SITE, 'games'); os.makedirs(os.path.join(GP, 'memory-match'), exist_ok=True)
+open(os.path.join(GP, 'index.html'), 'w').write(page('Games for kids', 'Free games for young children with the Telar Stories characters: Memory Match and Story Order for every story.', games_hub(), 1, 'games/'))
+open(os.path.join(GP, 'memory-match', 'index.html'), 'w').write(page('Memory Match: a free memory game for kids', 'A free memory card game for children ages 3 to 8 with the Telar Stories characters. Easy, medium and hard levels, no sign-up.',
+    '<p class="crumb"><a href="../">Games</a></p><h1>Memory Match</h1><p class="lead">Turn over two cards at a time and find the matching characters.</p>' + memory_game() + MEMORY_TEXT
+    + '<h2>More games</h2><ul>' + ''.join(f'<li><a href="../../stories/{x["slug"]}/#play">Story Order: {E(x["title"])}</a></li>' for x in STORIES) + '</ul>', 2, 'games/memory-match/'))
 open(os.path.join(SITE, 'sitemap.xml'), 'w').write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + ''.join(f'<url><loc>https://stories.telarlabs.net/{u}</loc></url>\n' for u in ['', 'guides/'] + [f'guides/{x[0]}/' for x in G] + ['stories/'] + [f'stories/{x["slug"]}/' for x in STORIES]) + '</urlset>\n')
+    + ''.join(f'<url><loc>https://stories.telarlabs.net/{u}</loc></url>\n' for u in ['', 'guides/'] + [f'guides/{x[0]}/' for x in G] + ['stories/'] + [f'stories/{x["slug"]}/' for x in STORIES] + ['games/', 'games/memory-match/']) + '</urlset>\n')
 open(os.path.join(SITE, 'robots.txt'), 'w').write('User-agent: *\nDisallow: /cdn-cgi/\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nSitemap: https://stories.telarlabs.net/sitemap.xml\n')
 open(os.path.join(SITE, 'ads.txt'), 'w').write('google.com, pub-4326677240395780, DIRECT, f08c47fec0942fa0\n')
 # The app needs cross-origin isolation for the AI voice; the guides must not have it, or ads can't load.
