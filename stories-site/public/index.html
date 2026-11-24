@@ -151,6 +151,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
     <div class="tipbar" id="hint"><b>Tip:</b> tap a character in the picture to <b>flip</b>, resize, move or remove it. Drag it to move it around.</div>
     <div class="scenebar"><button class="btn sm" id="playScene">▶ Play this scene</button><span class="muted" id="sceneInfo"></span></div>
     <label class="badgeopt"><input type="checkbox" id="badgeOn" checked> Add a small <b>“Made with Telar Stories”</b> badge to my videos</label>
+    <label class="badgeopt"><input type="checkbox" id="hqOn"> <b>Best quality</b>&nbsp;(sharper scene changes, about twice the file size)</label>
     <div class="strip" id="strip"></div>
   </main>
 
@@ -337,7 +338,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261125a';
+const AV='v=20261125b';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -554,6 +555,9 @@ function drawStoryFrame(L,durs,t){
 // a small "Made with Telar Stories" badge on exported videos (people can switch it off)
 let badgeOn=true;try{badgeOn=localStorage.getItem('ts-badge')!=='0'}catch(e){}
 (()=>{const b=document.getElementById('badgeOn');b.checked=badgeOn;b.onchange=()=>{badgeOn=b.checked;try{localStorage.setItem('ts-badge',badgeOn?'1':'0')}catch(e){}};})();
+let hqOn=false;try{hqOn=localStorage.getItem('ts-hq')==='1'}catch(e){}
+(()=>{const b=document.getElementById('hqOn');b.checked=hqOn;b.onchange=()=>{hqOn=b.checked;try{localStorage.setItem('ts-hq',hqOn?'1':'0')}catch(e){}};})();
+const vBitrate=()=>hqOn?12_000_000:6_000_000;
 function drawBadge(){
  if(!badgeOn)return; cx.save();
  const f1='600 19px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif', f2='500 15px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
@@ -948,7 +952,7 @@ async function exportRealtime(why=''){
  const dest=ctx.createMediaStreamDestination();
  const vt=cv.captureStream(0).getVideoTracks()[0]; recTrack=vt&&vt.requestFrame?vt:null;
  const stream=new MediaStream([recTrack||cv.captureStream(FPS).getVideoTracks()[0],...dest.stream.getAudioTracks()]);
- const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5_000_000}:{});
+ const mime=pickMime(); const mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:hqOn?10_000_000:5_000_000}:{});
  const chunks=[]; mr.ondataavailable=e=>e.data.size&&chunks.push(e.data);
  $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML=(why?'<b>Switching to the steady way.</b> The quick way stopped on this phone, so the video is now recorded while the story plays. ':'')+'<b>Keep this screen open</b> until it finishes. It takes as long as the story. If you leave the page, recording pauses and continues when you come back.'+(why?`<br><span style="font-size:.8em;opacity:.7">Reason: ${esc(why).slice(0,160)}</span>`:'');
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
@@ -967,7 +971,7 @@ let AUD={codec:'mp4a.40.2',mux:'aac'};
 // ways to encode, tried in order: the phone's video chip, then the browser's own encoder (slower but steadier on some phones)
 const VWAYS=[{codec:'avc1.4d401f',mux:'avc'},{codec:'avc1.42001f',mux:'avc'},{codec:'avc1.42001f',mux:'avc',hardwareAcceleration:'prefer-software'},
  {codec:'vp09.00.31.08',mux:'vp9',hardwareAcceleration:'prefer-software'}];
-const vcfg=w=>{const c={codec:w.codec,width:W,height:H,bitrate:6_000_000,framerate:FPS};if(w.hardwareAcceleration)c.hardwareAcceleration=w.hardwareAcceleration;return c;};
+const vcfg=w=>{const c={codec:w.codec,width:W,height:H,bitrate:vBitrate(),framerate:FPS};if(w.hardwareAcceleration)c.hardwareAcceleration=w.hardwareAcceleration;return c;};
 async function fastWays(){
  if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return [];
  try{let audio=false;
