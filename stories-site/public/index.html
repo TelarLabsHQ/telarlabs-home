@@ -329,7 +329,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124g';
+const AV='v=20261124h';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -911,9 +911,9 @@ async function exportRealtime(why=''){
 // ---------- fast, reliable export: render every frame, encode with WebCodecs, mux to MP4
 let AUD={codec:'mp4a.40.2',mux:'aac'};
 // ways to encode, tried in order: the phone's video chip, then the browser's own encoder (slower but steadier on some phones)
-const VWAYS=[{codec:'avc1.42001f',mux:'avc'},{codec:'avc1.42001f',mux:'avc',hardwareAcceleration:'prefer-software'},
+const VWAYS=[{codec:'avc1.4d401f',mux:'avc'},{codec:'avc1.42001f',mux:'avc'},{codec:'avc1.42001f',mux:'avc',hardwareAcceleration:'prefer-software'},
  {codec:'vp09.00.31.08',mux:'vp9',hardwareAcceleration:'prefer-software'}];
-const vcfg=w=>{const c={codec:w.codec,width:W,height:H,bitrate:2_500_000,framerate:FPS};if(w.hardwareAcceleration)c.hardwareAcceleration=w.hardwareAcceleration;return c;};
+const vcfg=w=>{const c={codec:w.codec,width:W,height:H,bitrate:5_000_000,framerate:FPS};if(w.hardwareAcceleration)c.hardwareAcceleration=w.hardwareAcceleration;return c;};
 async function fastWays(){
  if(!('VideoEncoder' in window)||!('AudioEncoder' in window)||!window.Mp4Muxer||!window.OfflineAudioContext)return [];
  try{let audio=false;
@@ -957,6 +957,7 @@ async function exportFast(way=VWAYS[0],note=''){
   const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});ae.encode(ad);ad.close();} try{await ae.flush();}catch(e){console.warn('audio flush',e);}}   // block: the rendered audio can be freed once encoded
  // video frames, drawn one by one (independent of the clock)
  sel=null; let lastUI=0;
+ let lastScene=-1;
  for(let f=0;f<nAll;f++){
   if(cancelled||err)break;
   if(document.hidden){$('ovText').innerHTML='<b>Paused.</b> Come back to this screen to finish your video.';
@@ -965,7 +966,9 @@ async function exportFast(way=VWAYS[0],note=''){
   const t=Math.min(f/FPS,total-0.001); let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
   drawScene(S[i],t-a,{fade:true});
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
-  ve.encode(vf,{keyFrame:f%(FPS*2)===0}); vf.close();
+  // a full picture at the start of every scene (and every 2 s), so fades from black stay sharp instead of blocky
+  const sceneStart=i!==lastScene, fadeInDone=(t-a)>=0.4&&(t-a-1/FPS)<0.4; lastScene=i;
+  ve.encode(vf,{keyFrame:f%(FPS*2)===0||sceneStart||fadeInDone}); vf.close();
   // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
   // let the queue grow until the page runs out of memory
   while(ve.encodeQueueSize>3&&!err) await new Promise(r=>{const t=setTimeout(r,15);ve.addEventListener('dequeue',()=>{clearTimeout(t);r();},{once:true});});
