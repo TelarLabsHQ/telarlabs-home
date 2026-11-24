@@ -331,7 +331,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124j';
+const AV='v=20261124k';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -495,7 +495,7 @@ function drawChar(c,t,dur,selected){
  cx.restore();
  if(selected){cx.save();cx.strokeStyle='#ff8fa3';cx.lineWidth=3;cx.setLineDash([10,8]);cx.strokeRect(x-w/2-6,y-h-6,w+12,h+12);cx.restore();}
 }
-function drawScene(s,t,{caption=true,fade=false,editing=false}={}){
+function drawScene(s,t,{caption=true,fade=false,fadeIn=fade,fadeOut=fade,editing=false}={}){
  const dur=sceneDur(s), u=Math.min(1,t/dur), e=0.5-0.5*Math.cos(Math.PI*u);
  const z = s.cam==='in'?1+0.05*e : s.cam==='out'?1.05-0.05*e : 1;
  cx.save(); cx.translate(W/2,H/2); cx.scale(z,z); cx.translate(-W/2,-H/2);
@@ -513,7 +513,22 @@ function drawScene(s,t,{caption=true,fade=false,editing=false}={}){
   cx.fillStyle='#fff'; cx.textAlign='center'; cx.textBaseline='middle';
   lines.forEach((l,i)=>cx.fillText(l,W/2,y0+14+lh*i+lh/2)); cx.restore();
  }
- if(fade){const f=Math.min(1,t/0.4,(dur-t)/0.4); if(f<1){cx.fillStyle=`rgba(0,0,0,${1-Math.max(0,f)})`;cx.fillRect(0,0,W,H);}}
+ if(fadeIn||fadeOut){const f=Math.min(1,fadeIn?t/0.4:1,fadeOut?(dur-t)/0.4:1); if(f<1){cx.fillStyle=`rgba(0,0,0,${1-Math.max(0,f)})`;cx.fillRect(0,0,W,H);}}
+}
+// One frame of the whole story at time t. Between scenes the next scene slides in and pushes the old one out
+// (like turning a page). Video compressors handle sideways motion far better than fades, so words stay sharp.
+const SLIDE=0.5;
+function drawStoryFrame(L,durs,t){
+ let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
+ const lt=Math.max(0,t-a), last=i===L.length-1, left=durs[i]-lt;
+ if(!last&&left<SLIDE){
+  const p=1-left/SLIDE, e=0.5-0.5*Math.cos(Math.PI*p), dx=Math.round(e*W);
+  for(const [sc,st,off] of [[L[i],lt,-dx],[L[i+1],0,W-dx]]){
+   cx.save(); cx.beginPath(); cx.rect(off,0,W,H); cx.clip(); cx.translate(off,0);
+   drawScene(sc,st,{fadeIn:false,fadeOut:false}); cx.restore();
+  }
+ } else drawScene(L[i],lt,{fadeIn:i===0,fadeOut:last});
+ drawBadge(); return {i,a,lt};
 }
 // a small "Made with Telar Stories" badge on exported videos (people can switch it off)
 let badgeOn=true;try{badgeOn=localStorage.getItem('ts-badge')!=='0'}catch(e){}
@@ -890,8 +905,7 @@ function play({dest=null,onProgress=null,only=null}={}){
    if(!playing)return;
    const t=ctx.currentTime-start;
    if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();refresh();res(true);return;}
-   let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-   drawScene(L[i],Math.max(0,t-a),{fade:true}); drawBadge(); if(recTrack&&dest)recTrack.requestFrame();
+   drawStoryFrame(L,durs,t); if(recTrack&&dest)recTrack.requestFrame();
    if(onProgress)onProgress(Math.max(0,t)/total);
    requestAnimationFrame(frame);
   })();
@@ -980,11 +994,11 @@ async function exportFast(way=VWAYS[0],note=''){
   if(document.hidden){$('ovText').innerHTML='<b>Paused.</b> Come back to this screen to finish your video.';
    await new Promise(r=>{const h=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',h);r();}};document.addEventListener('visibilitychange',h);});
    $('ovText').innerHTML=note+MSG; keepAwake(true);}
-  const t=Math.min(f/FPS,total-0.001); let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-  drawScene(S[i],t-a,{fade:true}); drawBadge();
+  const t=Math.min(f/FPS,total-0.001); const {i,lt}=drawStoryFrame(S,durs,t);
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
-  // every frame of a fade is a full picture: phone video chips starve fading frames of detail, which shows as a mosaic
-  const lt=t-a, inFade=lt<0.4+1/FPS||durs[i]-lt<0.4+1/FPS, sceneStart=i!==lastScene; lastScene=i;
+  // full pictures during the opening and closing fades (phone video chips starve fading frames, which shows as a mosaic)
+  // and at the first frame after each slide, so every scene starts crisp
+  const inFade=(i===0&&lt<0.4+1/FPS)||(i===S.length-1&&durs[i]-lt<0.4+1/FPS), sceneStart=i!==lastScene; lastScene=i;
   ve.encode(vf,{keyFrame:f%(FPS*2)===0||sceneStart||inFade}); vf.close();
   // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
   // let the queue grow until the page runs out of memory
