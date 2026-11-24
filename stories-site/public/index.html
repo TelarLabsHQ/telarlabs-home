@@ -337,7 +337,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124n';
+const AV='v=20261125a';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -1023,7 +1023,9 @@ async function exportFast(way=VWAYS[0],note=''){
   // and at the first frame after each slide, so every scene starts crisp
   const fin=lt<0.4+1/FPS, fout=durs[i]-lt<0.4+1/FPS;
   const inFade=TRANS==='fade'?(fin||fout):(TRANS==='dissolve'&&i<S.length-1&&durs[i]-lt<DISSOLVE+1/FPS)||(i===0&&fin)||(i===S.length-1&&fout), sceneStart=i!==lastScene; lastScene=i;
-  ve.encode(vf,{keyFrame:f%(FPS*2)===0||sceneStart||inFade}); vf.close();
+  // full pictures in a transition only every 3rd frame: a burst of full pictures makes phone video chips
+  // starve the next second or two of video to pay it back, which shows as blur right after each scene change
+  ve.encode(vf,{keyFrame:f%(FPS*4)===0||sceneStart||(inFade&&f%3===0)}); vf.close();
   // wait for the encoder: every frame waiting in its queue is a full picture in memory, and slow phone encoders
   // let the queue grow until the page runs out of memory
   while(ve.encodeQueueSize>3&&!err) await new Promise(r=>{const t=setTimeout(r,15);ve.addEventListener('dequeue',()=>{clearTimeout(t);r();},{once:true});});
