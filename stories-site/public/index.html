@@ -10,7 +10,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
 :root{--bg:#16131c;--bg2:#1f1b27;--bg3:#2a2533;--fg:#f4f1f8;--muted:#a8a1b1;--line:#352f40;--accent:#ff8fa3;--ok:#5ED39A;--warn:#ffb547;--r:12px}
-*{box-sizing:border-box}html,body{margin:0;height:100%}
+*{box-sizing:border-box}html,body{margin:0}html{height:100%}body{min-height:100%}
 body{background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 .top{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:#121017;position:sticky;top:0;z-index:5}
@@ -48,6 +48,15 @@ canvas{display:block;width:100%;height:auto;touch-action:none}
 .cgrid img{aspect-ratio:1;object-fit:contain;background:repeating-conic-gradient(#2f2a38 0 25%,#262130 0 50%) 0 0/16px 16px}
 .ghead{grid-column:1/-1;font-weight:700;font-size:13px;color:var(--accent);margin:10px 2px 0}
 .cgrid small{display:block;font-size:11px;color:var(--muted);text-align:center;padding-top:2px}
+/* the pose and place lists scroll in their own box, so the scene preview stays in view */
+.pick{max-height:min(62vh,600px);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px;padding:0 6px 8px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.pick .ghead{position:sticky;top:0;z-index:1;background:var(--bg2);margin:0 -6px;padding:9px 8px 6px}
+@media(max-width:980px){.pick{max-height:44vh}}
+/* computer: the tool panel stays beside the picture while the page scrolls */
+@media(min-width:981px){.panel{position:sticky;top:var(--topH,64px);align-self:start;max-height:calc(100vh - var(--topH,64px) - 16px);overflow-y:auto}}
+/* phone: while choosing characters or places, the picture stays pinned at the top */
+@media(max-width:980px){.wrap{row-gap:0}.panel{margin-top:16px}main{display:contents}
+ body[data-tab=chars] .stage-box,body[data-tab=bg] .stage-box{position:sticky;top:calc(var(--topH,64px) - 12px);z-index:4;box-shadow:0 6px 16px rgba(0,0,0,.55)}}
 h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px}
 h3:first-child{margin-top:0}
 textarea{width:100%;min-height:96px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;resize:vertical}
@@ -220,7 +229,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
     <section class="pane" id="p-chars">
       <h3>Tap a pose to add it to this scene</h3>
       <p class="muted">Each character comes in several poses. Pick the one that fits the moment in your story.</p>
-      <div class="grid cgrid" id="charGrid"></div>
+      <div class="grid cgrid pick" id="charGrid"></div>
       <h3>In this scene</h3>
       <div class="inscene" id="inScene"></div>
       <p class="muted">Tap a character in the picture (or here) to flip, resize or remove it.</p>
@@ -228,7 +237,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 
     <section class="pane" id="p-bg">
       <h3>Tap a place for this scene</h3>
-      <div class="grid" id="bgGrid"></div>
+      <div class="grid pick" id="bgGrid"></div>
       <h3>Camera</h3>
       <div class="row">
         <label class="muted"><input type="radio" name="cam" value="in"> Slow zoom in</label>
@@ -319,7 +328,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124e';
+const AV='v=20261124f';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -545,7 +554,9 @@ function refresh(){
   const e=document.createElement('button');e.className='btn sm';e.textContent='Select';e.onclick=()=>{sel=x.id;refresh();cv.scrollIntoView({behavior:'smooth',block:'nearest'});};
   r.append(f,e);L.appendChild(r);});
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+(()=>{const t=document.querySelector('.top');const f=()=>document.documentElement.style.setProperty('--topH',(t?t.offsetHeight:56)+12+'px');f();addEventListener('resize',f);})();
+document.body.dataset.tab='words';
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.body.dataset.tab=b.dataset.t;
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.t));});
 $('caption').oninput=e=>{delete S[cur].vo;S[cur].text=e.target.value;strip();save('text'+cur);};
