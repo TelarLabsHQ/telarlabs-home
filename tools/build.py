@@ -73,6 +73,7 @@ GAMES = [
  ('https://drafttrail.telarlabs.net/practice/word-choice/', 'Writing', 'Word Choice Check', 'Affect or effect? Fewer or less? Practice commonly confused words for essays.'),
  ('https://quizpolice.telarlabs.net/practice/percent-sprint/', 'Math', 'Percent & Estimation Sprint', 'Percentages, discounts, tips, fractions and quick estimates in 60 seconds.'),
  ('https://quizpolice.telarlabs.net/practice/math-sprint/', 'Math', 'Math Sprint', 'Adding, subtracting, times tables and division. Beat your best score.'),
+ ('https://quizpolice.telarlabs.net/practice/world-history/', 'History', 'World History Timeline', 'Which came first? Pick the year? Key events from every continent.'),
  ('https://quizpolice.telarlabs.net/practice/geography/', 'Geography', 'Geography Practice', 'Countries and capital cities from every continent, 10 questions at a time.'),
  ('https://stories.telarlabs.net/games/', 'Kids 3 to 8', 'Memory Match & Story Order', 'Gentle games with the Telar Stories characters, plus a story-order game for every story.'),
 ]
