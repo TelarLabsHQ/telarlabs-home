@@ -106,11 +106,12 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .sb-print{font-size:14px;color:var(--accent);margin-left:6px;white-space:nowrap}
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
+.homelink{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
 <header class="top">
-  <h1>Telar <span>Stories</span></h1>
+  <h1><a href="./" class="homelink" id="homeLink" title="Telar Stories home">Telar <span>Stories</span></a></h1>
   <div class="sp"></div>
   <button class="btn" id="helpBtn">❓<span class="lbl"> How to use</span></button>
   <button class="btn" id="undoBtn" disabled title="Undo (Ctrl+Z)">↶<span class="lbl"> Undo</span></button>
@@ -518,6 +519,7 @@ function roundRect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w
 let playing=null; const t0=performance.now();
 let lastDraw=0;
 let exporting=false;
+document.getElementById('homeLink').addEventListener('click',e=>{if(exporting&&!confirm('Your video is still being made. Leave and stop it?'))e.preventDefault();});
 function loop(now){ requestAnimationFrame(loop); if(playing||exporting||document.hidden||now-lastDraw<33)return; lastDraw=now; drawScene(S[cur],((now-t0)/1000)%6,{editing:true}); }
 
 // ---------- UI

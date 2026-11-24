@@ -291,7 +291,7 @@ Lucia = loo-see-ah</pre>
 CSS = '''<style>:root{--bg:#16131c;--bg2:#1f1b27;--fg:#f4f1f8;--muted:#a8a1b1;--line:#352f40;--accent:#ff8fa3}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 a{color:var(--accent)}.top{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:#121017;position:sticky;top:0}
-.top b{font-size:17px}.top b span{color:var(--accent)}.top .sp{flex:1}.btn{border:1px solid var(--line);background:#2a2533;color:var(--fg);padding:8px 14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px}
+.homelink{color:inherit;text-decoration:none}.top b{font-size:17px}.top b span{color:var(--accent)}.top .sp{flex:1}.btn{border:1px solid var(--line);background:#2a2533;color:var(--fg);padding:8px 14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px}
 .btn.primary{background:var(--accent);color:#2a0d14;border-color:var(--accent)}main{max-width:760px;margin:0 auto;padding:22px 16px 60px}
 h1{font-size:30px;line-height:1.2;margin:8px 0 10px}h2{font-size:21px;margin:28px 0 8px}.lead{font-size:18px;color:#e9e2f0}
 .crumb{font-size:14px;color:var(--muted)}.crumb a{color:var(--muted)}li{margin:4px 0}
@@ -309,7 +309,7 @@ def page(title, desc, body, depth, path=''):
 <title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script>{CSS}</head><body>
-<header class="top"><b>Telar <span>Stories</span></b><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
+<header class="top"><a href="{up}" class="homelink" title="Telar Stories home"><b>Telar <span>Stories</span></b></a><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
 <footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
 os.makedirs(OUT, exist_ok=True)
