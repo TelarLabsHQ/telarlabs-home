@@ -286,7 +286,7 @@ const BGS=[['#','Story places'],['reading-nook','Reading nook'],['library','Libr
  ['pasture','Green pasture'],['ravine-dusk','Rocky hills at sunset'],['ravine-night','Rocky hills at night'],['village-night','Village at night'],
  ['snowy-street','Snowy street'],['lily-bedroom','Cozy bedroom'],['toy-shop','Toy shop'],['gift-kitchen','Christmas kitchen'],['ben-door','Front door in snow'],['ben-living','Living room & fireplace'],
  ['noah-village','Village on the hills'],['ark-hill','Ark & rainbow'],['ark-building','Building the ark'],['ark-storm','Ark in the rain'],['ark-inside','Inside the ark'],['ark-mountain','Ark on the mountain'],
- ['school-gate','School gate'],['classroom-map','Classroom & world map'],['school-lunch','School lunch room'],['playground','Playground'],['sunny-bedroom','Sunny bedroom'],['bright-classroom','Bright classroom'],['little-church','Little church'],['sunny-beach','Sunny beach'],['forest-path','Forest path'],['town-street','Town street'],['birthday-party','Birthday party'],['farm','Farm'],
+ ['school-gate','School gate'],['classroom-map','Classroom & world map'],['school-lunch','School lunch room'],['playground','Playground'],['sunny-bedroom','Sunny bedroom'],['sunny-living','Sunny living room'],['bright-classroom','Bright classroom'],['little-church','Little church'],['sunny-beach','Sunny beach'],['forest-path','Forest path'],['town-street','Town street'],['birthday-party','Birthday party'],['farm','Farm'],
  ['#','From Telar Clips'],['clip-alpine-christmas','Snowy Christmas village'],['clip-harbour-fireworks','New Year fireworks harbour'],['clip-irish-cottage','Green hills & rainbow'],['clip-ramadan-town','Crescent moon town'],['clip-sakura-river','Cherry blossom river'],['clip-diwali-temple','Temple steps & lamps'],['clip-sunset-cove','Tropical beach at sunset'],['clip-rainy-alley','Lantern street in the rain'],['clip-autumn-park','Autumn park'],['clip-med-steps','Seaside steps & flowers'],['clip-starry-lake','Starry lake cabin']];
 const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave-happy','Mira · hello'],['mira-walking','Mira · walk'],['mira-reading','Mira · read'],
  ['mira-bored','Mira · bored'],['mira-surprised','Mira · surprised'],['mira-thinking','Mira · think'],['mira-pointing','Mira · point'],['mira-jumping','Mira · jump'],
@@ -328,7 +328,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124f';
+const AV='v=20261124g';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
