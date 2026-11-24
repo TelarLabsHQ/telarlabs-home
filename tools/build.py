@@ -67,6 +67,19 @@ def app_card(a):
             f'<div class="shot"><img src="/assets/img/{a["img"]}" alt="{E(a["name"])} screenshot" loading="lazy" width="800" height="450"></div>'
             f'<div class="app-body">{badge}<h3>{E(a["name"])}</h3><p>{E(a["blurb"])}</p>{cta}</div></{tag}>')
 
+
+GAMES = [
+ ('https://quizpolice.telarlabs.net/practice/spot-the-fallacy/', 'College', 'Spot the Fallacy', 'Read short arguments and name the logical fallacy. With a guide to 12 common fallacies.'),
+ ('https://drafttrail.telarlabs.net/practice/word-choice/', 'Writing', 'Word Choice Check', 'Affect or effect? Fewer or less? Practice commonly confused words for essays.'),
+ ('https://quizpolice.telarlabs.net/practice/percent-sprint/', 'Math', 'Percent & Estimation Sprint', 'Percentages, discounts, tips, fractions and quick estimates in 60 seconds.'),
+ ('https://quizpolice.telarlabs.net/practice/math-sprint/', 'Math', 'Math Sprint', 'Adding, subtracting, times tables and division. Beat your best score.'),
+ ('https://quizpolice.telarlabs.net/practice/geography/', 'Geography', 'Geography Practice', 'Countries and capital cities from every continent, 10 questions at a time.'),
+ ('https://stories.telarlabs.net/games/', 'Kids 3 to 8', 'Memory Match & Story Order', 'Gentle games with the Telar Stories characters, plus a story-order game for every story.'),
+]
+def games_cards():
+    return ''.join(f'<a class="gcard" href="{u}"><span class="gcat">{E(c)}</span><h3>{E(t)}</h3><p>{E(d)}</p><span class="gmeta">Play free →</span></a>'
+                   for u, c, t, d in GAMES if 'stories.' not in u or CFG.get('stories_live'))
+
 def home(G=()):
     cards = ''.join(app_card(a) for a in CFG['apps'])
     body = f'''
@@ -82,6 +95,9 @@ def home(G=()):
 </section>
 <section class="wrap section"><h2>Guides</h2><p class="muted">Practical help for teaching, running events and making videos.</p>
   <div class="guides">{''.join(gcard(g) for g in list(G)[:6])}</div><p style="margin-top:16px"><a class="btn ghost" href="/guides/">All guides →</a></p>
+</section>
+<section class="wrap section" id="practice"><h2>Free practice games</h2><p class="muted">Quick learning games for students, from early readers to college. No sign-up, and they work on any phone.</p>
+  <div class="guides">{games_cards()}</div>
 </section>
 <section class="wrap section why">
   <div><h3>Free to use</h3><p>Every app has a free version with no account needed. The information pages show a few ads to cover hosting; the tools themselves stay clean while you teach or create.</p></div>
