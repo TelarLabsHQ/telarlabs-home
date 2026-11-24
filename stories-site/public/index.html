@@ -107,6 +107,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
 .sb-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;background:#3a2230;border-radius:10px;padding:10px 12px}
 .sb-confirm span{flex:1 1 220px}
 .homelink{color:inherit;text-decoration:none}
+.badgeopt{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted);margin:6px 2px 0;cursor:pointer}.badgeopt input{width:18px;height:18px;accent-color:var(--accent);flex:none}.badgeopt b{color:var(--fg);font-weight:600}
 </style>
 </head>
 <body>
@@ -149,6 +150,7 @@ input[type=text]{width:100%;background:var(--bg);color:var(--fg);border:1px soli
     </div>
     <div class="tipbar" id="hint"><b>Tip:</b> tap a character in the picture to <b>flip</b>, resize, move or remove it. Drag it to move it around.</div>
     <div class="scenebar"><button class="btn sm" id="playScene">▶ Play this scene</button><span class="muted" id="sceneInfo"></span></div>
+    <label class="badgeopt"><input type="checkbox" id="badgeOn" checked> Add a small <b>“Made with Telar Stories”</b> badge to my videos</label>
     <div class="strip" id="strip"></div>
   </main>
 
@@ -329,7 +331,7 @@ const CHARS=[['#','Mira & Mochi'],['mira-wave-smile','Mira · wave'],['mira-wave
  ['kids-wave','Five friends · wave',300],['kids-hands','Five friends · hold hands',300],['kids-lunch','Five friends · lunch',320]];
 const POSES=CHARS.filter(c=>c[0]!=='#'), FACE_L=new Set(POSES.filter(c=>c[3]).map(c=>c[0]));
 const IMG={};
-const AV='v=20261124i';
+const AV='v=20261124j';
 function load1(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src+(src.includes('?')?'&':'?')+AV;});}
 async function load(src){for(let k=0;k<4;k++){const i=await load1(src+(k?'?r='+k:''));if(i)return i;await new Promise(r=>setTimeout(r,800*(k+1)));}return null;}
 const PEND={};
@@ -512,6 +514,21 @@ function drawScene(s,t,{caption=true,fade=false,editing=false}={}){
   lines.forEach((l,i)=>cx.fillText(l,W/2,y0+14+lh*i+lh/2)); cx.restore();
  }
  if(fade){const f=Math.min(1,t/0.4,(dur-t)/0.4); if(f<1){cx.fillStyle=`rgba(0,0,0,${1-Math.max(0,f)})`;cx.fillRect(0,0,W,H);}}
+}
+// a small "Made with Telar Stories" badge on exported videos (people can switch it off)
+let badgeOn=true;try{badgeOn=localStorage.getItem('ts-badge')!=='0'}catch(e){}
+(()=>{const b=document.getElementById('badgeOn');b.checked=badgeOn;b.onchange=()=>{badgeOn=b.checked;try{localStorage.setItem('ts-badge',badgeOn?'1':'0')}catch(e){}};})();
+function drawBadge(){
+ if(!badgeOn)return; cx.save();
+ const f1='600 19px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif', f2='500 15px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+ cx.font=f1; const a='Made with ', b='Telar Stories', w1=cx.measureText(a).width, w2=cx.measureText(b).width;
+ cx.font=f2; const u='stories.telarlabs.net', w3=cx.measureText(u).width;
+ const w=Math.max(w1+w2,w3)+32, h=58, x=W-w-18, y=H-h-18;
+ cx.fillStyle='rgba(10,8,20,.5)'; roundRect(x,y,w,h,14); cx.fill();
+ cx.textBaseline='alphabetic'; cx.textAlign='left'; cx.font=f1;
+ const tx=x+(w-(w1+w2))/2; cx.fillStyle='rgba(255,255,255,.92)'; cx.fillText(a,tx,y+26); cx.fillStyle='#ffb3c1'; cx.fillText(b,tx+w1,y+26);
+ cx.font=f2; cx.fillStyle='rgba(255,255,255,.75)'; cx.textAlign='center'; cx.fillText(u,x+w/2,y+47);
+ cx.restore();
 }
 function roundRect(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
 
@@ -874,7 +891,7 @@ function play({dest=null,onProgress=null,only=null}={}){
    const t=ctx.currentTime-start;
    if(t>=total){srcs.forEach(b=>{try{b.stop()}catch(e){}});stopMusic();playing=null;keepAwake(false);playLabels();refresh();res(true);return;}
    let i=0,a=0; while(i<L.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-   drawScene(L[i],Math.max(0,t-a),{fade:true}); if(recTrack&&dest)recTrack.requestFrame();
+   drawScene(L[i],Math.max(0,t-a),{fade:true}); drawBadge(); if(recTrack&&dest)recTrack.requestFrame();
    if(onProgress)onProgress(Math.max(0,t)/total);
    requestAnimationFrame(frame);
   })();
@@ -899,7 +916,7 @@ async function exportRealtime(why=''){
  $('ovTitle').textContent='Making your video…'; $('ovText').innerHTML=(why?'<b>Switching to the steady way.</b> The quick way stopped on this phone, so the video is now recorded while the story plays. ':'')+'<b>Keep this screen open</b> until it finishes. It takes as long as the story. If you leave the page, recording pauses and continues when you come back.'+(why?`<br><span style="font-size:.8em;opacity:.7">Reason: ${esc(why).slice(0,160)}</span>`:'');
  ovProg(0); $('ovBtns').innerHTML='<button class="btn" id="ovCancel">Cancel</button>'; $('ov').classList.add('on');
  let cancelled=false; $('ovCancel').onclick=()=>{cancelled=true;playing&&playing.stop();};
- activeRec=mr; drawScene(S[0],0,{fade:true}); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+ activeRec=mr; drawScene(S[0],0,{fade:true}); drawBadge(); await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
  mr.start(1000);
  const ok=await play({dest,onProgress:ovProg});
  await new Promise(r=>setTimeout(r,300)); await new Promise(r=>{mr.onstop=r;mr.stop();}); activeRec=null; recTrack=null;
@@ -964,7 +981,7 @@ async function exportFast(way=VWAYS[0],note=''){
    await new Promise(r=>{const h=()=>{if(!document.hidden){document.removeEventListener('visibilitychange',h);r();}};document.addEventListener('visibilitychange',h);});
    $('ovText').innerHTML=note+MSG; keepAwake(true);}
   const t=Math.min(f/FPS,total-0.001); let i=0,a=0; while(i<S.length-1&&t>=a+durs[i]){a+=durs[i];i++;}
-  drawScene(S[i],t-a,{fade:true});
+  drawScene(S[i],t-a,{fade:true}); drawBadge();
   const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});
   // every frame of a fade is a full picture: phone video chips starve fading frames of detail, which shows as a mosaic
   const lt=t-a, inFade=lt<0.4+1/FPS||durs[i]-lt<0.4+1/FPS, sceneStart=i!==lastScene; lastScene=i;
