@@ -439,3 +439,6 @@ open(os.path.join(SITE, '_headers'), 'w').write('/\n  Cross-Origin-Opener-Policy
     '/assets/*\n  Cross-Origin-Embedder-Policy: require-corp\n  Cross-Origin-Resource-Policy: same-origin\n'
     '/assets/ort-v2/*\n  Cache-Control: public, max-age=604800\n/assets/bg/*\n  Cache-Control: public, max-age=86400\n/assets/ch/*\n  Cache-Control: public, max-age=86400\n')
 print('built', len(G), 'guides')
+
+# old telar-stories.pages.dev address: send fresh visitors to stories.telarlabs.net
+import sys as _sys; _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')); import home_domain as _hd; _hd.inject(SITE)

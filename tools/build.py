@@ -284,3 +284,6 @@ def extras(GUIDES=()):
 if __name__ == '__main__':
     G = guides(); home(G); pages(); extras(G)
     print('Built Telar Labs home')
+
+    # old *.pages.dev address: send fresh visitors to the real domain (tools/home_domain.py)
+    import home_domain as _hd; _hd.inject(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public'))
