@@ -450,3 +450,4 @@ print('built', len(G), 'guides')
 
 # old telar-stories.pages.dev address: send fresh visitors to stories.telarlabs.net
 import sys as _sys; _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')); import home_domain as _hd; _hd.inject(SITE)
+import sitemap_lastmod as _sl; _sl.stamp(SITE)
