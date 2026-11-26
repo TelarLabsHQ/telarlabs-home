@@ -58,24 +58,6 @@
     }
   ],
   "guides_published": "2026-11-20",
-  "guides_order": [
-    "reduce-cheating-online-quizzes",
-    "sell-tickets-buyers-pay-you-directly",
-    "school-christmas-program-tickets",
-    "church-christmas-concert-tickets",
-    "writing-process-age-of-ai",
-    "projector-tv-classroom-whiteboard",
-    "class-reunion-planning-checklist",
-    "video-sizes-tiktok-reels-shorts-youtube",
-    "google-forms-quiz-settings",
-    "google-forms-vs-ticket-page-small-events",
-    "whiteboard-activities-projector-classroom",
-    "smooth-event-check-in",
-    "teaching-when-wifi-drops",
-    "price-tickets-community-event",
-    "fitness-classes-limited-slots",
-    "school-fundraiser-event-planning",
-    "school-event-recap-video"
-  ],
+  "guides_order": ["solicitation-letter-samples", "christmas-party-games-exchange-gift", "reduce-cheating-online-quizzes", "sell-tickets-buyers-pay-you-directly", "school-christmas-program-tickets", "church-christmas-concert-tickets", "writing-process-age-of-ai", "projector-tv-classroom-whiteboard", "class-reunion-planning-checklist", "video-sizes-tiktok-reels-shorts-youtube", "google-forms-quiz-settings", "google-forms-vs-ticket-page-small-events", "whiteboard-activities-projector-classroom", "smooth-event-check-in", "teaching-when-wifi-drops", "price-tickets-community-event", "fitness-classes-limited-slots", "school-fundraiser-event-planning", "school-event-recap-video"],
   "stories_live": true
 }
