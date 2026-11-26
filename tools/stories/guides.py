@@ -309,7 +309,7 @@ pre{background:#0f0d13;border:1px solid var(--line);border-radius:10px;padding:1
 .card:hover{border-color:var(--accent)}.card b{font-size:18px}.card span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
 .table,table{width:100%;border-collapse:collapse;margin:10px 0}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--bg2)}code{background:#0f0d13;padding:1px 6px;border-radius:6px}
 .next{margin-top:34px;display:flex;gap:10px;flex-wrap:wrap}
-.top b,.top .btn{white-space:nowrap}@media(max-width:480px){.top{gap:6px;padding:10px 12px}.top .btn{padding:7px 10px;font-size:13px}.top b{font-size:15px}}
+.top b,.top .btn{white-space:nowrap}@media(max-width:560px){.top{flex-wrap:wrap;gap:6px;padding:10px 12px}.top .btn{padding:7px 10px;font-size:13px}.top b{font-size:15px}.top .btn.primary{order:-1;margin-left:auto}.top .homelink{order:-2}.top .sp{display:none}.top .btn:not(.primary){flex:1;text-align:center}.top::after{content:"";flex-basis:100%;order:-1;height:0}}
 .foot{max-width:760px;margin:0 auto;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}.foot a{color:var(--muted)}</style>'''
 def page(title, desc, body, depth, path=''):
     up = '../' * depth
@@ -317,7 +317,7 @@ def page(title, desc, body, depth, path=''):
 <title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous" onerror="window.tsAdBlocked=1"></script>{CSS}</head><body>
-<header class="top"><a href="{up}" class="homelink" title="Telar Stories home"><b>Telar <span>Stories</span></b></a><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
+<header class="top"><a href="{up}" class="homelink" title="Telar Stories home"><b>Telar <span>Stories</span></b></a><div class="sp"></div><a class="btn" href="{up}guides/">Guides</a><a class="btn" href="{up}games/">Games</a><a class="btn" href="{up}stories/">Printables</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
 <footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer>{ADNOTE_JS}</body></html>'''
 os.makedirs(OUT, exist_ok=True)
