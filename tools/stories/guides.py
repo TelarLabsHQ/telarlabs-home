@@ -1,5 +1,13 @@
 """How-to guides for Telar Stories (stories.telarlabs.net/guides/). Public content pages with ads; the app itself has none."""
-import os, html
+import os, html, json
+# soft note for ad-blocker users when they download printables: off until AdSense ads are live ("adblock_note" in site.config.json)
+ADNOTE = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'site.config.json'))).get('adblock_note')
+ADNOTE_JS = '''<script>(function(){function blocked(){return !!window.tsAdBlocked}
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[download]');if(!a)return;try{if(sessionStorage.getItem('tsAdNote'))return}catch(x){}
+setTimeout(function(){if(!blocked()||document.querySelector('.adnote'))return;try{sessionStorage.setItem('tsAdNote','1')}catch(x){}
+var n=document.createElement('div');n.className='adnote';n.setAttribute('role','status');n.innerHTML='<span style="font-size:24px">💛</span><div><b>Your download is starting.</b><span>Telar Stories stays free thanks to ads. If you can, please allow ads on this site.</span></div><button type="button">OK</button>';
+n.querySelector('button').onclick=function(){n.remove()};document.body.appendChild(n);setTimeout(function(){if(n.parentNode)n.remove()},14000)},1200)});})();</script>
+<style>.adnote{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;display:flex;gap:12px;align-items:center;width:min(520px,calc(100vw - 24px));background:var(--bg2);color:var(--fg);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:12px 14px;box-shadow:0 12px 32px rgba(0,0,0,.45)}.adnote div{flex:1;font-size:14px;line-height:1.4}.adnote b{display:block;font-size:15px}.adnote span{color:var(--muted)}.adnote button{background:var(--accent);color:#1b1206;border:0;border-radius:9px;padding:8px 14px;font-weight:700;cursor:pointer}</style>''' if ADNOTE else ''
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'stories-site', 'public', 'guides')
 E = html.escape
 G = [
@@ -308,10 +316,10 @@ def page(title, desc, body, depth, path=''):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous"></script>{CSS}</head><body>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous" onerror="window.tsAdBlocked=1"></script>{CSS}</head><body>
 <header class="top"><a href="{up}" class="homelink" title="Telar Stories home"><b>Telar <span>Stories</span></b></a><div class="sp"></div><a class="btn" href="{up}stories/">Printables</a><a class="btn" href="{up}guides/">Guides</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
-<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer></body></html>'''
+<footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer>{ADNOTE_JS}</body></html>'''
 os.makedirs(OUT, exist_ok=True)
 cards = ''.join(f'<a class="card" href="{s}/"><b>{E(t)}</b><span>{E(d)}</span></a>' for s, t, d, _ in G)
 open(os.path.join(OUT, 'index.html'), 'w').write(page('Guides', 'How to make story videos with Telar Stories.',
