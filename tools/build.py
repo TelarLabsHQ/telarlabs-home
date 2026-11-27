@@ -77,6 +77,15 @@ GAMES = [
  ('https://quizpolice.telarlabs.net/practice/geography/', 'Geography', 'Geography Practice', 'Countries and capital cities from every continent, 10 questions at a time.'),
  ('https://stories.telarlabs.net/games/', 'Kids 3 to 8', 'Memory Match & Story Order', 'Gentle games with the Telar Stories characters, plus a story-order game for every story.'),
 ]
+TOOLS = [
+ ('https://pizarrapad.telarlabs.net/tools/', 'Classroom', 'Classroom tools', 'Timer, spinner wheel, name picker, pomodoro timer, animal race and icebreaker cards for the projector.'),
+ ('https://quizpolice.telarlabs.net/tools/', 'Grading', 'Grade calculator and exam tools', 'Grade calculator, quick grader, transmutation table, test set shuffler, seating chart and exam clock.'),
+ ('https://drafttrail.telarlabs.net/tools/', 'Writing', 'Writing tools', 'Typing speed test, word counter, readability checker and 100+ writing prompts.'),
+ ('https://tixward.telarlabs.net/tools/', 'Events', 'Event tools', 'Scoresheet, certificate maker, QR code generator, raffle draw, tournament bracket and Secret Santa.'),
+ ('https://clips.telarlabs.net/make/greeting-video/', 'Video', 'Greeting video maker', 'Make a short greeting video for Christmas, New Year, birthdays and graduations, right in the browser.'),
+]
+def tools_cards():
+    return ''.join(f'<a class="gcard" href="{u}"><span class="gcat">{E(c)}</span><h3>{E(t)}</h3><p>{E(d)}</p><span class="gmeta">Open free →</span></a>' for u, c, t, d in TOOLS)
 def games_cards():
     return ''.join(f'<a class="gcard" href="{u}"><span class="gcat">{E(c)}</span><h3>{E(t)}</h3><p>{E(d)}</p><span class="gmeta">Play free →</span></a>'
                    for u, c, t, d in GAMES if 'stories.' not in u or CFG.get('stories_live'))
@@ -88,7 +97,7 @@ def home(G=()):
   <p class="eyebrow">Free · No sign-up · Works on any device</p>
   <h1>Small, free tools for teachers and creators</h1>
   <p class="lead">{E(ST)} is an independent studio making simple web apps that work on the devices people already have: a classroom board, a quiz monitor, a writing recorder, a library of free video backgrounds, and event tickets and bookings paid directly to organizers.</p>
-  <div class="cta"><a class="btn" href="#apps">See the apps</a><a class="btn ghost" href="/about/">About the studio</a></div>
+  <div class="cta"><a class="btn" href="#apps">See the apps</a><a class="btn ghost" href="#tools">Free tools</a><a class="btn ghost" href="/about/">About the studio</a></div>
 </div></section>
 <section class="wrap section" id="apps">
   <h2>Our apps</h2>
@@ -96,6 +105,9 @@ def home(G=()):
 </section>
 <section class="wrap section"><h2>Guides</h2><p class="muted">Practical help for teaching, running events and making videos.</p>
   <div class="guides">{''.join(gcard(g) for g in list(G)[:6])}</div><p style="margin-top:16px"><a class="btn ghost" href="/guides/">All guides →</a></p>
+</section>
+<section class="wrap section" id="tools"><h2>Free tools</h2><p class="muted">Quick tools for class, grading, writing and events. They open in the browser with no sign-up.</p>
+  <div class="guides">{tools_cards()}</div>
 </section>
 <section class="wrap section" id="practice"><h2>Free practice games</h2><p class="muted">Quick learning games for students, from early readers to college. No sign-up, and they work on any phone.</p>
   <div class="guides">{games_cards()}</div>
