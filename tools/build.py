@@ -160,7 +160,7 @@ def pages():
 <p>We usually reply within two to three working days. If you're reporting a problem, please include the app name, the page link and what device you were using.</p>''')
     prose('/privacy/', 'Privacy Policy', f'Privacy policy for {ST} websites.', f'''
 <h1>Privacy policy</h1>
-<p class="lead">This policy covers telarlabs.net. Each of our apps also has its own privacy page with details for that app.</p>
+<p class="lead">This policy covers telarlabs.net and Telar Stories (stories.telarlabs.net). Each of our other apps has its own privacy page with details for that app.</p>
 <h2>What we collect</h2>
 <p>This site doesn't have accounts or forms, and we don't ask for personal information. If you email us, we use your address only to reply.</p>
 <h2>Advertising</h2>
@@ -168,6 +168,9 @@ def pages():
 <h2>Analytics</h2><p>We use Cloudflare Web Analytics to count page visits. It does not use cookies and does not track you across websites.</p>
 <h2>Hosting</h2>
 <p>Our sites are hosted on Cloudflare, which may record basic technical information such as IP address and browser type to keep the service secure.</p>
+<h2>Telar Stories</h2>
+<p>Telar Stories makes story videos right in your browser. The words you change, the voices you record and the videos you make stay on your device: they are saved in your browser's storage and are not uploaded to us. If you record your own voice, the browser asks for permission to use the microphone first, and you can delete saved voices at any time by clearing the site's data in your browser.</p>
+<p>The story maker itself shows no ads. Ads may appear on the Telar Stories guide, printable and game pages. Because these pages are made for families and young children, we ask Google to show only non-personalized ads there.</p>
 <h2>Children</h2>
 <p>Our tools are used in schools. We don't knowingly collect personal information from children, and our classroom apps are designed to work without student accounts.</p>
 <h2>Contact</h2>
@@ -175,7 +178,7 @@ def pages():
 <p class="muted">Last updated {E(CFG["updated"])}.</p>''')
     prose('/terms/', 'Terms of Use', f'Terms of use for the {ST} website.', f'''
 <h1>Terms of use</h1>
-<p class="lead">These terms cover telarlabs.net, including our guides. Each of our apps has its own terms page with details for that app.</p>
+<p class="lead">These terms cover telarlabs.net, including our guides, and Telar Stories (stories.telarlabs.net). Each of our other apps has its own terms page with details for that app.</p>
 <h2>Using this site</h2>
 <p>You're welcome to read, share and link to our pages and guides. Please don't copy whole guides onto other websites; a short quote with a link back is fine.</p>
 <h2>Our guides</h2>

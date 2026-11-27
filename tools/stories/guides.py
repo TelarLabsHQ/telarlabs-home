@@ -316,7 +316,7 @@ def page(title, desc, body, depth, path=''):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{E(title)} | Telar Stories</title><meta name="description" content="{E(desc)}"><link rel="canonical" href="https://stories.telarlabs.net/{path}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous" onerror="window.tsAdBlocked=1"></script>{CSS}</head><body>
+<script>(window.adsbygoogle=window.adsbygoogle||[]).requestNonPersonalizedAds=1;</script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4326677240395780" crossorigin="anonymous" onerror="window.tsAdBlocked=1"></script>{CSS}</head><body>
 <header class="top"><a href="{up}" class="homelink" title="Telar Stories home"><b>Telar <span>Stories</span></b></a><div class="sp"></div><a class="btn" href="{up}guides/">Guides</a><a class="btn" href="{up}games/">Games</a><a class="btn" href="{up}stories/">Printables</a><a class="btn primary" href="{up}">Open the app</a></header>
 <main>{body}</main>
 <footer class="foot"><a href="{up}">Telar Stories</a><a href="{up}guides/">Guides</a><a href="{up}stories/">Stories &amp; printables</a><a href="{up}games/">Games for kids</a><a href="https://telarlabs.net/">Telar Labs</a><a href="https://telarlabs.net/guides/">More guides</a><a href="https://telarlabs.net/about/">About</a><a href="https://telarlabs.net/privacy/">Privacy</a><a href="https://telarlabs.net/terms/">Terms</a><a href="https://telarlabs.net/contact/">Contact</a></footer>{ADNOTE_JS}</body></html>'''
